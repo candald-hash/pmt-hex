@@ -23,6 +23,17 @@
   function carregarSalvo() { try { return JSON.parse(localStorage.getItem(SAVE)); } catch (e) { return null; } }
   function act(fn) { return (...a) => { fn(...a); salvar(); render(); }; }
   function run(fn, ...a) { fn(st, ...a); salvar(); render(); }
+  // ---------- ações: tudo passa pelo despachante do motor ----------
+  // NET.modo: 'local' (passa-e-joga), 'host' (anfitrião on-line) ou 'cliente'; NET.eu: o meu assento no on-line
+  const NET = { modo: 'local', eu: null, enviar: null };
+  const souAnfitriao = () => NET.modo !== 'cliente';
+  function agir(nome, ...a) {
+    if (NET.modo === 'cliente') { if (NET.enviar) NET.enviar(nome, a); return; }
+    const j = NET.modo === 'local' ? 'host' : NET.eu;
+    if (E.acao(st, j, nome, ...a)) { salvar(); render(); if (NET.modo === 'host' && NET.difundir) NET.difundir(); }
+  }
+  // decisões da IA disparadas pela tela (na vez de um humano): só o anfitrião executa
+  function agirIA(nome, ...a) { if (!souAnfitriao()) return; if (E.acao(st, 'host', nome, ...a)) { salvar(); render(); if (NET.modo === 'host' && NET.difundir) NET.difundir(); } }
 
   // ---------- abertura ----------
   function telaAbertura() {
@@ -138,7 +149,7 @@
     // destinos destacados
     const marca = (k, cls, cb) => { const n = g.nodes[k]; const r = n.kind === 'cidade' ? 120 : 70; const c = el('circle', { class: 'dest ' + cls, cx: n.wx, cy: n.wy, r }, gP); c.addEventListener('click', ev => { ev.stopPropagation(); cb(k); }); };
     if (boardMode && boardMode.tipo === 'espaco') Object.values(g.nodes).filter(n => n.kind !== 'porta' && (!boardMode.filtro || boardMode.filtro.includes(n.key))).forEach(n => marca(n.key, 'alvo', k => { const cb = boardMode.cb; boardMode = null; cb(k); }));
-    else if (boardMode && boardMode.tipo === 'trem') E.J(st).passou.filter(k => k !== E.J(st).pos).forEach(k => marca(k, 'trem', k => { boardMode = null; run(E.trem, k); }));
+    else if (boardMode && boardMode.tipo === 'trem') E.J(st).passou.filter(k => k !== E.J(st).pos).forEach(k => marca(k, 'trem', k => { boardMode = null; agir('trem', k); }));
     else if (st.fase === 'mover' && st.turno && st.turno.destinos && !pd) Object.entries(st.turno.destinos).forEach(([k, info]) => marca(k, info.custo ? 'custo' : '', k => escolherDestino(k, info)));
     // peões
     const porEspaco = {}; st.jogadores.forEach(p => (porEspaco[p.pos] = porEspaco[p.pos] || []).push(p));
@@ -166,10 +177,10 @@
         <div class="hand" id="pay">${p.itens.map(i => `<div class="ic" data-i="${i}"><img src="${E.ITEM(i).img}"></div>`).join('')}</div>
         <div class="mfoot"><button data-x>Voltar</button><button class="pri" id="payOk" disabled>Pagar e entrar</button></div>`);
       const esc2 = []; $('#pay').querySelectorAll('.ic').forEach(c => c.onclick = () => { const i = c.dataset.i; const at = esc2.indexOf(i); if (at >= 0) esc2.splice(at, 1); else if (esc2.length < info.custo) esc2.push(i); c.classList.toggle('sel', esc2.includes(i)); $('#payOk').disabled = esc2.length !== info.custo; });
-      $('#payOk').onclick = () => { fecharModal(); run(E.mover, k, esc2); };
+      $('#payOk').onclick = () => { fecharModal(); agir('mover', k, esc2); };
       return;
     }
-    run(E.mover, k);
+    agir('mover', k);
   }
 
   // ---------- painéis ----------
@@ -228,16 +239,16 @@
     const bl = $('#btnLiga', tb); if (bl) bl.onclick = modalLiga;
     const pz = $('#pausa', tb); if (pz) pz.onclick = () => { pausado = !pausado; render(); };
     tb.querySelectorAll('[data-ld]').forEach(d => d.onclick = () => modalLiderInfo(d.dataset.ld));
-    tb.querySelectorAll('.die.escolher').forEach(d => d.onclick = () => run(E.escolherDado, +d.dataset.d));
+    tb.querySelectorAll('.die.escolher').forEach(d => d.onclick = () => agir('escolherDado', +d.dataset.d));
     tb.querySelectorAll('[data-a]').forEach(b => b.onclick = () => {
       const a = b.dataset.a;
-      if (a === 'rolar') run(E.rolarMovimento); else if (a === 'hiker') run(E.hiker); else if (a === 'lyra') run(E.lyra);
+      if (a === 'rolar') agir('rolarMovimento'); else if (a === 'hiker') agir('hiker'); else if (a === 'lyra') agir('lyra');
       else if (a === 'trem') { boardMode = { tipo: 'trem', msg: 'Escolha uma cidade já visitada para ir de Trem' }; enquadrar(); render(); }
-      else if (a === 'lider') run(E.abrirLider);
-      else if (a === 'fim') { run(E.encerrarTurno); if (!st.pend) setTimeout(() => focar(E.J(st).pos, 0.55), 20); }
+      else if (a === 'lider') agir('abrirLider');
+      else if (a === 'fim') { agir('encerrarTurno'); if (!st.pend) setTimeout(() => focar(E.J(st).pos, 0.55), 20); }
     });
-    tb.querySelectorAll('[data-celebi]').forEach(b => b.onclick = () => run(E.celebiMovimento, +b.dataset.celebi));
-    tb.querySelectorAll('[data-corda]').forEach(b => b.onclick = () => run(E.ajustarRolagem, +b.dataset.d, b.dataset.corda));
+    tb.querySelectorAll('[data-celebi]').forEach(b => b.onclick = () => agir('celebiMovimento', +b.dataset.celebi));
+    tb.querySelectorAll('[data-corda]').forEach(b => b.onclick = () => agir('ajustarRolagem', +b.dataset.d, b.dataset.corda));
     // --- minha ficha ---
     const mb = $('#meBox');
     const team = p.pokemon.slice().sort((a, b) => CORES_ORDEM.indexOf(E.P(a).cor) - CORES_ORDEM.indexOf(E.P(b).cor));
@@ -284,10 +295,10 @@
     }, 0);
     if (pd.tipo === 'captura') return mCaptura(pd, p);
     if (pd.tipo === 'carta') return mCarta(pd, p);
-    if (pd.tipo === 'escolherCaptura') return mEscolher(pd, pd.cartas.map(id => ({ id, img: E.P(id).img })), id => run(E.escolherCaptura, id), 'Escolha qual tentar capturar');
-    if (pd.tipo === 'escolherEvento') return mEscolher(pd, pd.cartas.map(id => ({ id, img: E.idx().ev[id].img })), id => run(E.escolherEvento, id), 'Escolha o Evento a ativar');
-    if (pd.tipo === 'treinador' && E.J(st, pd.jogador).ia && !p.ia) { const q = E.J(st, pd.jogador); if (!treinTimer) treinTimer = setTimeout(() => { treinTimer = null; if (st.pend && st.pend.tipo === 'treinador') run(E.escolherTreinador, window.AI.decidirTreinador(st)); }, 700); return abrirModal(`<h2>${esc(pd.titulo)}</h2><p class="mut">🤖 ${esc(q.nome)} está escolhendo o Treinador…</p>`); }
-    if (pd.tipo === 'treinador') { const q = E.J(st, pd.jogador); if (q.id !== p.id) pd.titulo = `${q.nome}: escolha seu Treinador`; const op = [q.treinador, ...q.treinadoresExtra].filter(Boolean); return mEscolher(pd, op.map(id => ({ id, img: E.idx().tr[id].img })), id => run(E.escolherTreinador, id), 'Você só pode manter um Treinador ativo'); }
+    if (pd.tipo === 'escolherCaptura') return mEscolher(pd, pd.cartas.map(id => ({ id, img: E.P(id).img })), id => agir('escolherCaptura', id), 'Escolha qual tentar capturar');
+    if (pd.tipo === 'escolherEvento') return mEscolher(pd, pd.cartas.map(id => ({ id, img: E.idx().ev[id].img })), id => agir('escolherEvento', id), 'Escolha o Evento a ativar');
+    if (pd.tipo === 'treinador' && E.J(st, pd.jogador).ia && !p.ia) { const q = E.J(st, pd.jogador); if (!treinTimer) treinTimer = setTimeout(() => { treinTimer = null; if (st.pend && st.pend.tipo === 'treinador') agirIA('escolherTreinador', window.AI.decidirTreinador(st)); }, 700); return abrirModal(`<h2>${esc(pd.titulo)}</h2><p class="mut">🤖 ${esc(q.nome)} está escolhendo o Treinador…</p>`); }
+    if (pd.tipo === 'treinador') { const q = E.J(st, pd.jogador); if (q.id !== p.id) pd.titulo = `${q.nome}: escolha seu Treinador`; const op = [q.treinador, ...q.treinadoresExtra].filter(Boolean); return mEscolher(pd, op.map(id => ({ id, img: E.idx().tr[id].img })), id => agir('escolherTreinador', id), 'Você só pode manter um Treinador ativo'); }
     if (pd.tipo === 'travar') return mTravar(pd);
     if (pd.tipo === 'lider') return mLider(pd, p);
     if (pd.tipo === 'descartar') return mDescartar(pd, p);
@@ -297,26 +308,26 @@
       abrirModal(`<h2>🎲 ${esc(pd.titulo)}</h2><div class="rolling final"><div class="die3d parou ${pd.ok ? 'ok' : 'no'}"><span>${pd.valor}</span></div><div class="result ${pd.ok ? 'ok' : 'no'}" style="margin:0;flex:1"><b class="big">${pd.valor}</b>${esc(pd.texto)}</div></div>
         <p class="mut">Você tem um Pedido a Celebi: pode descartá-lo para rolar de novo.</p>
         <div class="mfoot"><button class="celebi" id="tcel">🌸 Pedido a Celebi: rolar de novo</button><button class="pri" id="tok">Aceitar resultado</button></div>`);
-      $('#tcel').onclick = () => run(E.celebiTabela); $('#tok').onclick = () => run(E.aceitarTabela); return;
+      $('#tcel').onclick = () => agir('celebiTabela'); $('#tok').onclick = () => agir('aceitarTabela'); return;
     }
     if (pd.tipo === 'festival') {
       const q = E.J(st, pd.jogador);
-      if (q.ia && !p.ia) { if (!festTimer) festTimer = setTimeout(() => { festTimer = null; if (st.pend && st.pend.tipo === 'festival') run(E.resolverFestival, window.AI.decidirFestival(st)); }, 700); return abrirModal(`<h2>${esc(pd.titulo)}</h2><p class="mut">🤖 ${esc(q.nome)} está decidindo…</p>`); }
+      if (q.ia && !p.ia) { if (!festTimer) festTimer = setTimeout(() => { festTimer = null; if (st.pend && st.pend.tipo === 'festival') agirIA('resolverFestival', window.AI.decidirFestival(st)); }, 700); return abrirModal(`<h2>${esc(pd.titulo)}</h2><p class="mut">🤖 ${esc(q.nome)} está decidindo…</p>`); }
       abrirModal(`<h2>🎪 ${esc(pd.titulo)}</h2>${q.id !== p.id ? `<p class="mut">Passe o dispositivo para ${esc(q.nome)}.</p>` : ''}<p class="mut">Clique num Pokémon para devolvê-lo e receber outro aleatório da mesma cor.</p>
         <div class="pick" style="grid-template-columns:repeat(auto-fill,minmax(80px,1fr))">${q.pokemon.filter(id => !pd.trocados.includes(id) && st.decks[E.P(id).cor] && st.decks[E.P(id).cor].length).map(id => cartaPokemon(q, id)).join('')}</div>
         <div class="mfoot"><button class="pri" id="fs">${pd.restam > 1 ? 'Não trocar' : 'Pronto'}</button></div>`);
-      $('#modalCard').querySelectorAll('.pc').forEach(c => c.onclick = () => run(E.resolverFestival, c.dataset.id));
-      $('#fs').onclick = () => run(E.resolverFestival, null); return;
+      $('#modalCard').querySelectorAll('.pc').forEach(c => c.onclick = () => agir('resolverFestival', c.dataset.id));
+      $('#fs').onclick = () => agir('resolverFestival', null); return;
     }
     if (pd.tipo === 'juniper') {
       const d = E.J(st, pd.doador);
-      if (d.ia && !p.ia) { if (!junTimer) junTimer = setTimeout(() => { junTimer = null; if (st.pend && st.pend.tipo === 'juniper') run(E.resolverJuniper, window.AI.decidirJuniper(st)); }, 700); return abrirModal(`<h2>${esc(pd.titulo)}</h2><p class="mut">🤖 ${esc(d.nome)} está escolhendo…</p>`); }
+      if (d.ia && !p.ia) { if (!junTimer) junTimer = setTimeout(() => { junTimer = null; if (st.pend && st.pend.tipo === 'juniper') agirIA('resolverJuniper', window.AI.decidirJuniper(st)); }, 700); return abrirModal(`<h2>${esc(pd.titulo)}</h2><p class="mut">🤖 ${esc(d.nome)} está escolhendo…</p>`); }
       abrirModal(`<h2>${esc(pd.titulo)}</h2>${d.id !== p.id ? `<p class="mut">Passe o dispositivo para ${esc(d.nome)}.</p>` : ''}<p class="mut">Depois da troca de presentes, os dois ganham um Pokémon Rosa.</p>
         <div class="hand">${d.itens.map(i => `<div class="ic" data-i="${i}" title="${esc(E.ITEM(i).nome)}" style="width:96px"><img src="${E.ITEM(i).img}"></div>`).join('')}</div>`);
-      $('#modalCard').querySelectorAll('.ic').forEach(c => c.onclick = () => run(E.resolverJuniper, c.dataset.i)); return;
+      $('#modalCard').querySelectorAll('.ic').forEach(c => c.onclick = () => agir('resolverJuniper', c.dataset.i)); return;
     }
-    if (pd.tipo === 'azalea') return mEscolher(pd, pd.cartas.map(id => ({ id, img: E.idx().ev[id].img })), id => run(E.resolverAzalea, id), 'Clique no Evento que VOCÊ vai ativar; depois escolha o oponente que ativa o outro');
-    if (pd.tipo === 'fuchsia') return mEscolher(pd, pd.cartas.map(id => ({ id, img: E.P(id).img })), id => run(E.resolverFuchsia, id), 'O outro vai para o jogador com menos capturas');
+    if (pd.tipo === 'azalea') return mEscolher(pd, pd.cartas.map(id => ({ id, img: E.idx().ev[id].img })), id => agir('resolverAzalea', id), 'Clique no Evento que VOCÊ vai ativar; depois escolha o oponente que ativa o outro');
+    if (pd.tipo === 'fuchsia') return mEscolher(pd, pd.cartas.map(id => ({ id, img: E.P(id).img })), id => agir('resolverFuchsia', id), 'O outro vai para o jogador com menos capturas');
     if (pd.tipo === 'distribuir') {
       const D0 = sel.dist && pd.cartas.includes(sel.dist) ? sel.dist : null, IX = pd.baralho === 'superevento' ? E.idx().sev : E.idx().ev;
       const livres = pd.jogadores.filter(j => pd.atribuido[j] == null);
@@ -324,7 +335,7 @@
         <div class="pick">${pd.cartas.map(id => `<div class="pc ${D0 === id ? 'sel' : ''}" data-id="${id}"><img src="${IX[id].img}"></div>`).join('')}</div>
         <div style="display:grid;gap:8px;margin-top:14px">${livres.map(j => linhaJogador(E.J(st, j), j === p.id ? '<span class="tag">você</span>' : '')).join('')}</div>`);
       $('#modalCard').querySelectorAll('.pick .pc').forEach(c => c.onclick = () => { sel.dist = c.dataset.id; render(); });
-      $('#modalCard').querySelectorAll('.pj').forEach(c => c.onclick = () => { if (!D0) return; sel.dist = null; run(E.distribuirEvento, +c.dataset.p, D0); });
+      $('#modalCard').querySelectorAll('.pj').forEach(c => c.onclick = () => { if (!D0) return; sel.dist = null; agir('distribuirEvento', +c.dataset.p, D0); });
       return;
     }
     if (pd.tipo === 'wally') {
@@ -332,15 +343,15 @@
       abrirModal(`<h2>${esc(pd.titulo)}</h2><p class="mut">${esc(p.nome)}, clique num Item da sua mão para descartar e comprar ${pd.n + 1} em vez de ${pd.n}, ou compre normalmente.</p>
         <div class="pick">${p.itens.map(id => `<div class="pc" data-id="${id}" title="${esc(E.ITEM(id).nome)}"><img src="${E.ITEM(id).img}"></div>`).join('')}</div>
         <div class="row" style="margin-top:14px"><button class="pri" data-a="nao">Não descartar — comprar ${pd.n}</button></div>`);
-      $('#modalCard').querySelectorAll('.pc').forEach(c => c.onclick = () => run(E.resolverWally, c.dataset.id));
-      $('#modalCard').querySelector('[data-a]').onclick = () => run(E.resolverWally, null); return;
+      $('#modalCard').querySelectorAll('.pc').forEach(c => c.onclick = () => agir('resolverWally', c.dataset.id));
+      $('#modalCard').querySelector('[data-a]').onclick = () => agir('resolverWally', null); return;
     }
     if (pd.tipo === 'aquaCompra') {
       abrirModal(`<h2>${esc(pd.titulo)}</h2><p class="mut">Faltam <b>${pd.resta}</b>. Clique num Item descartado pelos oponentes ou compre da pilha.</p>
         <div class="pick">${pd.pool.length ? pd.pool.map(id => `<div class="pc" data-id="${id}" title="${esc(E.ITEM(id).nome)}"><img src="${E.ITEM(id).img}"></div>`).join('') : '<span class="mut">Nenhum Item descartado disponível.</span>'}</div>
         <div class="row" style="margin-top:14px"><button class="pri" data-a="pilha">🂠 Comprar da pilha</button><button data-a="parar">Parar aqui</button></div>`);
-      $('#modalCard').querySelectorAll('.pc').forEach(c => c.onclick = () => run(E.comprarAqua, c.dataset.id));
-      $('#modalCard').querySelectorAll('[data-a]').forEach(b => b.onclick = () => run(E.comprarAqua, b.dataset.a)); return;
+      $('#modalCard').querySelectorAll('.pc').forEach(c => c.onclick = () => agir('comprarAqua', c.dataset.id));
+      $('#modalCard').querySelectorAll('[data-a]').forEach(b => b.onclick = () => agir('comprarAqua', b.dataset.a)); return;
     }
     if (pd.tipo === 'criadores') return mCriadores(pd, p);
     if (pd.tipo === 'magmaTroca') {
@@ -348,13 +359,13 @@
       abrirModal(`<h2>${esc(pd.titulo)}</h2><p class="mut">Seu Treinador atual: <b>${meu ? esc(meu.nome) : 'nenhum'}</b>. Clique num dos descartados para trocar.</p>
         <div class="pick">${pd.opcoes.map(id => `<div class="pc" data-id="${id}" title="${esc(E.idx().tr[id].nome)}"><img src="${E.idx().tr[id].img}"></div>`).join('')}</div>
         <div class="row" style="margin-top:14px"><button data-a="manter">Manter o meu</button></div>`);
-      $('#modalCard').querySelectorAll('.pc').forEach(c => c.onclick = () => run(E.resolverMagma, c.dataset.id));
-      $('#modalCard').querySelector('[data-a]').onclick = () => run(E.resolverMagma, null); return;
+      $('#modalCard').querySelectorAll('.pc').forEach(c => c.onclick = () => agir('resolverMagma', c.dataset.id));
+      $('#modalCard').querySelector('[data-a]').onclick = () => agir('resolverMagma', null); return;
     }
     if (pd.tipo === 'briney') return mBriney(pd, p);
     if (pd.tipo === 'espaco') {
       if (p.ia) { abrirModal(`<h2>${esc(pd.titulo)}</h2><p class="mut">🤖 ${esc(p.nome)} está escolhendo…</p>`); return; }
-      if (!boardMode) { fecharModal(); $('#modalCard').dataset.pend = 'espaco'; boardMode = { tipo: 'espaco', pend: true, filtro: pd.opcoes, msg: pd.titulo, cb: k => run(E.escolherEspaco, k) }; renderBoard(); }
+      if (!boardMode) { fecharModal(); $('#modalCard').dataset.pend = 'espaco'; boardMode = { tipo: 'espaco', pend: true, filtro: pd.opcoes, msg: pd.titulo, cb: k => agir('escolherEspaco', k) }; renderBoard(); }
       return;
     }
     if (pd.tipo === 'slot') return mSlot(pd, p);
@@ -363,23 +374,23 @@
       const porCor = {}; pd.opcoes.forEach(k => { const cor = E.P(st.slots[k].carta).cor; (porCor[cor] = porCor[cor] || []).push(k); });
       abrirModal(`<h2>${esc(pd.titulo)}</h2>${pd.primeiro ? `<div class="row" style="margin:6px 0 12px"><span class="mut">Primeiro:</span><div style="width:90px">${cartaHtml(pd.primeiro).replace('class="pc"', 'class="pc sel"')}</div></div>` : '<p class="mut">Os dois precisam ser da mesma cor, e pelo menos um deve estar revelado.</p>'}
         ${Object.entries(porCor).map(([cor, ks]) => `<h3 style="margin-top:10px">${esc(cor)}</h3><div class="pick" style="grid-template-columns:repeat(auto-fill,minmax(90px,1fr))">${ks.map(cartaHtml).join('')}</div>`).join('')}`);
-      $('#modalCard').querySelectorAll('.pick .pc').forEach(c => c.onclick = () => run(E.escolherLura, c.dataset.k)); return;
+      $('#modalCard').querySelectorAll('.pick .pc').forEach(c => c.onclick = () => agir('escolherLura', c.dataset.k)); return;
     }
     if (pd.tipo === 'tipoCor') return mTipoCor(pd);
-    if (pd.tipo === 'pegarDeLista') return mEscolher(pd, pd.cartas.map(id => ({ id, img: E.P(id).img })), id => run(E.pegarDeLista, id), 'Clique para pegar');
-    if (pd.tipo === 'pegarItens') return mEscolher(pd, pd.itens.map(id => ({ id, img: E.ITEM(id).img })), id => run(E.pegarItem, id), 'Clique no Item para ficar com ele');
-    if (pd.tipo === 'escolherLider') { abrirModal(`<h2>${esc(pd.titulo)}</h2><p class="mut">Líderes fora do tabuleiro que dão uma insígnia que você ainda pode ganhar.</p><div class="pick" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr))">${pd.opcoes.map(id => { const L = E.idx().ld[id], pl = window.AI && window.AI.planoLider(st, p, L); return `<div class="pc" data-id="${id}"><img src="${L.img}"><span class="f">${pl ? Math.round(pl.p * 100) + '%' : '—'}</span></div>`; }).join('')}</div>`); $('#modalCard').querySelectorAll('.pc').forEach(c => c.onclick = () => run(E.escolherLiderFora, c.dataset.id)); return; }
+    if (pd.tipo === 'pegarDeLista') return mEscolher(pd, pd.cartas.map(id => ({ id, img: E.P(id).img })), id => agir('pegarDeLista', id), 'Clique para pegar');
+    if (pd.tipo === 'pegarItens') return mEscolher(pd, pd.itens.map(id => ({ id, img: E.ITEM(id).img })), id => agir('pegarItem', id), 'Clique no Item para ficar com ele');
+    if (pd.tipo === 'escolherLider') { abrirModal(`<h2>${esc(pd.titulo)}</h2><p class="mut">Líderes fora do tabuleiro que dão uma insígnia que você ainda pode ganhar.</p><div class="pick" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr))">${pd.opcoes.map(id => { const L = E.idx().ld[id], pl = window.AI && window.AI.planoLider(st, p, L); return `<div class="pc" data-id="${id}"><img src="${L.img}"><span class="f">${pl ? Math.round(pl.p * 100) + '%' : '—'}</span></div>`; }).join('')}</div>`); $('#modalCard').querySelectorAll('.pc').forEach(c => c.onclick = () => agir('escolherLiderFora', c.dataset.id)); return; }
     if (pd.tipo === 'pagarItens') return mPagar(pd, p);
     if (pd.tipo === 'negociador') return mNegociador(pd, p);
-    if (pd.tipo === 'desempate') { abrirModal(`<h2>${esc(pd.titulo)}</h2><div style="display:grid;gap:8px">${pd.opcoes.map(i => linhaJogador(E.J(st, i), insignias(E.J(st, i), true))).join('')}</div>`); $('#modalCard').querySelectorAll('.pj').forEach(c => c.onclick = () => run(E.escolherDesempate, +c.dataset.p)); return; }
-    if (pd.tipo === 'descartarDe') return mEscolher(pd, pd.itens.map(id => ({ id, img: E.ITEM(id).img })), id => run(E.descartarDe, id), 'Clique no Item que será descartado');
+    if (pd.tipo === 'desempate') { abrirModal(`<h2>${esc(pd.titulo)}</h2><div style="display:grid;gap:8px">${pd.opcoes.map(i => linhaJogador(E.J(st, i), insignias(E.J(st, i), true))).join('')}</div>`); $('#modalCard').querySelectorAll('.pj').forEach(c => c.onclick = () => agir('escolherDesempate', +c.dataset.p)); return; }
+    if (pd.tipo === 'descartarDe') return mEscolher(pd, pd.itens.map(id => ({ id, img: E.ITEM(id).img })), id => agir('descartarDe', id), 'Clique no Item que será descartado');
     if (pd.tipo === 'boneca') return mBoneca(pd);
     if (pd.tipo === 'troca') return mTroca(pd, p);
-    if (pd.tipo === 'dividir') return mEscolher(pd, pd.itens.map(id => ({ id, img: E.ITEM(id).img })), id => run(E.resolverDividir, id), 'Clique no Item que você quer manter');
-    if (pd.tipo === 'opcao') { abrirModal(`<h2>${esc(pd.titulo)}</h2><div class="mfoot" style="justify-content:flex-start">${pd.opcoes.map((o, k) => `<button class="pri" data-o="${k}">${esc(o.nome)}</button>`).join('')}</div>`); $('#modalCard').querySelectorAll('[data-o]').forEach(b => b.onclick = () => run(E.escolherOpcao, +b.dataset.o)); return; }
+    if (pd.tipo === 'dividir') return mEscolher(pd, pd.itens.map(id => ({ id, img: E.ITEM(id).img })), id => agir('resolverDividir', id), 'Clique no Item que você quer manter');
+    if (pd.tipo === 'opcao') { abrirModal(`<h2>${esc(pd.titulo)}</h2><div class="mfoot" style="justify-content:flex-start">${pd.opcoes.map((o, k) => `<button class="pri" data-o="${k}">${esc(o.nome)}</button>`).join('')}</div>`); $('#modalCard').querySelectorAll('[data-o]').forEach(b => b.onclick = () => agir('escolherOpcao', +b.dataset.o)); return; }
     if (pd.tipo === 'duelo') return mDuelo(pd);
     if (pd.tipo === 'liga') return abrirModal(`<h2>🏆 A Liga Pokémon começa!</h2><p>${esc(p.nome)} parou em "Começar a Liga" depois de dar a volta no Planalto.</p>
-      <div class="mfoot"><button class="pri" id="ok">Começar a Liga</button></div>`), $('#ok').onclick = () => run(E.fecharPend);
+      <div class="mfoot"><button class="pri" id="ok">Começar a Liga</button></div>`), $('#ok').onclick = () => agir('fecharPend');
     if (pd.tipo === 'ligaOponente') return mLigaOponente(pd);
     if (pd.tipo === 'praca') return mPraca(pd);
     if (pd.tipo === 'cynthia') return mCynthia(pd);
@@ -394,8 +405,8 @@
     abrirModal(`<div class="mgrid"><img src="${c.img}"><div><h2>${esc(pd.titulo)}</h2>
       <p>${esc(cap.nome)} falhou na captura de <b>${esc(c.nome)}</b> no seu hexágono. Com a <b>Cynthia</b>, ${esc(q.nome)} pode tentar essa captura antes de o Pokémon ficar enfraquecido.</p>
       ${q.ia ? `<p class="mut">🤖 ${esc(q.nome)} está decidindo…</p>` : `<p class="mut">Chance sem Poké-Bola: ~${chance}%. Você poderá usar suas Bolas normalmente.</p><div class="mfoot" style="justify-content:flex-start"><button class="pri" id="cyS">Tentar a captura</button><button id="cyN">Não</button></div>`}</div></div>`);
-    if (q.ia) { const k = 'cy' + st.log.length + q.id; if (!E.J(st).ia && !ligaTimers[k]) ligaTimers[k] = setTimeout(() => { if (st.pend === pd) run(E.responderCynthia, window.AI.decidirCynthia(st)); }, 900); return; }
-    $('#cyS').onclick = () => run(E.responderCynthia, true); $('#cyN').onclick = () => run(E.responderCynthia, false);
+    if (q.ia) { const k = 'cy' + st.log.length + q.id; if (!E.J(st).ia && !ligaTimers[k]) ligaTimers[k] = setTimeout(() => { if (st.pend === pd) agirIA('responderCynthia', window.AI.decidirCynthia(st)); }, 900); return; }
+    $('#cyS').onclick = () => agir('responderCynthia', true); $('#cyN').onclick = () => agir('responderCynthia', false);
   }
   // ---------- Festival de Praça ----------
   let animPr = { feito: null, timer: null };
@@ -427,11 +438,11 @@
     if (r) {
       corpo = `${arenaPraca(pd, r, animando)}${animando ? '' : `<div class="result surge ok"><b class="big">🏆 ${esc(E.J(st, r.venc).nome)} vence o Festival de Praça!</b>${r.empates ? `<div class="mut">Houve ${r.empates} empate(s): os dados foram rolados de novo.</div>` : ''}</div>
         <div class="mfoot"><button class="pri" id="prOk">Escolher o prêmio ▸</button></div>`}`;
-      if (!animando && humanoVez && A.ia && B.ia) { const k = 'prf' + r.seq; if (!ligaTimers[k]) ligaTimers[k] = setTimeout(() => { if (st.pend === pd) run(E.fecharPraca); }, 1800); }
+      if (!animando && humanoVez && A.ia && B.ia) { const k = 'prf' + r.seq; if (!ligaTimers[k]) ligaTimers[k] = setTimeout(() => { if (st.pend === pd) agir('fecharPraca'); }, 1800); }
     } else {
       const S = sel.praca && sel.praca.k === pd.titulo ? sel.praca : (sel.praca = { k: pd.titulo, aberto: null, ids: { a: [], b: [] }, it: { a: {}, b: {} } });
       // IAs escolhem em segredo (na vez de um humano)
-      ['a', 'b'].forEach(l => { const k = 'pr' + pd.titulo + l; if (humanoVez && E.J(st, pd[l]).ia && !pd.dupla[l] && !ligaTimers[k]) ligaTimers[k] = setTimeout(() => { if (st.pend === pd && !pd.dupla[l]) { const d = window.AI.duplaPraca(st, l); run(E.escolherDuplaPraca, l, d.ids, d.itens); } }, 700); });
+      ['a', 'b'].forEach(l => { const k = 'pr' + pd.titulo + l; if (humanoVez && E.J(st, pd[l]).ia && !pd.dupla[l] && !ligaTimers[k]) ligaTimers[k] = setTimeout(() => { if (st.pend === pd && !pd.dupla[l]) { const d = window.AI.duplaPraca(st, l); agirIA('escolherDuplaPraca', l, d.ids, d.itens); } }, 700); });
       const humanosP = ['a', 'b'].filter(l => !E.J(st, pd[l]).ia), pend = humanosP.filter(l => !pd.dupla[l]);
       const painel = l => {
         const q = E.J(st, pd[l]), ap = E.pracaAptosDe(q), n = Math.min(2, ap.length), its = q.itens.filter(i => E.ITEM(i).uso === 'batalha' && E.ITEM(i).bonus), I = S.it[l];
@@ -452,17 +463,17 @@
     const cel = r && !animando && !pz.ia && [pd.a, pd.b].includes(pz.id) && E.celebiDe(pz) ? `<div class="row celebiRow"><span class="mut">🌸 ${esc(pz.nome)}, usar Pedido a Celebi?</span><button class="celebi" data-pcd="a">Refazer o dado de ${esc(A.nome)} (${r.da})</button><button class="celebi" data-pcd="b">Refazer o dado de ${esc(B.nome)} (${r.db})</button></div>` : '';
     abrirModal(`<h2>🎪 ${esc(pd.titulo)}</h2><p class="mut">Dupla contra dupla, só Pokémons Rosas, Verdes e Iniciais (Azuis ou mais fortes não contam nem para o bônus de evolução). Cada dupla soma as forças e rola um dado. As duplas são escolhidas ao mesmo tempo, em segredo.</p>${corpo.replace('<div class="mfoot"><button class="pri" id="prOk">', cel + '<div class="mfoot"><button class="pri" id="prOk">')}`);
     const M = $('#modalCard');
-    const ok = $('#prOk'); if (ok) ok.onclick = () => run(E.fecharPraca);
-    M.querySelectorAll('[data-pcd]').forEach(b => b.onclick = () => run(E.celebiPraca, b.dataset.pcd));
+    const ok = $('#prOk'); if (ok) ok.onclick = () => agir('fecharPraca');
+    M.querySelectorAll('[data-pcd]').forEach(b => b.onclick = () => agir('celebiPraca', b.dataset.pcd));
     M.querySelectorAll('[data-pg]').forEach(b => b.onclick = () => { sel.praca.aberto = b.dataset.pg; render(); });
     M.querySelectorAll('[data-pp]').forEach(c => c.onclick = () => { const S = sel.praca, l = c.dataset.pl, id = c.dataset.pp, n = Math.min(2, E.pracaAptosDe(E.J(st, pd[l])).length); if (S.ids[l].includes(id)) { S.ids[l] = S.ids[l].filter(x => x !== id); delete S.it[l][id]; } else { if (S.ids[l].length >= n) { const fora = S.ids[l].shift(); delete S.it[l][fora]; } S.ids[l].push(id); } render(); });
     M.querySelectorAll('[data-pi]').forEach(x => x.onchange = () => { const I = sel.praca.it[x.dataset.pl]; if (x.value) I[x.dataset.pi] = x.value; else delete I[x.dataset.pi]; render(); });
-    M.querySelectorAll('[data-pc]').forEach(b => b.onclick = () => { const S = sel.praca, l = b.dataset.pc, ids = S.ids[l], it = S.it[l]; S.aberto = null; S.ids[l] = []; S.it[l] = {}; run(E.escolherDuplaPraca, l, ids, it); });
+    M.querySelectorAll('[data-pc]').forEach(b => b.onclick = () => { const S = sel.praca, l = b.dataset.pc, ids = S.ids[l], it = S.it[l]; S.aberto = null; S.ids[l] = []; S.it[l] = {}; agir('escolherDuplaPraca', l, ids, it); });
   }
   function mPracaPremio(pd, p) {
     if (p.ia) { abrirModal(`<h2>${esc(pd.titulo)}</h2><p class="mut">🤖 ${esc(p.nome)} está escolhendo…</p>`); return; }
     abrirModal(`<h2>🎪 ${esc(pd.titulo)}</h2><div style="display:grid;gap:8px;margin-top:12px">${Object.entries(E.PREMIOS_PRACA).map(([k, v]) => `<button class="pri" data-pz="${k}" style="text-align:left">${esc(v[0])}${k === 'azul' && !E.obedece(p, 'azul') ? ' <span class="mut">(ainda não te obedece)</span>' : ''}</button>`).join('')}</div>`);
-    $('#modalCard').querySelectorAll('[data-pz]').forEach(b => b.onclick = () => run(E.resolverPracaPremio, b.dataset.pz));
+    $('#modalCard').querySelectorAll('[data-pz]').forEach(b => b.onclick = () => agir('resolverPracaPremio', b.dataset.pz));
   }
   // ---------- Liga Pokémon ----------
   const forcaTrio = q => q.pokemon.filter(id => E.obedece(q, E.P(id).cor)).map(id => E.forcaBase(q, id) + E.bonusTreinador(q, id)).sort((a, b) => b - a).slice(0, 3);
@@ -471,12 +482,12 @@
     const q = E.J(st, pd.escolhe);
     if (q.ia) {
       abrirModal(`<h2>${esc(pd.titulo)}</h2><p class="mut">🤖 ${esc(q.nome)} está escolhendo o oponente…</p>`);
-      const k = 'op' + st.log.length; if (!E.J(st).ia && !ligaTimers[k]) { ligaTimers[k] = setTimeout(() => { if (st.pend === pd) run(E.resolverLigaOponente, window.AI.oponenteLiga(st)); }, 900); }
+      const k = 'op' + st.log.length; if (!E.J(st).ia && !ligaTimers[k]) { ligaTimers[k] = setTimeout(() => { if (st.pend === pd) agirIA('resolverLigaOponente', window.AI.oponenteLiga(st)); }, 900); }
       return;
     }
     abrirModal(`<h2>${esc(pd.titulo)}</h2><p class="mut">${pd.opcoes.length === 3 ? 'Os outros dois se enfrentam na outra batalha.' : ''} Ao lado, a força dos 3 Pokémons mais fortes de cada um (sem vantagens de tipo).</p>
       <div style="display:grid;gap:8px;margin-top:12px">${pd.opcoes.map(j => linhaJogador(E.J(st, j), `<span class="tag">trio ${forcaTrio(E.J(st, j)).join(' · ') || '—'}</span>`)).join('')}</div>`);
-    $('#modalCard').querySelectorAll('.pj').forEach(c => c.onclick = () => run(E.resolverLigaOponente, +c.dataset.p));
+    $('#modalCard').querySelectorAll('.pj').forEach(c => c.onclick = () => agir('resolverLigaOponente', +c.dataset.p));
   }
   function placarLiga(pd, l) {
     const q = E.J(st, pd[l]), at = pd.ativo[l] || (pd.forcado && pd.forcado[l]), mortos = pd.mortos[l];
@@ -500,13 +511,13 @@
     }
     const humanos = ['a', 'b'].filter(l => !E.J(st, pd[l]).ia);
     // IA escolhe na vez de um humano; entre duas IAs o resultado avança sozinho
-    if (humanoVez && !r && !pd.vencLado) ['a', 'b'].forEach(l => { const k = pd.titulo + nD + l; if (E.J(st, pd[l]).ia && !pd.esc[l] && !ligaTimers[k]) ligaTimers[k] = setTimeout(() => { if (st.pend === pd && !pd.esc[l] && !pd.resultado) { const e = window.AI.escolhaLiga(st, l); run(E.ligaEscolher, l, e.pokemon, e.item); } }, 600); });
+    if (humanoVez && !r && !pd.vencLado) ['a', 'b'].forEach(l => { const k = pd.titulo + nD + l; if (E.J(st, pd[l]).ia && !pd.esc[l] && !ligaTimers[k]) ligaTimers[k] = setTimeout(() => { if (st.pend === pd && !pd.esc[l] && !pd.resultado) { const e = window.AI.escolhaLiga(st, l); agirIA('ligaEscolher', l, e.pokemon, e.item); } }, 600); });
     const reIA = r && !animando && humanoVez ? window.AI.reacaoLiga(st) : null;
-    if (reIA) { const k = 're' + r.seq + nD + JSON.stringify(reIA); if (!ligaTimers[k]) ligaTimers[k] = setTimeout(() => { if (st.pend === pd && pd.resultado === r) { window.AI.aplicarReacaoLiga(st, reIA); salvar(); render(); } }, 1200); }
-    else if (humanoVez && !humanos.length && (r || pd.vencLado) && !animando) { const k = 'seg' + pd.titulo + nD + (pd.vencLado || '') + (r ? r.seq : ''); if (!ligaTimers[k]) ligaTimers[k] = setTimeout(() => { if (st.pend === pd) run(E.ligaSeguir); }, 1800); }
+    if (reIA) { const k = 're' + r.seq + nD + JSON.stringify(reIA); if (!ligaTimers[k]) ligaTimers[k] = setTimeout(() => { if (st.pend === pd && pd.resultado === r) { if (reIA.tipo === 'remedio') agirIA('ligaRemedio', reIA.lado); else agirIA('ligaCelebi', reIA.quem, reIA.lado); } }, 1200); }
+    else if (humanoVez && !humanos.length && (r || pd.vencLado) && !animando) { const k = 'seg' + pd.titulo + nD + (pd.vencLado || '') + (r ? r.seq : ''); if (!ligaTimers[k]) ligaTimers[k] = setTimeout(() => { if (st.pend === pd) agir('ligaSeguir'); }, 1800); }
     const S = sel.liga && sel.liga.k === pd.titulo + nD ? sel.liga : (sel.liga = { k: pd.titulo + nD, aberto: null, pk: {}, it: {} });
     // humano com Pokémon já em campo e sem Itens de batalha: nada a decidir
-    if (!r && !pd.vencLado) humanos.forEach(l => { const q = E.J(st, pd[l]); const fixo = (pd.forcado && pd.forcado[l]) || pd.ativo[l]; if (!pd.esc[l] && fixo && !q.itens.some(i => E.ITEM(i).uso === 'batalha' && E.ITEM(i).bonus)) { const k = 'auto' + pd.titulo + nD + l + (pd.forcado ? 'f' + st.log.length : ''); if (!ligaTimers[k]) ligaTimers[k] = setTimeout(() => { if (st.pend === pd && !pd.esc[l]) run(E.ligaEscolher, l, fixo, null); }, 50); } });
+    if (!r && !pd.vencLado) humanos.forEach(l => { const q = E.J(st, pd[l]); const fixo = (pd.forcado && pd.forcado[l]) || pd.ativo[l]; if (!pd.esc[l] && fixo && !q.itens.some(i => E.ITEM(i).uso === 'batalha' && E.ITEM(i).bonus)) { const k = 'auto' + pd.titulo + nD + l + (pd.forcado ? 'f' + st.log.length : ''); if (!ligaTimers[k]) ligaTimers[k] = setTimeout(() => { if (st.pend === pd && !pd.esc[l]) agir('ligaEscolher', l, fixo, null); }, 50); } });
     let corpo = '';
     if (r) {
       const msg = animando ? '' : r.venc == null ? 'Empate — os dois Pokémons desmaiam.' : `${esc(E.J(st, r.venc).nome)} vence o duelo${pd.vencLado ? ' e a batalha!' : ' — o Pokémon vencedor continua em campo.'}`;
@@ -547,13 +558,13 @@
     abrirModal(`<h2>🏆 ${esc(pd.titulo)}</h2><p class="mut">3 contra 3, um de cada vez. O vencedor do duelo continua em campo; no empate, os dois desmaiam. Cada lado pode usar 1 Item de batalha por duelo.</p>
       <div class="lgPlacar">${placarLiga(pd, 'a')}<div class="vs">VS</div>${placarLiga(pd, 'b')}</div>${histLiga(r && animando ? pd.duelos.slice(0, -1) : pd.duelos)}${corpo}`);
     const M = $('#modalCard');
-    const sg = $('#lgSeg'); if (sg) sg.onclick = () => run(E.ligaSeguir);
-    M.querySelectorAll('[data-lcq]').forEach(b => b.onclick = () => run(E.ligaCelebi, b.dataset.lcq, b.dataset.lcl));
-    M.querySelectorAll('[data-lrm]').forEach(b => b.onclick = () => run(E.ligaRemedio, b.dataset.lrm));
+    const sg = $('#lgSeg'); if (sg) sg.onclick = () => agir('ligaSeguir');
+    M.querySelectorAll('[data-lcq]').forEach(b => b.onclick = () => agir('ligaCelebi', b.dataset.lcq, b.dataset.lcl));
+    M.querySelectorAll('[data-lrm]').forEach(b => b.onclick = () => agir('ligaRemedio', b.dataset.lrm));
     M.querySelectorAll('[data-lg]').forEach(b => b.onclick = () => { S.aberto = b.dataset.lg; render(); });
     M.querySelectorAll('[data-lp]').forEach(c => c.onclick = () => { S.pk[c.dataset.lp] = c.dataset.id; render(); });
     M.querySelectorAll('[data-li]').forEach(x => x.onchange = () => { S.it[x.dataset.li] = x.value || null; render(); });
-    M.querySelectorAll('[data-lc]').forEach(b => b.onclick = () => { const l = b.dataset.lc, pk = (pd.forcado && pd.forcado[l]) || pd.ativo[l] || S.pk[l], it = S.it[l] || null; S.aberto = null; delete S.pk[l]; delete S.it[l]; run(E.ligaEscolher, l, pk, it); });
+    M.querySelectorAll('[data-lc]').forEach(b => b.onclick = () => { const l = b.dataset.lc, pk = (pd.forcado && pd.forcado[l]) || pd.ativo[l] || S.pk[l], it = S.it[l] || null; S.aberto = null; delete S.pk[l]; delete S.it[l]; agir('ligaEscolher', l, pk, it); });
   }
   function resumoLiga() {
     const L = st.liga; if (!L) return '';
@@ -585,7 +596,7 @@
     abrirModal(`<div class="campeao"><div class="coroa">👑</div><h2>${esc(q.nome)} é o novo Mestre Pokémon!</h2>
       <div class="team" style="justify-content:center">${q.pokemon.map(id => `<img src="${E.P(id).img}" style="width:70px;border-radius:6px">`).join('')}</div></div>
       <h3>Caminho na Liga</h3>${histBatalhas()}<div class="mfoot"><button class="pri" id="ok">Ver o tabuleiro</button></div>`);
-    $('#ok').onclick = () => run(E.fecharPend);
+    $('#ok').onclick = () => agir('fecharPend');
   }
   function mCriadores(pd, p) {
     if (p.ia) { abrirModal(`<h2>${esc(pd.titulo)}</h2><p class="mut">🤖 ${esc(p.nome)} está escolhendo…</p>`); return; }
@@ -612,13 +623,13 @@
     }
     abrirModal(`<h2>${esc(pd.titulo)}</h2>${corpo}`);
     const M = $('#modalCard');
-    M.querySelectorAll('[data-op]').forEach(b => b.onclick = () => { const k = +b.dataset.op; if (k === 3) { sel.cri = null; run(E.resolverCriadores, 3); } else { c.op = k; c.desc = []; c.pegar = null; render(); } });
+    M.querySelectorAll('[data-op]').forEach(b => b.onclick = () => { const k = +b.dataset.op; if (k === 3) { sel.cri = null; agir('resolverCriadores', 3); } else { c.op = k; c.desc = []; c.pegar = null; render(); } });
     M.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { const id = b.dataset.d; if (c.desc.includes(id)) c.desc = c.desc.filter(x => x !== id); else { if (c.desc.length && E.P(c.desc[0]).familia !== E.P(id).familia) c.desc = []; c.desc.push(id); } render(); });
     M.querySelectorAll('[data-cor]').forEach(b => b.onclick = () => { c.cor = b.dataset.cor; render(); });
     M.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { c.pegar = b.dataset.g; render(); });
     M.querySelectorAll('[data-a]').forEach(b => b.onclick = () => {
       if (b.dataset.a === 'voltar') { if (c.desc.length >= N) { c.desc = []; c.pegar = null; } else c.op = null; return render(); }
-      const { op, desc, pegar } = c; sel.cri = null; run(E.resolverCriadores, op, desc, pegar);
+      const { op, desc, pegar } = c; sel.cri = null; agir('resolverCriadores', op, desc, pegar);
     });
   }
   function mEscolher(pd, cartas, cb, sub) {
@@ -653,11 +664,11 @@
       ${r ? `<div class="rolling final">${r.dados.map(d => `<div class="die3d parou ${r.ok ? 'ok' : 'no'}"><span>${d}</span></div>`).join('')}</div><div class="result surge ${r.ok ? 'ok' : 'no'}"><b class="big">${r.ok ? 'Capturado!' : 'Escapou…'}</b>Dado${r.dados.length > 1 ? 's' : ''}: ${r.dados.join(' e ')}${r.faixa ? ` · ajuste ±${r.faixa}` : ''}${!r.ok && pd.slot && c.cor !== 'amarelo' ? '<br>O Pokémon fica revelado e enfraquecido.' : ''}</div>` : ''}
       <div class="mfoot">${animando ? '' : !r ? `<button data-desist>Não tentar</button><button class="pri" id="rol" ${c.captura.length ? '' : 'disabled'}>🎲 Rolar captura</button>` : `${!r.ok && E.celebiDe(p) && !p.ia ? '<button class="celebi" id="celC">🌸 Pedido a Celebi: refazer</button>' : ''}<button class="pri" id="ok">Continuar</button>`}</div>
     </div></div>`);
-    const cc = $('#celC'); if (cc) cc.onclick = () => run(E.celebiCaptura);
+    const cc = $('#celC'); if (cc) cc.onclick = () => agir('celebiCaptura');
     $('#modalCard').querySelectorAll('[data-b]').forEach(b => b.onclick = () => { sel.bola = sel.bola === b.dataset.b ? null : b.dataset.b; render(); });
-    const rol = $('#rol'); if (rol) rol.onclick = () => { const b = escolhida; sel.bola = null; run(E.rolarCaptura, b); };
-    const ds = $('[data-desist]'); if (ds) ds.onclick = () => { if (!pd.slot) st.decks[pd.cor].push(pd.carta); run(E.fecharPend); };
-    const ok = $('#ok'); if (ok) ok.onclick = () => run(E.fecharPend);
+    const rol = $('#rol'); if (rol) rol.onclick = () => { const b = escolhida; sel.bola = null; agir('rolarCaptura', b); };
+    const ds = $('[data-desist]'); if (ds) ds.onclick = () => { if (!pd.slot) st.decks[pd.cor].push(pd.carta); agir('fecharPend'); };
+    const ok = $('#ok'); if (ok) ok.onclick = () => agir('fecharPend');
   }
   // ---------- janela de reações (Exp. Share / Poké-Flauta) ----------
   let reac = { seq: null, fim: 0, tick: null, quem: null, iaFeitos: {} };
@@ -671,12 +682,12 @@
         const rest = Math.max(0, Math.ceil((reac.fim - Date.now()) / 1000)); const el = $('#reacSeg'); if (el) el.textContent = rest;
         const pend = Object.keys(st.pend.reacao.opcoes).filter(j => st.pend.reacao.resp[j] == null);
         const humanos = pend.filter(j => !E.J(st, +j).ia);
-        if (Date.now() >= reac.fim || (!humanos.length && !pend.length)) { clearInterval(reac.tick); run(E.encerrarReacoes); }
+        if (Date.now() >= reac.fim || (!humanos.length && !pend.length)) { clearInterval(reac.tick); agir('encerrarReacoes'); }
       }, 250);
     }
     // IAs decidem com um pequeno atraso, para não denunciar quem tem o item
     Object.keys(R.opcoes).filter(j => R.resp[j] == null && E.J(st, +j).ia && !reac.iaFeitos[j]).forEach(j => {
-      reac.iaFeitos[j] = true; setTimeout(() => { if (E.reacaoAberta(st) && st.pend.reacao.seq === R.seq && st.pend.reacao.resp[j] == null) run(E.reagir, +j, window.AI.decidirReacao(st, +j)); }, 1200 + Math.random() * 2000);
+      reac.iaFeitos[j] = true; setTimeout(() => { if (E.reacaoAberta(st) && st.pend.reacao.seq === R.seq && st.pend.reacao.resp[j] == null) agirIA('reagir', +j, window.AI.decidirReacao(st, +j)); }, 1200 + Math.random() * 2000);
     });
     const humanos = st.jogadores.filter(q => !q.ia);
     let painel = '';
@@ -696,11 +707,11 @@
       rp.tick = setInterval(() => {
         if (!st || !st.pend || st.pend.tipo !== 'repel' || st.pend.seq !== rp.seq) { clearInterval(rp.tick); return; }
         const el = $('#rpSeg'); if (el) el.textContent = Math.max(0, Math.ceil((rp.fim - Date.now()) / 1000));
-        if (Date.now() >= rp.fim) { clearInterval(rp.tick); run(E.encerrarRepel); }
+        if (Date.now() >= rp.fim) { clearInterval(rp.tick); agir('encerrarRepel'); }
       }, 250);
     }
     pd.opcoes.filter(j => pd.resp[j] == null && E.J(st, j).ia && !rp.iaFeitos[j]).forEach(j => {
-      rp.iaFeitos[j] = true; setTimeout(() => { if (st.pend === pd && pd.resp[j] == null) run(E.reagirRepel, j, window.AI.decidirRepel(st, j)); }, 1000 + Math.random() * 2000);
+      rp.iaFeitos[j] = true; setTimeout(() => { if (st.pend === pd && pd.resp[j] == null) agirIA('reagirRepel', j, window.AI.decidirRepel(st, j)); }, 1000 + Math.random() * 2000);
     });
     const cartas = pd.slots.map(k => st.slots[k] && st.slots[k].carta).filter(Boolean);
     const humanos = st.jogadores.filter(q => !q.ia && !q.eliminado);
@@ -716,15 +727,15 @@
       ${humanos.length ? `<div class="row" style="margin-top:8px"><span class="mut">Tenho uma reação:</span>${humanos.map(q => `<button class="sm" data-rq="${q.id}">${esc(q.nome)}</button>`).join('')}</div>` : ''}${painel}</div>`);
     const M = $('#modalCard');
     M.querySelectorAll('[data-rq]').forEach(b => b.onclick = () => { rp.quem = +b.dataset.rq; rp.fim = Math.max(rp.fim, Date.now() + 5000); render(); });
-    M.querySelectorAll('[data-rk]').forEach(b => b.onclick = () => { const r = b.dataset.rk, q = rp.quem; rp.quem = null; if (r === 'voltar') return render(); run(E.reagirRepel, q, r); });
+    M.querySelectorAll('[data-rk]').forEach(b => b.onclick = () => { const r = b.dataset.rk, q = rp.quem; rp.quem = null; if (r === 'voltar') return render(); agir('reagirRepel', q, r); });
   }
   function ligarReacao() {
     $('#modalCard').querySelectorAll('[data-quem]').forEach(b => b.onclick = () => { reac.quem = +b.dataset.quem; reac.fim = Math.max(reac.fim, Date.now() + 5000); render(); });
-    $('#modalCard').querySelectorAll('[data-r]').forEach(b => b.onclick = () => { const r = b.dataset.r, q = reac.quem; reac.quem = null; if (r === 'voltar') return render(); run(E.reagir, q, r); });
+    $('#modalCard').querySelectorAll('[data-r]').forEach(b => b.onclick = () => { const r = b.dataset.r, q = reac.quem; reac.quem = null; if (r === 'voltar') return render(); agir('reagir', q, r); });
   }
   function mCarta(pd, p) {
     const card = (pd.baralho === 'evento' ? E.idx().ev : E.idx().sev)[pd.carta];
-    if (!pd.ativado && pd.reacao == null) { E.iniciarReacoes(st); salvar(); }
+    if (!pd.ativado && pd.reacao == null && souAnfitriao()) { E.iniciarReacoes(st); salvar(); }
     if (E.reacaoAberta(st)) {
       abrirModal(`<div class="mgrid"><img src="${card.img}"><div><h2>${esc(card.nome)}</h2><span class="tag">${pd.baralho === 'evento' ? 'Evento' : 'Super Evento'}</span> <span class="mut">ativado por ${esc(E.J(st, pd.reacao.ativador).nome)}</span>
         <p style="font-size:16px;margin:14px 0">${esc(card.texto)}</p>${janelaReacao(pd, card)}</div></div>`);
@@ -743,9 +754,9 @@
         ${!pd.ativado && auto ? '<button class="pri" id="atv">Ativar efeito</button>' : ''}
         <button ${!pd.ativado && auto ? '' : 'class="pri"'} id="fim">Concluir ${pd.baralho === 'evento' ? 'Evento' : 'Super Evento'}</button>
       </div></div></div>`);
-    const a = $('#atv'); if (a) a.onclick = () => run(E.ativarCarta);
+    const a = $('#atv'); if (a) a.onclick = () => agir('ativarCarta');
     $('#modalCard').querySelectorAll('.gpk img').forEach(i => i.onclick = () => zoom(i.dataset.z));
-    $('#fim').onclick = () => { esperandoHumano = false; run(E.concluirCarta); };
+    $('#fim').onclick = () => { esperandoHumano = false; agir('concluirCarta'); };
     $('#tools').onclick = () => caixaFerramentas();
     const du = $('#duel'); if (du) du.onclick = () => modalDuelo(card.duelo);
   }
@@ -754,14 +765,14 @@
     const fams = {}; p.pokemon.forEach(id => { const c = E.P(id); const f = c.familia || id; (fams[f] = fams[f] || []).push(id); });
     abrirModal(`<h2>${esc(pd.titulo)}</h2><p class="mut">O mais evoluído da família recebe +1 permanente, e a família inteira fica protegida contra trocas.</p>
       <div class="pick">${Object.entries(fams).map(([f, ids]) => `<div class="pc ${p.travadas.includes(f) ? 'off' : ''}" data-f="${f}" title="${ids.map(i => E.P(i).nome).join(' + ')}"><img src="${E.P(ids.reduce((a, b) => E.P(b).estagio > E.P(a).estagio ? b : a)).img}"><span class="f">${ids.length}×</span></div>`).join('')}</div>`);
-    $('#modalCard').querySelectorAll('.pc').forEach(c => c.onclick = () => run(E.travar, c.dataset.f));
+    $('#modalCard').querySelectorAll('.pc').forEach(c => c.onclick = () => agir('travar', c.dataset.f));
   }
   function linhaJogador(q, extra) { return `<div class="pc pj" data-p="${q.id}" style="display:flex;gap:10px;align-items:center;padding:10px;background:var(--bg2);border:1px solid var(--line);cursor:pointer"><span class="dot" style="background:${COR_HEX[q.cor]}"></span><b style="flex:1">${esc(q.nome)}${q.ia ? ' 🤖' : ''}</b><span class="mut cnt">${q.pokemon.length} <img src="img/ui/pokebola.webp"> · ${q.itens.length} <img src="img/ui/item.webp"></span>${extra || ''}</div>`; }
   function nomeHex(k) { const hx = E.grafo(st).slots[k].pos; return D.hexes[st.layout[hx]].id.replace(/BR.*$/i, ''); }
   function mSlot(pd, p) {
     abrirModal(`<h2>${esc(pd.titulo)}</h2><p class="mut">${pd.opcoes.length} opção(ões). Cartas viradas mostram só a cor; o rótulo indica o hexágono.</p>
       <div class="pick" style="grid-template-columns:repeat(auto-fill,minmax(96px,1fr))">${pd.opcoes.map(k => { const c = st.slots[k], pk = E.P(c.carta); return `<div class="pc" data-k="${k}" title="Hexágono ${nomeHex(k)}"><img src="${c.aberta ? pk.img : D.versos[E.grafo(st).slots[k].cor]}"><span class="f">${nomeHex(k)}${c.fraco ? ' · enfraq.' : ''}</span></div>`; }).join('')}</div>`);
-    $('#modalCard').querySelectorAll('.pc').forEach(c => c.onclick = () => run(E.escolherSlot, c.dataset.k));
+    $('#modalCard').querySelectorAll('.pc').forEach(c => c.onclick = () => agir('escolherSlot', c.dataset.k));
   }
   function mTipoCor(pd) {
     const S = sel.tc || (sel.tc = { tipo: null, cor: pd.cores[pd.cores.length - 1] });
@@ -772,14 +783,14 @@
       <div class="mfoot"><button class="pri" id="tcok" ${S.tipo && conta(S.tipo) ? '' : 'disabled'}>Pegar</button></div>`);
     $('#modalCard').querySelectorAll('[data-c]').forEach(b => b.onclick = () => { S.cor = b.dataset.c; render(); });
     $('#modalCard').querySelectorAll('[data-t]').forEach(b => b.onclick = () => { S.tipo = b.dataset.t; render(); });
-    $('#tcok').onclick = () => { const t = S.tipo, c = S.cor; sel.tc = null; run(E.resolverTipoCor, t, c); };
+    $('#tcok').onclick = () => { const t = S.tipo, c = S.cor; sel.tc = null; agir('resolverTipoCor', t, c); };
   }
   function mPagar(pd, p) {
     const esc2 = sel.pag || (sel.pag = []);
     abrirModal(`<h2>${esc(pd.titulo)}</h2><div class="hand">${p.itens.map(i => `<div class="ic ${esc2.includes(i) ? 'sel' : ''}" data-i="${i}" style="width:96px"><img src="${E.ITEM(i).img}"></div>`).join('')}</div>
       <div class="mfoot"><button class="pri" id="pg" ${esc2.length === pd.n ? '' : 'disabled'}>Descartar ${pd.n}</button></div>`);
     $('#modalCard').querySelectorAll('.ic').forEach(c => c.onclick = () => { const i = c.dataset.i, k = esc2.indexOf(i); if (k >= 0) esc2.splice(k, 1); else if (esc2.length < pd.n) esc2.push(i); render(); });
-    $('#pg').onclick = () => { const e = esc2.slice(); sel.pag = null; run(E.pagarItens, e); };
+    $('#pg').onclick = () => { const e = esc2.slice(); sel.pag = null; agir('pagarItens', e); };
   }
   function mNegociador(pd, p) {
     const S = sel.neg || (sel.neg = []);
@@ -787,36 +798,36 @@
     abrirModal(`<h2>${esc(pd.titulo)}</h2><div class="pick" style="grid-template-columns:repeat(auto-fill,minmax(80px,1fr))">${p.pokemon.filter(id => !['inicial', 'amarelo'].includes(E.P(id).cor)).map(id => cartaPokemon(p, id, S.includes(id) ? 'sel' : '')).join('')}</div>
       <div class="mfoot"><button id="ngn">Não trocar</button><button class="pri" id="ngs" ${ok ? '' : 'disabled'}>Devolver os 2 e ganhar 1</button></div>`);
     $('#modalCard').querySelectorAll('.pc').forEach(c => c.onclick = () => { const id = c.dataset.id, k = S.indexOf(id); if (k >= 0) S.splice(k, 1); else { if (S.length >= 2) S.shift(); S.push(id); } render(); });
-    $('#ngn').onclick = () => { sel.neg = null; run(E.resolverNegociador, null); };
-    $('#ngs').onclick = () => { const e = S.slice(); sel.neg = null; run(E.resolverNegociador, e); };
+    $('#ngn').onclick = () => { sel.neg = null; agir('resolverNegociador', null); };
+    $('#ngs').onclick = () => { const e = S.slice(); sel.neg = null; agir('resolverNegociador', e); };
   }
   function mAlvo(pd, p) {
     abrirModal(`<h2>${esc(pd.titulo)}</h2>${pd.bloqueavel ? '<p class="mut">Este efeito pode ser bloqueado por Poké-Boneca.</p>' : ''}
       <div style="display:grid;gap:8px">${pd.opcoes.map(i => { const q = E.J(st, i); const t = q.treinador && E.idx().tr[q.treinador]; return linhaJogador(q, `${q.id === p.id ? '<span class="tag">você</span>' : ''}<span class="mut">${t ? esc(t.nome) : ''}</span>${insignias(q, true)}`); }).join('')}</div>`);
-    $('#modalCard').querySelectorAll('.pj').forEach(c => c.onclick = () => run(E.escolherAlvo, +c.dataset.p));
+    $('#modalCard').querySelectorAll('.pj').forEach(c => c.onclick = () => agir('escolherAlvo', +c.dataset.p));
   }
   let brineyTimer = null, treinTimer = null, junTimer = null, festTimer = null;
   function mBriney(pd, p) {
     const dono = E.J(st, pd.dono);
     if (dono.ia && !p.ia) {
-      if (!brineyTimer) brineyTimer = setTimeout(() => { brineyTimer = null; if (st.pend && st.pend.tipo === 'briney') run(E.resolverBriney, window.AI.decidirBriney(st)); }, 700);
+      if (!brineyTimer) brineyTimer = setTimeout(() => { brineyTimer = null; if (st.pend && st.pend.tipo === 'briney') agirIA('resolverBriney', window.AI.decidirBriney(st)); }, 700);
       abrirModal(`<h2>${esc(pd.titulo)}</h2><p class="mut">🤖 ${esc(dono.nome)} está decidindo…</p>`); return;
     }
     abrirModal(`<h2>⛵ ${esc(pd.titulo)}</h2><p class="mut">${dono.id !== p.id ? 'Passe o dispositivo para ' + esc(dono.nome) + '.' : ''}</p>
       <div class="dice">${[-1, 0, 1].map(d => `<button class="${d === 0 ? '' : 'pri'}" data-d="${d}" style="min-width:110px">${d > 0 ? '+1' : d < 0 ? '−1' : 'manter'} → ${Math.max(1, pd.valor + d)}</button>`).join('')}</div>`);
-    $('#modalCard').querySelectorAll('[data-d]').forEach(b => b.onclick = () => run(E.resolverBriney, +b.dataset.d));
+    $('#modalCard').querySelectorAll('[data-d]').forEach(b => b.onclick = () => agir('resolverBriney', +b.dataset.d));
   }
   let bonecaTimer = null;
   function mBoneca(pd) {
     const r = E.J(st, pd.respondente), atk = E.J(st), alvo = E.J(st, pd.alvo);
     if (r.ia && !E.J(st).ia) { // humano jogando, IA decide se usa a Boneca
-      if (!bonecaTimer) bonecaTimer = setTimeout(() => { bonecaTimer = null; if (st.pend && st.pend.tipo === 'boneca' && E.J(st, st.pend.respondente).ia) run(E.responderBoneca, window.AI.decidirBoneca(st)); }, 700);
+      if (!bonecaTimer) bonecaTimer = setTimeout(() => { bonecaTimer = null; if (st.pend && st.pend.tipo === 'boneca' && E.J(st, st.pend.respondente).ia) agirIA('responderBoneca', window.AI.decidirBoneca(st)); }, 700);
       abrirModal(`<h2>${esc(pd.titulo)}</h2><p class="mut">🤖 ${esc(r.nome)} está decidindo…</p>`); return;
     }
     const txt = pd.respondente === pd.alvo ? `${esc(atk.nome)} quer aplicar <b>${esc(pd.acao)}</b> em você.` : `${esc(alvo.nome)} bloqueou com Poké-Boneca. Usar a sua para anular a dele?`;
     abrirModal(`<div class="mgrid"><img src="${E.ITEM(E.temBoneca(r)).img}"><div><h2>${esc(pd.titulo)}</h2><p>${txt}</p><p class="mut">Passe o dispositivo para <b>${esc(r.nome)}</b>.</p>
       <div class="mfoot"><button id="nb">Não usar</button><button class="pri" id="sb">Usar Poké-Boneca</button></div></div></div>`);
-    $('#nb').onclick = () => run(E.responderBoneca, false); $('#sb').onclick = () => run(E.responderBoneca, true);
+    $('#nb').onclick = () => agir('responderBoneca', false); $('#sb').onclick = () => agir('responderBoneca', true);
   }
   function mTroca(pd, p) {
     const q = E.J(st, pd.com), pares = E.paresTroca(p, q, pd.cores), S = sel.troca || (sel.troca = { meu: null, dele: null });
@@ -828,7 +839,7 @@
       <div class="mfoot"><button class="pri" id="tk" ${ok ? '' : 'disabled'}>Trocar</button></div>`);
     $('#modalCard').querySelectorAll('.pick:not(#dl) .pc').forEach(c => c.onclick = () => { S.meu = c.dataset.id; if (!pares.some(x => x[0] === S.meu && x[1] === S.dele)) S.dele = null; render(); });
     $('#dl').querySelectorAll('.pc').forEach(c => c.onclick = () => { S.dele = c.dataset.id; render(); });
-    $('#tk').onclick = () => { const a = S.meu, b = S.dele; sel.troca = null; run(E.resolverTroca, a, b); };
+    $('#tk').onclick = () => { const a = S.meu, b = S.dele; sel.troca = null; agir('resolverTroca', a, b); };
   }
   let animDu = { feito: null, timer: null };
   function arenaDuelo(pd, r, animando) {
@@ -859,7 +870,8 @@
       const giro = setInterval(() => document.querySelectorAll('.arena .die3d span').forEach(x => x.textContent = 1 + Math.floor(Math.random() * 6)), 70);
       animDu.timer = setTimeout(() => { clearInterval(giro); animDu.timer = null; animDu.feito = chave; render(); }, 800);
     }
-    ['a', 'b'].forEach(l => { if (E.J(st, pd[l]).ia && !S[l].pokemon && !fim) S[l] = window.AI.escolhaDuelo(st, l); });
+    ['a', 'b'].forEach(l => { if (E.J(st, pd[l]).ia && !(pd.escolhas && pd.escolhas[l]) && !fim && !animando && !E.J(st).ia) { const k = 'du' + st.log.length + l; if (!ligaTimers[k]) ligaTimers[k] = setTimeout(() => { if (st.pend === pd) agirIA('escolherDuelo', l, window.AI.escolhaDuelo(st, l)); }, 400); } });
+    const ladoPronto = l => (pd.escolhas && pd.escolhas[l]) || E.J(st, pd[l]).ia || S[l].pokemon;
     const lado = l => { const q = E.J(st, pd[l]); if (q.ia) return `<div><h3>${esc(q.nome)} 🤖</h3><p class="mut">Escolha feita em segredo.</p></div>`;
       const its = q.itens.filter(i => E.ITEM(i).uso === 'batalha' && E.ITEM(i).bonus);
       return `<div><h3>${esc(q.nome)}</h3><div class="pick" style="grid-template-columns:repeat(auto-fill,minmax(70px,1fr))">${E.aptosDuelo(st, pd, l).map(id => `<div class="pc ${S[l].pokemon === id ? 'sel' : ''}" data-l="${l}" data-id="${id}"><img src="${E.P(id).img}"><span class="f">${E.forcaEmBatalha(st, q.id, id, null, [], pd.mods)}</span></div>`).join('')}</div>
@@ -871,19 +883,19 @@
       ${msg ? `<div class="result surge ${r.venc != null ? 'ok' : ''}"><b class="big">${msg}</b></div>` : ''}
       ${!fim && !animando ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:10px">${lado('a')}${lado('b')}</div>` : ''}
       ${r && r.det && !animando && !E.J(st, pd.a).ia && E.celebiDe(E.J(st, pd.a)) ? `<div class="row celebiRow"><span class="mut">🌸 ${esc(E.J(st, pd.a).nome)}, usar Pedido a Celebi?</span><button class="celebi" data-cd="a">Refazer meu dado (${r.da})</button><button class="celebi" data-cd="b">Refazer o dado de ${esc(E.J(st, pd.b).nome)} (${r.db})</button></div>` : ''}
-      <div class="mfoot">${animando ? '' : fim ? '<button class="pri" id="dc">Continuar</button>' : `<button class="pri" id="dg" ${S.a.pokemon && S.b.pokemon ? '' : 'disabled'}>🎲 Batalhar</button>`}</div>`);
+      <div class="mfoot">${animando ? '' : fim ? '<button class="pri" id="dc">Continuar</button>' : `<button class="pri" id="dg" ${ladoPronto('a') && ladoPronto('b') ? '' : 'disabled'}>🎲 Batalhar</button>`}</div>`);
     $('#modalCard').querySelectorAll('[data-l]').forEach(c => c.onclick = () => { S[c.dataset.l].pokemon = c.dataset.id; render(); });
     $('#modalCard').querySelectorAll('[data-i]').forEach(x => x.onchange = () => { S[x.dataset.i].item = x.value || null; });
-    const g = $('#dg'); if (g) g.onclick = () => { const a = S.a, b = S.b; sel.duelo = null; run(E.lutarDuelo, a, b); };
-    const c = $('#dc'); if (c) c.onclick = () => { sel.duelo = null; run(E.fecharDuelo); };
-    $('#modalCard').querySelectorAll('[data-cd]').forEach(b => b.onclick = () => run(E.celebiDuelo, b.dataset.cd));
+    const g = $('#dg'); if (g) g.onclick = () => { const a = S.a, b = S.b; sel.duelo = null; ['a', 'b'].forEach(l => { const e = l === 'a' ? a : b; if (!E.J(st, pd[l]).ia && e.pokemon && !(pd.escolhas && pd.escolhas[l])) agir('escolherDuelo', l, e); }); };
+    const c = $('#dc'); if (c) c.onclick = () => { sel.duelo = null; agir('fecharDuelo'); };
+    $('#modalCard').querySelectorAll('[data-cd]').forEach(b => b.onclick = () => agir('celebiDuelo', b.dataset.cd));
   }
   function mDescartar(pd, p) {
     const escolhidos = sel.desc || (sel.desc = []);
     abrirModal(`<h2>${esc(pd.titulo)}</h2><div class="hand">${p.itens.map(i => `<div class="ic ${escolhidos.includes(i) ? 'sel' : ''}" data-i="${i}" title="${esc(E.ITEM(i).nome)}" style="width:96px"><img src="${E.ITEM(i).img}"></div>`).join('')}</div>
       <div class="mfoot"><button class="pri" id="ok" ${escolhidos.length === pd.n ? '' : 'disabled'}>Descartar ${pd.n}</button></div>`);
     $('#modalCard').querySelectorAll('.ic').forEach(c => c.onclick = () => { const i = c.dataset.i, k = escolhidos.indexOf(i); if (k >= 0) escolhidos.splice(k, 1); else if (escolhidos.length < pd.n) escolhidos.push(i); render(); });
-    $('#ok').onclick = () => { const e = escolhidos.slice(); sel.desc = null; run(E.descartarExcesso, e); };
+    $('#ok').onclick = () => { const e = escolhidos.slice(); sel.desc = null; agir('descartarExcesso', e); };
   }
   let animLd = { feito: null, timer: null };
   function mLider(pd, p) {
@@ -941,11 +953,11 @@
       </div></div></div>`);
     $('#modalCard').querySelectorAll('.pc').forEach(c => c.onclick = () => { const id = c.dataset.id, k = S.pk.indexOf(id); if (k >= 0) { S.pk.splice(k, 1); delete S.it[id]; } else if (S.pk.length < n) S.pk.push(id); else { delete S.it[S.pk.shift()]; S.pk.push(id); } render(); });
     $('#modalCard').querySelectorAll('[data-it]').forEach(s => s.onchange = () => { if (s.value) S.it[s.dataset.it] = s.value; else delete S.it[s.dataset.it]; render(); });
-    const b = $('#bat'); if (b) b.onclick = () => { const pk = S.pk.slice(), it = pk.map(id => S.it[id] || null); sel.lider = null; run(E.lutarLider, pk, it); };
-    const x = $('[data-x2]'); if (x) x.onclick = () => { sel.lider = null; run(E.fecharPend); };
-    const rm = $('#rem'); if (rm) rm.onclick = () => run(E.remedio, remedios[0]);
-    const cl = $('#celL'); if (cl) cl.onclick = () => run(E.celebiLider);
-    const ok = $('#ok'); if (ok) ok.onclick = () => { sel.lider = null; run(E.fecharPend); };
+    const b = $('#bat'); if (b) b.onclick = () => { const pk = S.pk.slice(), it = pk.map(id => S.it[id] || null); sel.lider = null; agir('lutarLider', pk, it); };
+    const x = $('[data-x2]'); if (x) x.onclick = () => { sel.lider = null; agir('fecharPend'); };
+    const rm = $('#rem'); if (rm) rm.onclick = () => agir('remedio', remedios[0]);
+    const cl = $('#celL'); if (cl) cl.onclick = () => agir('celebiLider');
+    const ok = $('#ok'); if (ok) ok.onclick = () => { sel.lider = null; agir('fecharPend'); };
   }
   function modalItem(inst) {
     const it = E.ITEM(inst), p = E.J(st);
@@ -955,7 +967,7 @@
       <p style="font-size:15px">${esc(it.texto)}</p>
       <p class="mut">${it.bola ? 'Bolas são usadas na janela de captura.' : it.uso === 'batalha' ? 'Itens de batalha são escolhidos na janela de batalha.' : ['corda', 'escaperope'].includes(it.id) ? 'Use depois de rolar o dado, pelos botões no painel do turno.' : it.id === 'pedidocelebi' ? 'Use pelos botões 🌸 que aparecem depois das rolagens: movimento, captura, batalha de Ginásio, Duelos e Eventos de dado.' : automatico ? '' : 'Ao usar, o item é descartado; aplique o efeito com a caixa de ferramentas.'}</p>
       <div class="mfoot"><button data-x>Fechar</button>${!it.bola && it.uso !== 'batalha' && !['corda', 'escaperope', 'pedidocelebi'].includes(it.id) ? `<button class="pri" id="usar">Usar ${esc(it.nome)}</button>` : ''}</div></div></div>`);
-    const u = $('#usar'); if (u) u.onclick = () => { fecharModal(); run(E.usarItem, inst); if (!automatico) caixaFerramentas(); };
+    const u = $('#usar'); if (u) u.onclick = () => { fecharModal(); agir('usarItem', inst); if (!automatico) caixaFerramentas(); };
   }
   function modalJogador(i) {
     const q = E.J(st, i), tr = q.treinador && E.idx().tr[q.treinador];
@@ -1054,7 +1066,7 @@
   // ---------- IA ----------
   let timerIA = null, pausado = false, esperandoHumano = false;
   function agendarIA() {
-    if (timerIA || !st || pausado) return;
+    if (timerIA || !st || pausado || !souAnfitriao()) return;
     const p = E.J(st); if (!p.ia || !window.AI) { esperandoHumano = false; return; }
     if (!$('#modal').hidden && !$('#modalCard').dataset.pend) return; // um humano está usando outra janela
     if (!$('#parqueFx').hidden) { setTimeout(agendarIA, 600); return; }
@@ -1066,7 +1078,7 @@
       const r = window.AI.passo(st);
       if (r === 'esperar') { if (!esperandoHumano) { esperandoHumano = true; render(); } return; }
       esperandoHumano = false;
-      if (r) { salvar(); render(); const q = E.J(st); if (!q.ia) setTimeout(() => focar(q.pos, 0.55), 20); }
+      if (r) { E.posAcao(st); salvar(); render(); if (NET.modo === 'host' && NET.difundir) NET.difundir(); const q = E.J(st); if (!q.ia) setTimeout(() => focar(q.pos, 0.55), 20); }
       else if (st.fila && st.fila.length && !st.pend) { st.fila = []; render(); }
     }, VEL[prefs.velIA] || 750);
   }

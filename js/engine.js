@@ -1188,6 +1188,14 @@
   }
   // Duelo: cada lado escolhe Pokémon (e item); empate → ambos desmaiam e escolhem de novo
   function aptosDuelo(st, pd, lado) { const q = J(st, pd[lado]); return q.pokemon.filter(id => obedece(q, P(id).cor) && !pd.fora.includes(lado + ':' + id)); }
+  // escolha de um lado do Duelo (cada jogador escolhe o seu, em segredo); quando os dois escolheram, o duelo acontece
+  function escolherDuelo(st, lado, e) {
+    const pd = st.pend; if (!pd || pd.tipo !== 'duelo' || !['a', 'b'].includes(lado) || !e || (pd.resultado && (pd.resultado.venc != null || pd.resultado.fim))) return;
+    if (!aptosDuelo(st, pd, lado).includes(e.pokemon)) return;
+    const q = J(st, pd[lado]); const item = e.item && q.itens.includes(e.item) && ITEM(e.item).uso === 'batalha' ? e.item : null;
+    pd.escolhas = pd.escolhas || {}; pd.escolhas[lado] = { pokemon: e.pokemon, item };
+    if (pd.escolhas.a && pd.escolhas.b) { const { a, b } = pd.escolhas; pd.escolhas = {}; lutarDuelo(st, a, b); }
+  }
   function lutarDuelo(st, ea, eb) {
     const pd = st.pend; if (!pd || pd.tipo !== 'duelo' || pd.resultado && pd.resultado.venc != null) return;
     if (!aptosDuelo(st, pd, 'a').includes(ea.pokemon) || !aptosDuelo(st, pd, 'b').includes(eb.pokemon)) return;
@@ -1631,10 +1639,51 @@
     st.pend = null; continuar(st);
   }
 
-  G.Engine = {
+
+  // ---------- Despachante de ações (base do modo on-line) ----------
+  // quem pode responder à decisão pendente agora
+  function quemDecide(st) {
+    const pd = st.pend; if (!pd) return st.vencedor != null ? [] : [atv(st)];
+    switch (pd.tipo) {
+      case 'treinador': case 'festival': return [pd.jogador];
+      case 'travar': return [pd.jogador != null ? pd.jogador : atv(st)];
+      case 'juniper': return [pd.doador];
+      case 'briney': return [pd.dono];
+      case 'boneca': case 'cynthia': return [pd.respondente];
+      case 'duelo': case 'ligaBatalha': case 'praca': return [pd.a, pd.b];
+      case 'ligaOponente': return [pd.escolhe];
+      case 'repel': return pd.opcoes.filter(j => pd.resp[j] == null);
+      case 'campeao': return st.jogadores.map(q => q.id);
+      case 'carta': if (reacaoAberta(st)) return Object.keys(pd.reacao.opcoes).map(Number).filter(j => pd.reacao.resp[j] == null); return [atv(st)];
+      default: return [atv(st)];
+    }
+  }
+  const ACOES_TURNO = new Set(['rolarMovimento', 'escolherDado', 'hiker', 'ajustarRolagem', 'mover', 'trem', 'encerrarTurno', 'lyra', 'abrirLider', 'usarItem', 'celebiMovimento', 'descartarExcesso',
+    'rolarCaptura', 'celebiCaptura', 'lutarLider', 'remedio', 'celebiLider', 'aceitarTabela', 'celebiTabela', 'celebiDuelo', 'celebiPraca', 'ativarCarta', 'concluirCarta']);
+  const ACOES_LADO = new Set(['escolherDuelo', 'ligaEscolher', 'escolherDuplaPraca', 'ligaCelebi', 'ligaRemedio']);
+  const ACOES_JOGADOR = new Set(['reagir', 'reagirRepel']); // o 1º argumento é o próprio jogador
+  const ACOES_ANFITRIAO = new Set(['ferramenta', 'encerrarReacoes', 'encerrarRepel', 'iniciarLiga']);
+  function podeAgir(st, j, nome, args) {
+    if (j === 'host') return true;
+    if (ACOES_ANFITRIAO.has(nome)) return false;
+    const pd = st.pend;
+    if (ACOES_JOGADOR.has(nome)) return args[0] === j && quemDecide(st).includes(j);
+    if (ACOES_LADO.has(nome)) return !!pd && ['a', 'b'].includes(args[0]) && pd[args[0]] === j;
+    if (['ligaSeguir', 'fecharPraca', 'fecharDuelo'].includes(nome)) return !!pd && (pd.a === j || pd.b === j || atv(st) === j);
+    if (ACOES_TURNO.has(nome)) return atv(st) === j;
+    return quemDecide(st).includes(j);
+  }
+  // executa uma ação em nome de um jogador (j = id) ou do anfitrião (j = 'host', usado no modo local)
+  function acao(st, j, nome, ...args) {
+    const fn = API[nome]; if (typeof fn !== 'function' || !podeAgir(st, j, nome, args)) return false;
+    fn(st, ...args); posAcao(st); return true;
+  }
+  // ajustes automáticos depois de qualquer ação (no anfitrião)
+  function posAcao(st) { const pd = st.pend; if (pd && pd.tipo === 'carta' && !pd.ativado && pd.reacao == null) iniciarReacoes(st); }
+  const API = G.Engine = {
     novoJogo, grafo, destinos, rolarMovimento, escolherDado, hiker, ajustarRolagem, mover, trem, encerrarTurno, podeEncerrar, descartarExcesso,
     ativarCarta, concluirCarta, fecharPend, rolarCaptura, escolherCaptura, escolherEvento, escolherTreinador, travar, abrirLider, lutarLider, remedio,
     podeEnfrentar, usarItem, lyra, ferramenta, duelo, forcaBase, forcaEmBatalha, bonusEvolucao, bonusTreinador, obedece, nInsignias, limiteItens, faixaCaptura,
-    nomeEspaco, familiaTravada, posXY, autoTexto, escolherAlvo, responderBoneca, iniciarReacoes, reacaoAberta, reagir, encerrarReacoes, celebiMovimento, celebiCaptura, celebiLider, celebiDuelo, aceitarTabela, celebiTabela, celebiDe, escolherLura, resolverFestival, resolverJuniper, resolverAzalea, distribuirEvento, comprarAqua, resolverMagma, celebiPraca, reagirRepel, encerrarRepel, temRepel, ligaCelebi, ligaRemedio, responderCynthia, temCynthia, escolherDuplaPraca, fecharPraca, resolverPracaPremio, pracaAptosDe, pracaForca, PREMIOS_PRACA, iniciarLiga, ligaGatilho, resolverLigaOponente, ligaEscolher, ligaSeguir, ligaAptos, porCapturas, FASE_LIGA, resolverWally, wallyOk, resolverCriadores, opcoesCriadores, linhasCriadores, foraDeJogoCriadores, resolverFuchsia, resolverBriney, encrencado, escolherSlot, resolverTipoCor, pegarDeLista, escolherEspaco, escolherLiderFora, pagarItens, resolverNegociador, pegarItem, filtrarSlots, escolherDesempate, descartarDe, resolverTroca, resolverDividir, escolherOpcao, lutarDuelo, fecharDuelo, aptosDuelo, paresTroca, temBoneca, slotInsignia, vantagem, bonusItemBatalha, idx, P, ITEM, J, HW, HH, CORES_PEAO, TIPOS_NOME, ORDEM_FORCA
+    nomeEspaco, familiaTravada, posXY, autoTexto, escolherAlvo, responderBoneca, iniciarReacoes, reacaoAberta, reagir, encerrarReacoes, celebiMovimento, celebiCaptura, celebiLider, celebiDuelo, aceitarTabela, celebiTabela, celebiDe, escolherLura, resolverFestival, resolverJuniper, resolverAzalea, distribuirEvento, comprarAqua, resolverMagma, escolherDuelo, quemDecide, podeAgir, acao, posAcao, celebiPraca, reagirRepel, encerrarRepel, temRepel, ligaCelebi, ligaRemedio, responderCynthia, temCynthia, escolherDuplaPraca, fecharPraca, resolverPracaPremio, pracaAptosDe, pracaForca, PREMIOS_PRACA, iniciarLiga, ligaGatilho, resolverLigaOponente, ligaEscolher, ligaSeguir, ligaAptos, porCapturas, FASE_LIGA, resolverWally, wallyOk, resolverCriadores, opcoesCriadores, linhasCriadores, foraDeJogoCriadores, resolverFuchsia, resolverBriney, encrencado, escolherSlot, resolverTipoCor, pegarDeLista, escolherEspaco, escolherLiderFora, pagarItens, resolverNegociador, pegarItem, filtrarSlots, escolherDesempate, descartarDe, resolverTroca, resolverDividir, escolherOpcao, lutarDuelo, fecharDuelo, aptosDuelo, paresTroca, temBoneca, slotInsignia, vantagem, bonusItemBatalha, idx, P, ITEM, J, HW, HH, CORES_PEAO, TIPOS_NOME, ORDEM_FORCA
   };
 })(window);

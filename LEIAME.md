@@ -10,6 +10,8 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- **Preparação para o modo on-line (etapa 1):** todas as ações da tela agora passam por um despachante único do motor, que sabe quem pode decidir cada coisa (quem joga a vez, o lado de cada um num Duelo, na Liga ou no Festival de Praça, quem tem o item numa janela de reação, e a Caixa de ferramentas só para o anfitrião). No Duelo, cada lado agora confirma a própria escolha. Nada muda no modo local.
+
 - **Festival de Praça com escolha secreta:** as duas duplas são escolhidas ao mesmo tempo; entre dois humanos, cada um abre as próprias opções sem o outro olhar, e nada aparece até as duas serem confirmadas. Quem joga a vez pode usar o **Pedido a Celebi** nos dados do Festival (o adversário pode bloquear com Poké-Boneca).
 - **Pilhas vazias no hexágono final:** "Compre os N próximos Pokémons Vermelhos/Azuis/Verdes (ou mais fracos)" agora completa com a cor mais fraca quando a pilha acaba (Vermelho → Azul → Verde → Rosa), e o registro avisa.
 - **Bola GS:** o Pokémon com o marcador +1 permanente ganha borda dourada e a etiqueta "GS +1". O marcador acompanha o Pokémon nas trocas e some se ele voltar para a pilha. (A carta Bola GS já era removida do jogo depois do uso.)

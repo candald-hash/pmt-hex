@@ -339,8 +339,8 @@
         const r = pd.resultado;
         if (r && r.det && !r.celebi && E.J(st, pd.a).ia && E.celebiDe(E.J(st, pd.a)) && r.venc !== pd.a) { E.celebiDuelo(st, r.da <= 3 || r.db <= 2 ? 'a' : 'b'); return true; }
         if (pd.resultado && (pd.resultado.venc != null || pd.resultado.fim)) { E.fecharDuelo(st); return true; }
-        if (!E.J(st, pd.b).ia) return 'esperar';
-        E.lutarDuelo(st, escolhaDuelo(st, 'a'), escolhaDuelo(st, 'b')); return true;
+        for (const l of ['a', 'b']) if (!(pd.escolhas && pd.escolhas[l]) && E.J(st, pd[l]).ia) { E.escolherDuelo(st, l, escolhaDuelo(st, l)); return true; }
+        return 'esperar';
       }
       if (pd.tipo === 'briney') { if (!E.J(st, pd.dono).ia) return 'esperar'; E.resolverBriney(st, decidirBriney(st)); return true; }
       if (pd.tipo === 'slot') { E.escolherSlot(st, decidirSlot(st)); return true; }
