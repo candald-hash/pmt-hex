@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mapeador de Hexágonos — PMT HEX</title>
+<style>
+:root{
+  --bg:#14161b; --panel:#1d2027; --panel2:#252932; --line:#343944; --txt:#e8eaef; --mut:#9aa1ae;
+  --acc:#ffcb05; --acc2:#3b82f6; --bad:#ef4444; --ok:#22c55e;
+  --rosa:#ec6fab; --verde:#0a8a2c; --azul:#0b74c8; --vermelho:#e3202b; --amarelo:#f7c814; --cinza:#6b7280;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font:13px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+#app{display:grid;grid-template-columns:240px 1fr 300px;height:100vh}
+aside{background:var(--panel);overflow:auto;border-right:1px solid var(--line)}
+aside.right{border-right:0;border-left:1px solid var(--line)}
+h1{font-size:15px;margin:0;padding:12px 14px;border-bottom:1px solid var(--line);letter-spacing:.3px}
+h1 b{color:var(--acc)}
+h2{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--mut);margin:14px 14px 6px}
+.sec{padding:0 14px 10px}
+button,select,input,textarea{font:inherit;color:var(--txt);background:var(--panel2);border:1px solid var(--line);border-radius:6px}
+button{padding:6px 10px;cursor:pointer}
+button:hover{border-color:#566}
+button.on{background:var(--acc);color:#111;border-color:var(--acc);font-weight:600}
+input,select,textarea{padding:5px 7px;width:100%}
+textarea{min-height:52px;resize:vertical}
+label{display:block;color:var(--mut);font-size:11px;margin:8px 0 3px}
+.row{display:flex;gap:6px;flex-wrap:wrap}
+.row>*{flex:1}
+.filebtn{position:relative;overflow:hidden;display:block;text-align:center}
+.filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+#hexlist{list-style:none;margin:0;padding:0}
+#hexlist li{padding:7px 14px;cursor:pointer;display:flex;justify-content:space-between;gap:6px;border-left:3px solid transparent}
+#hexlist li:hover{background:var(--panel2)}
+#hexlist li.cur{background:var(--panel2);border-left-color:var(--acc)}
+#hexlist .tg{font-size:10px;padding:1px 6px;border-radius:9px;background:#333a46;color:var(--mut);white-space:nowrap}
+#hexlist .done{color:var(--ok)}
+#hexlist .noimg{opacity:.5}
+main{position:relative;overflow:hidden;background:#0d0f13}
+#tools{position:absolute;top:10px;left:10px;right:10px;display:flex;gap:6px;flex-wrap:wrap;z-index:2;pointer-events:none}
+#tools>*{pointer-events:auto}
+#tools button{background:rgba(29,32,39,.92)}
+#tools button.on{background:var(--acc)}
+#tools .sp{flex:1;pointer-events:none}
+#hint{position:absolute;bottom:10px;left:10px;right:10px;z-index:2;color:var(--mut);background:rgba(13,15,19,.85);padding:6px 10px;border-radius:6px;font-size:12px;pointer-events:none}
+#stage{width:100%;height:100%;display:block;cursor:crosshair}
+#stage.sel{cursor:default}
+#empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--mut);text-align:center;padding:40px}
+.sw{display:inline-block;width:22px;height:22px;border-radius:50%;border:2px solid transparent;cursor:pointer;flex:0 0 22px}
+.sw.on{border-color:#fff;box-shadow:0 0 0 2px #000 inset}
+.kinds{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.kinds button{text-align:left;font-size:12px;padding:5px 7px}
+.kinds kbd,.k{font-size:10px;color:var(--mut);float:right}
+button.on kbd{color:#333}
+.stat{display:flex;justify-content:space-between;padding:2px 0;color:var(--mut)}
+.stat b{color:var(--txt)}
+.warn{color:#fbbf24;font-size:12px;padding:3px 0;cursor:pointer}
+.warn:hover{text-decoration:underline}
+.dice{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.muted{color:var(--mut);font-size:12px}
+.chk{display:flex;align-items:center;gap:6px;color:var(--txt);font-size:12px;margin:8px 0}
+.chk input{width:auto}
+svg text{font:600 11px system-ui;paint-order:stroke;stroke:#000;stroke-width:3px;fill:#fff;pointer-events:none}
+</style>
+</head>
+<body>
+<div id="app">
+  <aside>
+    <h1>PMT <b>HEX</b> · Mapeador</h1>
+    <h2>Imagens</h2>
+    <div class="sec">
+      <label class="filebtn"><button style="width:100%">Abrir pasta de hexágonos…</button><input type="file" id="dirIn" webkitdirectory multiple></label>
+      <div style="height:6px"></div>
+      <label class="filebtn"><button style="width:100%">…ou selecionar imagens</button><input type="file" id="filesIn" accept="image/*" multiple></label>
+      <p class="muted">As imagens não saem do seu computador. Só os dados do mapeamento ficam salvos no navegador.</p>
+    </div>
+    <h2>Hexágonos <span id="prog" class="k"></span></h2>
+    <ul id="hexlist"></ul>
+    <h2>Dados</h2>
+    <div class="sec">
+      <div class="row"><button id="expBtn">Exportar JSON</button><label class="filebtn" style="margin:0"><button style="width:100%">Importar</button><input type="file" id="impIn" accept=".json,application/json"></label></div>
+      <div style="height:6px"></div>
+      <button id="copyBtn" style="width:100%">Copiar JSON</button>
+      <p class="muted" id="saveState">Salvo automaticamente.</p>
+    </div>
+  </aside>
+
+  <main>
+    <div id="tools">
+      <button data-mode="select" title="1">Selecionar/mover <span class="k">1</span></button>
+      <button data-mode="space" title="2">+ Espaço <span class="k">2</span></button>
+      <button data-mode="slot" title="3">+ Carta <span class="k">3</span></button>
+      <button data-mode="link" title="4">Ligar <span class="k">4</span></button>
+      <button data-mode="sim" title="5">Testar movimento <span class="k">5</span></button>
+      <span class="sp"></span>
+      <button id="fitBtn" title="F">Enquadrar <span class="k">F</span></button>
+      <button id="undoBtn" title="Ctrl+Z">Desfazer</button>
+    </div>
+    <svg id="stage" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#ffcb05"/></marker>
+      </defs>
+      <g id="vp"><image id="bgimg"/><g id="gEdges"></g><g id="gSlots"></g><g id="gSpaces"></g><g id="gOver"></g></g>
+    </svg>
+    <div id="empty">Abra a pasta com as imagens dos hexágonos para começar.<br>Cada arquivo vira um hexágono (o nome do arquivo é o identificador).</div>
+    <div id="hint"></div>
+  </main>
+
+  <aside class="right">
+    <h2>Hexágono</h2>
+    <div class="sec" id="hexProps"></div>
+    <h2>Novo espaço</h2>
+    <div class="sec">
+      <div class="kinds" id="kindBtns"></div>
+      <label>Cor</label>
+      <div class="row" id="newColor" style="flex-wrap:nowrap;align-items:center"></div>
+      <p class="muted">Em "+ Espaço", segure <b>Shift</b> ao clicar para já ligar ao espaço selecionado — dá para traçar um caminho inteiro em sequência.</p>
+    </div>
+    <h2>Seleção</h2>
+    <div class="sec" id="selProps"><p class="muted">Nada selecionado.</p></div>
+    <h2>Verificação</h2>
+    <div class="sec" id="checks"></div>
+    <div id="simBox" style="display:none">
+      <h2>Testar movimento</h2>
+      <div class="sec">
+        <p class="muted">Clique num espaço de origem e escolha o resultado do dado. Os destinos possíveis ficam destacados (dentro deste hexágono).</p>
+        <div class="dice" id="dice"></div>
+        <p class="muted" id="simOut"></p>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script>
+// ---------- constantes ----------
+const COLORS = {rosa:'#ec6fab', verde:'#0a8a2c', azul:'#0b74c8', vermelho:'#e3202b', amarelo:'#f7c814', cinza:'#6b7280'};
+const COLOR_RGB = {rosa:[236,111,171], verde:[10,138,44], azul:[11,116,200], vermelho:[227,32,43], amarelo:[247,200,20], cinza:[110,110,120]};
+const KINDS = {
+  pokebola:{n:'Poké-Bola', k:'P', g:'◓'},
+  evento:{n:'Evento !', k:'E', g:'!'},
+  superevento:{n:'Super Evento', k:'S', g:'★'},
+  cidade:{n:'Cidade', k:'C', g:'⌂'},
+  passagem:{n:'Passagem de tipo', k:'T', g:'◆'},
+  porta:{n:'Saída do hexágono', k:'O', g:'⇥'},
+  especial:{n:'Especial', k:'X', g:'✦'},
+};
+const ESPECIAIS = ['planalto','comecar_liga','compre_super_evento','compre_2_eventos','compre_2_vermelhos','compre_3_azuis','compre_4_verdes','inicio','outro'];
+const TIPOS = ['','normal','fogo','agua','grama','eletrico','gelo','lutador','veneno','terra','voador','psiquico','inseto','pedra','fantasma','dragao','sombrio','metal','fada'];
+const TIERS = {'':'—', inicio:'Início', t1:'Tier 1', t2:'Tier 2', t3:'Tier 3', fim:'Final (Planalto)'};
+const LS = 'pmthex-mapper-v1';
+
+// ---------- estado ----------
+let DB = load() || {version:1, hexes:{}};
+const IMG = {};      // id -> {url, w, h, data(ImageData)}
+let cur = null, mode = 'space', sel = null, linkFrom = null;
+let newKind = 'pokebola', newColor = 'auto';
+let simFrom = null, simRes = null;
+const undoStack = [];
+let view = {x:0,y:0,w:1000,h:1000};
+
+const $ = s => document.querySelector(s);
+const svg = $('#stage'), vp = $('#vp');
+const NS = 'http://www.w3.org/2000/svg';
+
+function load(){ try{ return JSON.parse(localStorage.getItem(LS)); }catch(e){ return null; } }
+let saveT;
+function save(){ clearTimeout(saveT); saveT=setTimeout(()=>{ try{ localStorage.setItem(LS, JSON.stringify(DB)); $('#saveState').textContent='Salvo automaticamente · '+new Date().toLocaleTimeString(); }catch(e){ $('#saveState').textContent='Não consegui salvar no navegador — exporte o JSON.'; } },250); }
+function H(){ return cur ? DB.hexes[cur] : null; }
+function snap(){ const h=H(); if(!h) return; undoStack.push({id:cur, s:JSON.stringify(h)}); if(undoStack.length>80) undoStack.shift(); }
+function undo(){ const u=undoStack.pop(); if(!u) return; DB.hexes[u.id]=JSON.parse(u.s); if(u.id!==cur) selectHex(u.id); sel=null; changed(); }
+function nid(h,p){ h.seq=(h.seq||0)+1; return p+h.seq; }
+function ensureHex(id){ if(!DB.hexes[id]) DB.hexes[id]={id, tier:guessTier(id), spaces:[], slots:[], edges:[], seq:0, done:false, nota:''}; return DB.hexes[id]; }
+function guessTier(id){ const s=id.toLowerCase(); if(/inic|start/.test(s)) return 'inicio'; if(/fim|final|indigo|planalto|end/.test(s)) return 'fim'; const m=s.match(/t(?:ier)?[ _-]?([123])/); return m?'t'+m[1]:''; }
+
+// ---------- imagens ----------
+function loadFiles(files){
+  const imgs=[...files].filter(f=>/^image\//.test(f.type)||/\.(png|jpe?g|webp)$/i.test(f.name));
+  if(!imgs.length) return;
+  let first=null;
+  imgs.sort((a,b)=>a.name.localeCompare(b.name,'pt',{numeric:true}));
+  imgs.forEach(f=>{
+    const id=f.name.replace(/\.[^.]+$/,'');
+    const url=URL.createObjectURL(f);
+    const im=new Image();
+    im.onload=()=>{
+      const c=document.createElement('canvas'); c.width=im.naturalWidth; c.height=im.naturalHeight;
+      const x=c.getContext('2d',{willReadFrequently:true}); x.drawImage(im,0,0);
+      let data=null; try{ data=x.getImageData(0,0,c.width,c.height); }catch(e){}
+      IMG[id]={url,w:im.naturalWidth,h:im.naturalHeight,data};
+      const h=ensureHex(id); h.w=im.naturalWidth; h.h=im.naturalHeight;
+      if(!cur || cur===id) selectHex(id); else renderList();
+      save();
+    };
+    im.src=url;
+    ensureHex(id); if(!first) first=id;
+  });
+  if(!cur) cur=first;
+  renderList();
+}
+$('#dirIn').onchange=e=>loadFiles(e.target.files);
+$('#filesIn').onchange=e=>loadFiles(e.target.files);
+
+function sampleRGB(px,py){
+  const I=IMG[cur]; if(!I||!I.data) return null;
+  px=Math.round(px); py=Math.round(py);
+  if(px<0||py<0||px>=I.w||py>=I.h) return null;
+  const i=(py*I.w+px)*4, d=I.data.data; if(d[i+3]<100) return null;
+  return [d[i],d[i+1],d[i+2]];
+}
+function classify(rgb, maxD=95){
+  if(!rgb) return null;
+  const [r,g,b]=rgb, mx=Math.max(r,g,b), mn=Math.min(r,g,b);
+  if(mx<55) return null;            // preto (contorno/caminho)
+  if(mn>200) return null;           // branco
+  let best=null, bd=1e9;
+  for(const [k,c] of Object.entries(COLOR_RGB)){ const dd=Math.hypot(r-c[0],g-c[1],b-c[2]); if(dd<bd){bd=dd;best=k;} }
+  return bd<maxD?best:null;
+}
+function detectRing(px,py){
+  const W=H().w, votes={};
+  for(const rr of [0.047,0.052,0.057]) for(let a=0;a<32;a++){
+    const t=a/32*Math.PI*2, c=classify(sampleRGB(px+Math.cos(t)*rr*W, py+Math.sin(t)*rr*W));
+    if(c) votes[c]=(votes[c]||0)+1;
+  }
+  return Object.entries(votes).sort((a,b)=>b[1]-a[1])[0]?.[0]||'azul';
+}
+function detectSolid(px,py){
+  const votes={};
+  for(let dx=-6;dx<=6;dx+=3) for(let dy=-6;dy<=6;dy+=3){ const c=classify(sampleRGB(px+dx,py+dy),120); if(c) votes[c]=(votes[c]||0)+1; }
+  return Object.entries(votes).sort((a,b)=>b[1]-a[1])[0]?.[0]||'azul';
+}
+
+// ---------- lista ----------
+function renderList(){
+  const ids=Object.keys(DB.hexes).sort((a,b)=>a.localeCompare(b,'pt',{numeric:true}));
+  const ul=$('#hexlist'); ul.innerHTML='';
+  let done=0;
+  ids.forEach(id=>{
+    const h=DB.hexes[id]; if(h.done) done++;
+    const li=document.createElement('li');
+    li.className=(id===cur?'cur ':'')+(IMG[id]?'':'noimg');
+    li.innerHTML=`<span>${h.done?'<span class="done">✓</span> ':''}${esc(id)}</span><span class="tg">${h.auto&&!h.done?'rascunho · ':''}${TIERS[h.tier]||'—'} · ${h.spaces.length}</span>`;
+    li.title=IMG[id]?'':'Imagem não carregada nesta sessão';
+    li.onclick=()=>selectHex(id);
+    ul.appendChild(li);
+  });
+  $('#prog').textContent=ids.length?`${done}/${ids.length} prontos`:'';
+}
+function esc(s){ return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function selectHex(id){
+  cur=id; sel=null; linkFrom=null; simFrom=null; simRes=null;
+  const I=IMG[id], h=H();
+  $('#empty').style.display=I?'none':'flex';
+  if(!I) $('#empty').innerHTML=`A imagem de <b>${esc(id)}</b> não está carregada nesta sessão.<br>Abra a pasta de novo — o mapeamento já feito continua salvo.`;
+  const bg=$('#bgimg');
+  if(I){ bg.setAttribute('href',I.url); bg.setAttribute('width',I.w); bg.setAttribute('height',I.h); fit(); }
+  else bg.removeAttribute('href');
+  renderAll();
+}
+
+// ---------- viewport ----------
+function setView(){ svg.setAttribute('viewBox',`${view.x} ${view.y} ${view.w} ${view.h}`); }
+function fit(){ const h=H(); if(!h||!h.w) return; const r=svg.getBoundingClientRect(); const pad=0.06; const s=Math.max(h.w/(r.width*(1-pad*2)), h.h/((r.height-60)*(1-pad*2))); view.w=r.width*s; view.h=r.height*s; view.x=(h.w-view.w)/2; view.y=(h.h-view.h)/2; setView(); }
+window.addEventListener('resize',fit);
+function toImg(ev){ const p=svg.createSVGPoint(); p.x=ev.clientX; p.y=ev.clientY; return p.matrixTransform(svg.getScreenCTM().inverse()); }
+svg.addEventListener('wheel',ev=>{ ev.preventDefault(); const p=toImg(ev); const f=ev.deltaY>0?1.15:1/1.15; view.x=p.x-(p.x-view.x)*f; view.y=p.y-(p.y-view.y)*f; view.w*=f; view.h*=f; setView(); },{passive:false});
+
+// ---------- render ----------
+function R(){ return (H()?.w||1000)*0.05; }
+function P(o){ const h=H(); return {x:o.x*h.w, y:o.y*h.h}; }
+function el(tag,attrs,parent){ const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); if(parent) parent.appendChild(e); return e; }
+function spaceById(id){ return H().spaces.find(s=>s.id===id); }
+
+function renderAll(){ renderBoard(); renderList(); renderHexProps(); renderSel(); renderChecks(); renderTools(); }
+function changed(){ save(); renderAll(); }
+
+function renderBoard(){
+  const h=H(); const gE=$('#gEdges'), gS=$('#gSpaces'), gC=$('#gSlots'), gO=$('#gOver');
+  gE.innerHTML=gS.innerHTML=gC.innerHTML=gO.innerHTML='';
+  if(!h||!h.w) return;
+  const r=R();
+  // arestas
+  h.edges.forEach(e=>{
+    const a=spaceById(e.a), b=spaceById(e.b); if(!a||!b) return;
+    const A=P(a), B=P(b), dx=B.x-A.x, dy=B.y-A.y, L=Math.hypot(dx,dy)||1;
+    const ra=a.kind==='porta'?r*.35:r*.75, rb=b.kind==='porta'?r*.35:r*.75;
+    const x1=A.x+dx/L*ra, y1=A.y+dy/L*ra, x2=B.x-dx/L*rb, y2=B.y-dy/L*rb;
+    const isSel=sel?.t==='edge'&&sel.id===e.id;
+    const line=el('line',{x1,y1,x2,y2,stroke:isSel?'#fff':(e.duvida?'#ff6a00':(e.itemCost?'#f59e0b':'#ffcb05')),'stroke-width':r*(isSel?.22:.14),'stroke-linecap':'round',opacity:.95},gE);
+    if(e.duvida) line.setAttribute('stroke-dasharray',`${r*.3} ${r*.22}`);
+    if(e.dir==='ab' || e.itemCost) line.setAttribute('marker-end','url(#arr)');
+    const hit=el('line',{x1,y1,x2,y2,stroke:'transparent','stroke-width':r*.6,style:'cursor:pointer'},gE);
+    hit.addEventListener('pointerdown',ev=>onItemDown(ev,{t:'edge',id:e.id}));
+    if(e.itemCost){ const t=el('text',{x:(x1+x2)/2,y:(y1+y2)/2-r*.25,'text-anchor':'middle','font-size':r*.5},gE); t.textContent='🎒'+e.itemCost; }
+  });
+  // cartas (slots)
+  h.slots.forEach(s=>{
+    const p=P(s), w=r*1.1, isSel=sel?.t==='slot'&&sel.id===s.id;
+    const sp=s.space&&spaceById(s.space);
+    if(sp){ const q=P(sp); el('line',{x1:p.x,y1:p.y,x2:q.x,y2:q.y,stroke:'#fff','stroke-width':r*.06,'stroke-dasharray':`${r*.15} ${r*.12}`,opacity:.8},gC); }
+    const g=el('g',{style:'cursor:pointer'},gC);
+    el('rect',{x:p.x-w/2,y:p.y-w*.65,width:w,height:w*1.3,rx:r*.12,fill:COLORS[s.color]||'#888','fill-opacity':.55,stroke:isSel?'#fff':'#000','stroke-width':r*(isSel?.14:.08)},g);
+    const t=el('text',{x:p.x,y:p.y+r*.18,'text-anchor':'middle','font-size':r*.5},g); t.textContent='🂠';
+    g.addEventListener('pointerdown',ev=>onItemDown(ev,{t:'slot',id:s.id}));
+  });
+  // espaços
+  h.spaces.forEach(s=>{
+    const p=P(s), isSel=sel?.t==='space'&&sel.id===s.id, isLink=linkFrom===s.id;
+    const g=el('g',{style:'cursor:pointer'},gS);
+    const rr=s.kind==='porta'?r*.35:r*.75;
+    let fillOp=.35, stroke='#000', sw=r*.08;
+    if(simRes){ if(simFrom===s.id){stroke='#fff';sw=r*.2;fillOp=.8;} else if(simRes.has(s.id)){stroke='#22c55e';sw=r*.22;fillOp=.75;} else fillOp=.12; }
+    if(isSel||isLink){ stroke=isLink?'#22c55e':'#fff'; sw=r*.18; }
+    if(s.kind==='porta'){
+      el('rect',{x:p.x-rr,y:p.y-rr,width:rr*2,height:rr*2,fill:'#fff','fill-opacity':.9,stroke,'stroke-width':sw,transform:`rotate(45 ${p.x} ${p.y})`},g);
+    } else {
+      el('circle',{cx:p.x,cy:p.y,r:rr,fill:COLORS[s.color]||'#888','fill-opacity':fillOp,stroke,'stroke-width':sw},g);
+    }
+    const t=el('text',{x:p.x,y:p.y+r*.2,'text-anchor':'middle','font-size':r*.55},g);
+    t.textContent=s.kind==='porta'?'':(KINDS[s.kind]?.g||'?');
+    if(s.kind==='cidade'&&s.cidade?.nome){ const t2=el('text',{x:p.x,y:p.y+rr+r*.5,'text-anchor':'middle','font-size':r*.45},g); t2.textContent=s.cidade.nome; }
+    if(s.kind==='especial'&&s.especial){ const t5=el('text',{x:p.x,y:p.y+rr+r*.45,'text-anchor':'middle','font-size':r*.36},g); t5.textContent=s.especial.replace(/_/g,' '); }
+    if(s.tipo){ const t3=el('text',{x:p.x,y:p.y-rr-r*.15,'text-anchor':'middle','font-size':r*.38},g); t3.textContent=s.tipo; }
+    if(s.kind==='porta'){ const t4=el('text',{x:p.x,y:p.y-rr-r*.25,'text-anchor':'middle','font-size':r*.4},g); t4.textContent=s.lado||sideOf(s); }
+    g.addEventListener('pointerdown',ev=>onItemDown(ev,{t:'space',id:s.id}));
+  });
+}
+
+// lado do hexágono (pontudo em cima) mais próximo de um ponto
+function sideOf(s){
+  const ang=Math.atan2(s.y-.5, s.x-.5)*180/Math.PI; // 0 = leste, 90 = sul
+  const sides=[[0,'L'],[60,'SE'],[120,'SO'],[180,'O'],[-180,'O'],[-120,'NO'],[-60,'NE']];
+  let best='L',bd=1e9; sides.forEach(([a,n])=>{ const d=Math.abs(ang-a); if(d<bd){bd=d;best=n;} }); return best;
+}
+
+// ---------- interação ----------
+let drag=null;
+svg.addEventListener('pointerdown',ev=>{
+  if(!H()||!IMG[cur]) return;
+  if(ev.button===1||ev.button===2||(mode==='select'&&ev.target===svg)||(mode==='select'&&ev.target.id==='bgimg')||ev.altKey||spaceHeld){ startPan(ev); return; }
+  if(ev.button!==0) return;
+  const p=toImg(ev), h=H();
+  if(mode==='space'){
+    snap();
+    const s={id:nid(h,'s'), x:p.x/h.w, y:p.y/h.h, kind:newKind, color:newColor==='auto'?(newKind==='superevento'?'amarelo':newKind==='porta'?'cinza':detectRing(p.x,p.y)):newColor};
+    if(newKind==='cidade') s.cidade={nome:'',insignias:'',tipoLider:'',lider:'',pioneiro:'',primeiraVisita:''};
+    if(newKind==='especial') s.especial='outro';
+    h.spaces.push(s);
+    if(ev.shiftKey && sel?.t==='space' && sel.id!==s.id) addEdge(sel.id,s.id);
+    sel={t:'space',id:s.id}; changed();
+  } else if(mode==='slot'){
+    snap();
+    const s={id:nid(h,'c'), x:p.x/h.w, y:p.y/h.h, color:detectSolid(p.x,p.y), space:nearestBall(p)};
+    h.slots.push(s); sel={t:'slot',id:s.id}; changed();
+  } else if(mode==='link'){ linkFrom=null; renderBoard(); }
+  else if(mode==='sim'){ simFrom=null; simRes=null; renderBoard(); }
+});
+function nearestBall(p){
+  const h=H(); let best=null,bd=R()*4.5;
+  h.spaces.forEach(s=>{ if(s.kind!=='pokebola') return; if(h.slots.some(c=>c.space===s.id)) return; const q=P(s), d=Math.hypot(q.x-p.x,q.y-p.y); if(d<bd){bd=d;best=s.id;} });
+  return best;
+}
+function addEdge(a,b){ const h=H(); const ex=h.edges.find(e=>(e.a===a&&e.b===b)||(e.a===b&&e.b===a)); if(ex) return ex; const e={id:nid(h,'e'),a,b,dir:'both',itemCost:0}; h.edges.push(e); return e; }
+
+function onItemDown(ev,item){
+  ev.stopPropagation();
+  if(ev.button!==0||ev.altKey||spaceHeld){ startPan(ev); return; }
+  const h=H();
+  if(mode==='link' && item.t==='space'){
+    if(!linkFrom){ linkFrom=item.id; renderBoard(); return; }
+    if(linkFrom!==item.id){ snap(); const e=addEdge(linkFrom,item.id); sel={t:'edge',id:e.id}; }
+    linkFrom=item.id; changed(); return;
+  }
+  if(mode==='sim' && item.t==='space'){ simFrom=item.id; runSim(); return; }
+  if(mode==='space' && ev.shiftKey && item.t==='space' && sel?.t==='space' && sel.id!==item.id){ snap(); addEdge(sel.id,item.id); sel={t:'space',id:item.id}; changed(); return; }
+  if(mode==='slot' && item.t==='space' && sel?.t==='slot'){ snap(); const c=h.slots.find(c=>c.id===sel.id); c.space=item.id; changed(); return; }
+  sel=item; renderAll();
+  if(item.t!=='edge'){
+    const o=item.t==='space'?spaceById(item.id):h.slots.find(c=>c.id===item.id);
+    const p0=toImg(ev); drag={o, ox:o.x, oy:o.y, p0, moved:false};
+    svg.setPointerCapture(ev.pointerId);
+  }
+}
+let pan=null, spaceHeld=false;
+function startPan(ev){ ev.preventDefault(); pan={cx:ev.clientX,cy:ev.clientY,vx:view.x,vy:view.y}; svg.setPointerCapture(ev.pointerId); }
+svg.addEventListener('pointermove',ev=>{
+  if(pan){ const r=svg.getBoundingClientRect(), s=view.w/r.width; view.x=pan.vx-(ev.clientX-pan.cx)*s; view.y=pan.vy-(ev.clientY-pan.cy)*s; setView(); return; }
+  if(drag){ const p=toImg(ev), h=H(); const dx=p.x-drag.p0.x, dy=p.y-drag.p0.y; if(!drag.moved && Math.hypot(dx,dy)<R()*.15) return; if(!drag.moved){ snap(); drag.moved=true; } drag.o.x=drag.ox+dx/h.w; drag.o.y=drag.oy+dy/h.h; renderBoard(); }
+});
+svg.addEventListener('pointerup',()=>{ if(drag?.moved) changed(); drag=null; pan=null; });
+svg.addEventListener('contextmenu',e=>e.preventDefault());
+
+function delSel(){
+  const h=H(); if(!sel||!h) return; snap();
+  if(sel.t==='space'){ h.spaces=h.spaces.filter(s=>s.id!==sel.id); h.edges=h.edges.filter(e=>e.a!==sel.id&&e.b!==sel.id); h.slots.forEach(c=>{ if(c.space===sel.id) c.space=null; }); }
+  if(sel.t==='slot') h.slots=h.slots.filter(c=>c.id!==sel.id);
+  if(sel.t==='edge') h.edges=h.edges.filter(e=>e.id!==sel.id);
+  sel=null; changed();
+}
+
+document.addEventListener('keydown',ev=>{
+  const tag=document.activeElement?.tagName;
+  if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'){ if(ev.key==='Escape') document.activeElement.blur(); return; }
+  if(ev.key===' '){ spaceHeld=true; svg.style.cursor='grab'; ev.preventDefault(); return; }
+  if((ev.ctrlKey||ev.metaKey)&&ev.key.toLowerCase()==='z'){ ev.preventDefault(); undo(); return; }
+  if(ev.key==='Delete'||ev.key==='Backspace'){ ev.preventDefault(); delSel(); return; }
+  if(ev.key==='Enter' && sel?.t==='edge'){ const e=H().edges.find(x=>x.id===sel.id); if(e?.duvida){ confirmEdge(e); return; } }
+  if(ev.key==='Escape'){ sel=null; linkFrom=null; simFrom=null; simRes=null; renderAll(); return; }
+  if(/^[1-5]$/.test(ev.key)){ setMode(['select','space','slot','link','sim'][+ev.key-1]); return; }
+  if(ev.key.toLowerCase()==='f'){ fit(); return; }
+  const k=ev.key.toUpperCase(), kind=Object.keys(KINDS).find(n=>KINDS[n].k===k);
+  if(kind){
+    // no modo "+ Espaço" a tecla escolhe o tipo do PRÓXIMO espaço; nos outros modos, muda o selecionado
+    if(mode!=='space' && sel?.t==='space'){ snap(); const s=spaceById(sel.id); setKind(s,kind); changed(); }
+    else { newKind=kind; renderTools(); }
+  }
+  if(sel?.t==='edge' && k==='D'){ snap(); const e=H().edges.find(e=>e.id===sel.id); cycleDir(e); changed(); }
+});
+document.addEventListener('keyup',ev=>{ if(ev.key===' '){ spaceHeld=false; svg.style.cursor=''; } });
+
+function confirmEdge(e){ snap(); delete e.duvida; const h=H(); const nx=h.edges.find(x=>x.duvida); sel=nx?{t:'edge',id:nx.id}:null; changed(); }
+function setKind(s,kind){
+  s.kind=kind;
+  if(kind==='cidade'&&!s.cidade) s.cidade={nome:'',insignias:'',tipoLider:'',lider:'',pioneiro:'',primeiraVisita:''};
+  if(kind==='especial'&&!s.especial) s.especial='outro';
+  if(kind==='superevento') s.color='amarelo';
+}
+function cycleDir(e){ if(e.dir==='both'){ e.dir='ab'; delete e._rev; } else if(!e._rev){ [e.a,e.b]=[e.b,e.a]; e._rev=true; } else { e.dir='both'; delete e._rev; } }
+
+function setMode(m){ mode=m; linkFrom=null; if(m!=='sim'){simFrom=null;simRes=null;} svg.classList.toggle('sel',m==='select'); renderAll(); }
+document.querySelectorAll('#tools [data-mode]').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
+$('#fitBtn').onclick=fit; $('#undoBtn').onclick=undo;
+
+// ---------- painéis ----------
+function renderTools(){
+  document.querySelectorAll('#tools [data-mode]').forEach(b=>b.classList.toggle('on',b.dataset.mode===mode));
+  $('#kindBtns').innerHTML=Object.entries(KINDS).map(([k,v])=>`<button data-k="${k}" class="${k===newKind?'on':''}">${v.g} ${v.n}<kbd>${v.k}</kbd></button>`).join('');
+  $('#kindBtns').querySelectorAll('button').forEach(b=>b.onclick=()=>{ newKind=b.dataset.k; if(mode!=='space') setMode('space'); else renderTools(); });
+  $('#newColor').innerHTML=`<button data-c="auto" class="${newColor==='auto'?'on':''}" style="flex:0 0 auto;padding:3px 8px">auto</button>`+Object.keys(COLORS).map(c=>`<span class="sw ${newColor===c?'on':''}" data-c="${c}" title="${c}" style="background:${COLORS[c]}"></span>`).join('');
+  $('#newColor').querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{ newColor=b.dataset.c; renderTools(); });
+  const hints={select:'Arraste itens para mover · arraste o fundo para navegar · roda do mouse = zoom · Delete apaga · Ctrl+Z desfaz',
+    space:'Clique no centro de cada círculo do tabuleiro. Shift+clique liga ao espaço selecionado. Letras P E S C T O X trocam o tipo. Cor "auto" lê a cor do anel na imagem.',
+    slot:'Clique sobre cada quadrado de carta. Ele se liga sozinho à Poké-Bola mais próxima; para corrigir, com a carta selecionada clique na Poké-Bola certa.',
+    link:'Clique em um espaço e depois no próximo — as ligações vão encadeando. Esc solta. Selecionando uma ligação, D alterna o sentido.',
+    sim:'Clique na origem e escolha o valor do dado para ver aonde dá para chegar.'};
+  $('#hint').textContent=hints[mode]+'  ·  Espaço/Alt + arrastar = navegar';
+  $('#simBox').style.display=mode==='sim'?'':'none';
+}
+
+function renderHexProps(){
+  const h=H(), box=$('#hexProps');
+  if(!h){ box.innerHTML='<p class="muted">—</p>'; return; }
+  box.innerHTML=`<div style="font-weight:600;font-size:14px">${esc(h.id)}</div>
+    <label>Posição no tabuleiro</label>
+    <select id="hTier">${Object.entries(TIERS).map(([k,v])=>`<option value="${k}" ${h.tier===k?'selected':''}>${v}</option>`).join('')}</select>
+    <label>Observações</label><textarea id="hNota" placeholder="Algo a revisar…">${esc(h.nota||'')}</textarea>
+    <label class="chk"><input type="checkbox" id="hDone" ${h.done?'checked':''}> Mapeamento concluído</label>`;
+  $('#hTier').onchange=e=>{h.tier=e.target.value; changed();};
+  $('#hNota').oninput=e=>{h.nota=e.target.value; save();};
+  $('#hDone').onchange=e=>{h.done=e.target.checked; changed();};
+}
+
+function colorPicker(cur,cb){
+  const d=document.createElement('div'); d.className='row'; d.style.flexWrap='nowrap';
+  Object.keys(COLORS).forEach(c=>{ const s=document.createElement('span'); s.className='sw'+(cur===c?' on':''); s.style.background=COLORS[c]; s.title=c; s.onclick=()=>cb(c); d.appendChild(s); });
+  return d;
+}
+
+function renderSel(){
+  const h=H(), box=$('#selProps');
+  if(!h||!sel){ box.innerHTML='<p class="muted">Nada selecionado.</p>'; return; }
+  if(sel.t==='space'){
+    const s=spaceById(sel.id); if(!s){ box.innerHTML=''; return; }
+    const deg=h.edges.filter(e=>e.a===s.id||e.b===s.id).length;
+    box.innerHTML=`<div class="stat"><span>Espaço <b>${s.id}</b></span><span>${deg} ligação(ões)</span></div>
+      <label>Tipo de espaço</label><select id="sKind">${Object.entries(KINDS).map(([k,v])=>`<option value="${k}" ${s.kind===k?'selected':''}>${v.n}</option>`).join('')}</select>
+      <label>Cor</label><div id="sCol"></div>
+      <label>Exige tipo de Pokémon (passagem de tipo)</label><select id="sTipo">${TIPOS.map(t=>`<option value="${t}" ${s.tipo===t||(!s.tipo&&!t)?'selected':''}>${t||'— nenhum —'}</option>`).join('')}</select>
+      <div id="sExtra"></div>
+      <label>Nota</label><input id="sNota" value="${esc(s.nota||'')}">
+      <div style="height:10px"></div><button id="sDel" style="width:100%">Apagar espaço</button>`;
+    $('#sCol').appendChild(colorPicker(s.color,c=>{snap();s.color=c;changed();}));
+    $('#sKind').onchange=e=>{snap();setKind(s,e.target.value);changed();};
+    $('#sTipo').onchange=e=>{snap();s.tipo=e.target.value||undefined;changed();};
+    $('#sNota').oninput=e=>{s.nota=e.target.value;save();};
+    $('#sDel').onclick=delSel;
+    const ex=$('#sExtra');
+    if(s.kind==='cidade'){
+      const c=s.cidade;
+      ex.innerHTML=`<label>Nome da cidade</label><input id="cNome" value="${esc(c.nome)}">
+        <div class="row"><div><label>Insígnias</label><select id="cIns">${['','1-2','3-4','5-6'].map(v=>`<option ${c.insignias===v?'selected':''}>${v}</option>`).join('')}</select></div>
+        <div><label>Tipo do líder</label><select id="cTipo">${TIPOS.map(t=>`<option value="${t}" ${c.tipoLider===t?'selected':''}>${t||'—'}</option>`).join('')}</select></div></div>
+        <label>Líder</label><input id="cLider" value="${esc(c.lider)}">
+        <label>Pioneiro</label><textarea id="cPio">${esc(c.pioneiro)}</textarea>
+        <label>Primeira visita</label><textarea id="cPri">${esc(c.primeiraVisita)}</textarea>`;
+      const bind=(id,k)=>{ $(id).oninput=e=>{c[k]=e.target.value; save(); if(k==='nome') renderBoard();}; $(id).onchange=$(id).oninput; };
+      bind('#cNome','nome'); bind('#cIns','insignias'); bind('#cTipo','tipoLider'); bind('#cLider','lider'); bind('#cPio','pioneiro'); bind('#cPri','primeiraVisita');
+    }
+    if(s.kind==='especial'){
+      ex.innerHTML=`<label>Efeito especial</label><select id="eSp">${ESPECIAIS.map(v=>`<option ${s.especial===v?'selected':''}>${v}</option>`).join('')}</select>`;
+      $('#eSp').onchange=e=>{s.especial=e.target.value;changed();};
+    }
+    if(s.kind==='porta') ex.innerHTML=`<p class="muted">Ponto onde o caminho sai pela borda do hexágono (lado <b>${s.lado||sideOf(s)}</b>). Não conta como casa no movimento — serve para emendar com o hexágono vizinho.</p>`;
+  }
+  if(sel.t==='slot'){
+    const c=h.slots.find(c=>c.id===sel.id); if(!c){box.innerHTML='';return;}
+    box.innerHTML=`<div class="stat"><span>Carta <b>${c.id}</b></span><span>${c.space?'ligada a '+c.space:'<span style="color:#fbbf24">sem Poké-Bola</span>'}</span></div>
+      <label>Cor da carta</label><div id="cCol"></div>
+      <p class="muted">Para trocar a Poké-Bola ligada: fique no modo "+ Carta" e clique na Poké-Bola certa.</p>
+      <button id="cDel" style="width:100%">Apagar carta</button>`;
+    $('#cCol').appendChild(colorPicker(c.color,v=>{snap();c.color=v;changed();}));
+    $('#cDel').onclick=delSel;
+  }
+  if(sel.t==='edge'){
+    const e=h.edges.find(e=>e.id===sel.id); if(!e){box.innerHTML='';return;}
+    box.innerHTML=`<div class="stat"><span>Ligação <b>${e.a} — ${e.b}</b></span></div>
+      ${e.duvida?`<p class="warn" style="cursor:default">Ligação detectada com dúvida. Confira na imagem.</p><div class="row"><button id="eOk" class="on">Confirmar <kbd>Enter</kbd></button><button id="eNo">Não existe <kbd>Del</kbd></button></div>`:''}
+      <label>Sentido</label>
+      <div class="row"><button id="d0" class="${e.dir==='both'?'on':''}">↔ ambos</button><button id="d1" class="${e.dir==='ab'?'on':''}">${e.a} → ${e.b}</button><button id="d2">inverter</button></div>
+      <label>Custo em Itens — cobrado só de ${e.a} → ${e.b} (use "inverter" para trocar)</label><input id="eCost" type="number" min="0" max="9" value="${e.itemCost||0}">
+      <div style="height:10px"></div><button id="eDel" style="width:100%">Apagar ligação</button>`;
+    $('#d0').onclick=()=>{snap();e.dir='both';changed();};
+    $('#d1').onclick=()=>{snap();e.dir='ab';changed();};
+    $('#d2').onclick=()=>{snap();[e.a,e.b]=[e.b,e.a];if(e.dir==='both'&&!e.itemCost)e.dir='ab';changed();};
+    $('#eCost').onchange=e2=>{snap();e.itemCost=Math.max(0,+e2.target.value||0);changed();};
+    $('#eDel').onclick=delSel;
+    if(e.duvida){ $('#eOk').onclick=()=>confirmEdge(e); $('#eNo').onclick=delSel; }
+  }
+}
+
+function renderChecks(){
+  const h=H(), box=$('#checks');
+  if(!h){ box.innerHTML=''; return; }
+  const cnt={}; h.spaces.forEach(s=>cnt[s.kind]=(cnt[s.kind]||0)+1);
+  const deg={}; h.edges.forEach(e=>{deg[e.a]=(deg[e.a]||0)+1;deg[e.b]=(deg[e.b]||0)+1;});
+  const w=[];
+  h.spaces.forEach(s=>{
+    if(!deg[s.id]) w.push([s.id,`${s.id}: espaço sem ligação`]);
+    else if(deg[s.id]===1 && s.kind!=='porta') w.push([s.id,`${s.id}: beco sem saída (1 ligação)`]);
+    if(s.kind==='pokebola' && !h.slots.some(c=>c.space===s.id)) w.push([s.id,`${s.id}: Poké-Bola sem carta ao lado`]);
+    if(s.kind==='cidade' && !s.cidade?.nome) w.push([s.id,`${s.id}: cidade sem nome`]);
+  });
+  h.slots.forEach(c=>{ if(!c.space) w.push([c.id,`${c.id}: carta sem Poké-Bola`,'slot']); });
+  h.edges.filter(e=>e.duvida).forEach(e=>w.unshift([e.id,`${e.a}—${e.b}: ligação a confirmar`,'edge']));
+  // componentes conexos
+  const ids=h.spaces.map(s=>s.id), adj={}; ids.forEach(i=>adj[i]=[]); h.edges.forEach(e=>{adj[e.a]?.push(e.b);adj[e.b]?.push(e.a);});
+  const seen=new Set(); let comp=0; ids.forEach(i=>{ if(seen.has(i)) return; comp++; const st=[i]; while(st.length){ const x=st.pop(); if(seen.has(x)) continue; seen.add(x); adj[x].forEach(y=>st.push(y)); } });
+  const ports={}; h.spaces.filter(s=>s.kind==='porta').forEach(s=>{const sd=s.lado||sideOf(s); ports[sd]=(ports[sd]||0)+1;});
+  box.innerHTML=Object.entries(KINDS).filter(([k])=>cnt[k]).map(([k,v])=>`<div class="stat"><span>${v.n}</span><b>${cnt[k]}</b></div>`).join('')
+    +`<div class="stat"><span>Cartas</span><b>${h.slots.length}</b></div><div class="stat"><span>Ligações</span><b>${h.edges.length}</b></div>`
+    +(Object.keys(ports).length?`<div class="stat"><span>Saídas por lado</span><b>${Object.entries(ports).map(([k,v])=>k+':'+v).join(' ')}</b></div>`:'')
+    +(comp>1?`<div class="warn">⚠ O mapa está dividido em ${comp} partes desconectadas</div>`:'')
+    +w.slice(0,30).map(([id,m,t])=>`<div class="warn" data-id="${id}" data-t="${t||'space'}">⚠ ${esc(m)}</div>`).join('')
+    +(w.length>30?`<div class="muted">… e mais ${w.length-30}</div>`:'')
+    +(!w.length&&h.spaces.length?'<div class="stat" style="color:var(--ok)">Tudo certo ✓</div>':'');
+  box.querySelectorAll('.warn[data-id]').forEach(d=>d.onclick=()=>{ sel={t:d.dataset.t,id:d.dataset.id}; renderAll(); });
+}
+
+// ---------- simulação de movimento ----------
+$('#dice').innerHTML=[1,2,3,4,5,6].map(n=>`<button data-n="${n}">${n}</button>`).join('');
+let simN=null;
+$('#dice').querySelectorAll('button').forEach(b=>b.onclick=()=>{ simN=+b.dataset.n; $('#dice').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); runSim(); });
+function runSim(){
+  const h=H(); if(!simFrom||!simN){ simRes=null; renderBoard(); $('#simOut').textContent=simFrom?'Escolha o valor do dado.':'Clique num espaço de origem.'; return; }
+  const out=new Map(); // destino -> motivo
+  const nb={}; h.spaces.forEach(s=>nb[s.id]=[]);
+  // custo em Itens só no sentido a -> b (sentido da seta); a volta é livre
+  h.edges.forEach(e=>{ nb[e.a]?.push({to:e.b,cost:e.itemCost||0}); if(e.dir==='both') nb[e.b]?.push({to:e.a,cost:0}); });
+  const kind=id=>spaceById(id)?.kind;
+  (function dfs(node,steps,visited){
+    for(const {to,cost} of nb[node]){
+      if(visited.has(to)) continue;
+      const k=kind(to), ns=steps+((k==='porta'||k==='passagem')?0:1);
+      if(ns>simN) continue;
+      if(k!=='porta'&&k!=='passagem'){
+        if(cost>0) out.set(to,'itens');
+        else if(ns===simN) out.set(to,'exato');
+        else if(k==='cidade' || (k==='especial'&&['planalto','comecar_liga'].includes(spaceById(to).especial))) out.set(to, out.get(to)||'cidade');
+        else if(cost>0) out.set(to, out.get(to)||'itens');
+      }
+      if(ns<simN){ visited.add(to); dfs(to,ns,visited); visited.delete(to); }
+    }
+  })(simFrom,0,new Set([simFrom]));
+  simRes=out; renderBoard();
+  const c={exato:0,cidade:0,itens:0}; out.forEach(v=>c[v]++);
+  $('#simOut').innerHTML=`${out.size} destino(s): ${c.exato} pelo dado exato${c.cidade?`, ${c.cidade} cidade(s) no caminho`:''}${c.itens?`, ${c.itens} via passagem de Item`:''}.<br>Regras: sem repetir casa no mesmo movimento, saídas do hexágono não contam como casa, cidade dá para parar antes.`;
+}
+
+// ---------- exportar/importar ----------
+function exportObj(){ const o=JSON.parse(JSON.stringify(DB)); o.exportadoEm=new Date().toISOString(); Object.values(o.hexes).forEach(h=>{ h.spaces.forEach(s=>{s.x=+s.x.toFixed(4);s.y=+s.y.toFixed(4);}); h.slots.forEach(s=>{s.x=+s.x.toFixed(4);s.y=+s.y.toFixed(4);}); h.edges.forEach(e=>delete e._rev); }); return o; }
+$('#expBtn').onclick=()=>{ const b=new Blob([JSON.stringify(exportObj(),null,1)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='hex-mapa.json'; a.click(); };
+$('#copyBtn').onclick=async()=>{ try{ await navigator.clipboard.writeText(JSON.stringify(exportObj())); $('#copyBtn').textContent='Copiado ✓'; setTimeout(()=>$('#copyBtn').textContent='Copiar JSON',1500);}catch(e){ alert('Não consegui copiar — use Exportar.'); } };
+$('#impIn').onchange=async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  try{ const o=JSON.parse(await f.text()); if(!o.hexes) throw 0;
+    const n=Object.keys(o.hexes).length;
+    if(!confirm(`Importar ${n} hexágono(s)? Hexágonos com o mesmo nome serão substituídos.`)) return;
+    Object.assign(DB.hexes,o.hexes); if(o.saidasPadrao) DB.saidasPadrao=o.saidasPadrao; changed(); if(cur) selectHex(cur);
+  }catch(err){ alert('Arquivo JSON inválido.'); }
+  e.target.value='';
+};
+
+renderList(); renderTools(); renderHexProps(); renderChecks();
+</script>
+</body>
+</html>

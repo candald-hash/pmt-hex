@@ -1,0 +1,20 @@
+{"verso":"1back.png","cartas":[
+{"img":"arceus.png","nome":"Pedido a Arceus","texto":"Compre 2 Super Eventos. Distribua eles para 2 jogadores diferentes (você pode escolher a si mesmo como alvo de um deles)."},
+{"img":"brineybarco.png","nome":"Barco de Briney","texto":"Jogue um turno extra após comprar esse Super Evento. Até seu próximo turno você pode somar ou subtrair 1 do dado de movimentação de todos os jogadores no seu hexágono."},
+{"img":"criadores.png","nome":"Criadores Pokémon","texto":"Escolha uma das opções: 1) Descarte dois Pokémons da mesma linha evolucionária e pegue qualquer Pokémon Azul ou mais fraco fora de jogo; 2) Descarte três Pokémons da mesma linha evolucionária e pegue qualquer Pokémon fora de jogo; 3) Compre 2 Cartas Item."},
+{"img":"encontrolendario.png","nome":"Encontro Lendário","texto":"Revele os 4 próximos Pokémons Amarelos. Escolha um deles e tente a captura."},
+{"img":"expertemfosseis.png","nome":"Expert em Fósseis","texto":"Revele os 3 próximos Pokémons Verdes fora de jogo. Escolha 2 entre eles para pegar de graça."},
+{"img":"fossilgrande.png","nome":"Fóssil Grande","texto":"Ganhe um Pokémon Vermelho aleatório e não revelado."},
+{"img":"incubadoras.png","nome":"Incubadoras","texto":"Ganhe 3 Pokémons Rosas aleatórios e não revelados."},
+{"img":"maquinadobill.png","nome":"Máquina do Bill","texto":"Revele 4 Pokémons no tabuleiro, um de cada cor. Tente capturar 2 entre eles."},
+{"img":"missingno.png","nome":"Missingno","texto":"Compre 2 Cartas Item. Ganhe um Pokémon Azul aleatório e não revelado."},
+{"img":"museupokemon.png","nome":"Museu Pokémon","texto":"Compre 4 Cartas Item."},
+{"img":"opaqua.png","nome":"Operação Aqua","bloqueavel":true,"texto":"Todos os seus oponentes devem descartar uma Carta Item. Então, você pode comprar 3 Cartas Item dentre os itens descartados ou da pilha de Cartas Item."},
+{"img":"opgalat.png","nome":"Operação Galactic","bloqueavel":true,"texto":"Compre 3 Cartas Item. Após isso, escolha uma das opções: 1) Um oponente da sua escolha perde os próximos dois turnos. 2) Dois oponentes da sua escolha perdem o próximo turno."},
+{"img":"opmagma.png","nome":"Operação Magma","bloqueavel":true,"texto":"Todos os seus oponentes devem descartar suas Cartas de Treinador. Então, você pode trocar sua Carta de Treinador por qualquer uma das descartadas."},
+{"img":"oprocket.png","nome":"Operação Rocket","bloqueavel":true,"texto":"Escolha uma das opções: 1) Subtraia aleatoriamente dois Itens de um oponente da sua escolha. 2) Subtraia aleatoriamente um Item de dois oponentes da sua escolha."},
+{"img":"pesquisa.png","nome":"Pesquisa de Oak","texto":"Escolha um tipo e uma cor (que não seja amarela) de Pokémon. Busque pelo próximo Pokémon fora de jogo que seja do tipo e cor escolhidos e pegue-o de graça. Após isso, compre uma Carta Item."},
+{"img":"pokenav.png","nome":"Pokénav Melhorado","bloqueavel":true,"texto":"Compre 4 Cartas de Treinador. Após isso, escolha um oponente para descartar a Carta de Treinador."},
+{"img":"sabrina.png","nome":"Previsão de Sabrina","texto":"Revele as próximas 5 Cartas Item e compre 3 dentre elas. Após isso, descarte uma Carta Item."},
+{"img":"trocapok.png","nome":"Troca Pokémon","bloqueavel":true,"texto":"Troque um de seus Pokémons por outro da mesma cor que pertença a um oponente da sua escolha."}
+]}

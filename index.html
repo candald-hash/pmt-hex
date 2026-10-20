@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pokémon Master Trainer: HEX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="setup" class="screen"></div>
+<div id="game" class="screen" hidden>
+  <main id="boardWrap">
+    <svg id="board" xmlns="http://www.w3.org/2000/svg"><g id="vp"><g id="lHex"></g><g id="lSlots"></g><g id="lSpaces"></g><g id="lPawns"></g></g></svg>
+    <div id="boardTools">
+      <button id="zoomFit" title="Enquadrar tabuleiro">⤢</button>
+      <button id="zoomMe" title="Ir até o meu peão">◎</button>
+    </div>
+    <div id="boardHint" hidden></div>
+  </main>
+  <aside id="side">
+    <section id="turnBox"></section>
+    <section id="meBox"></section>
+    <section id="othersBox"></section>
+    <section id="logBox"><h3>Registro</h3><div id="log"></div></section>
+    <footer id="sideFoot">
+      <button id="btnTools">Caixa de ferramentas</button>
+      <button id="btnLideres" title="Líderes em jogo">Líderes</button>
+      <button id="btnTema" title="Alternar tema claro/escuro" style="flex:0 0 46px">☀️</button>
+      <button id="btnMenu">Partida ▾</button>
+    </footer>
+  </aside>
+</div>
+<div id="modal" hidden><div id="modalCard"></div></div>
+<div id="zoomCard" hidden></div>
+<div id="tip" hidden></div>
+<div id="dadoFx" hidden></div>
+<div id="parqueFx" hidden></div>
+<script src="js/data.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>
