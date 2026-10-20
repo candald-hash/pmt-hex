@@ -26,7 +26,8 @@
   }
   function norm(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z]/g, ''); }
   const P = id => idx().poke[id];
-  const ITEM = inst => idx().it[inst.split('#')[0]];
+  const ITEM_OCULTO = { id: 'oculto', nome: 'Item', texto: '', uso: null };
+  const ITEM = inst => idx().it[String(inst).split('#')[0]] || Object.assign({ img: D().versos.item }, ITEM_OCULTO);
 
   // ---------- montagem do tabuleiro ----------
   // posições: linha de baixo b0..b3, linha de cima t0..t3 (deslocada meia largura para a direita)
@@ -1678,12 +1679,37 @@
     const fn = API[nome]; if (typeof fn !== 'function' || !podeAgir(st, j, nome, args)) return false;
     fn(st, ...args); posAcao(st); return true;
   }
+  // desistir de tentar a captura (antes de rolar): a carta comprada da pilha volta para ela
+  function desistirCaptura(st) { const pd = st.pend; if (!pd || pd.tipo !== 'captura' || pd.resultado) return; if (!pd.slot) devolver(st, pd.cor, pd.carta); st.pend = null; continuar(st); }
+  // ---------- Estado filtrado: o que cada jogador pode ver (j = id; -1 = espectador) ----------
+  const PEND_PRIVADO = new Set(['treinador', 'pegarItens', 'dividir', 'descartarDe', 'juniper', 'escolherEvento', 'distribuir', 'azalea', 'wally', 'descartar', 'pagarItens']);
+  function vistaDe(st, j) {
+    const v = JSON.parse(JSON.stringify(st, (k, x) => (k === 'token' ? undefined : x)));
+    v.rng = 0;
+    ['item', 'evento', 'superevento', 'treinador'].forEach(k => { if (v.decks[k]) v.decks[k] = v.decks[k].map(() => '?'); });
+    ['inicial', 'rosa', 'verde', 'azul', 'vermelho', 'amarelo'].forEach(c => { if (v.decks[c]) v.decks[c].sort(); }); // fora do jogo: conteúdo público, ordem escondida
+    const fake = {}; D().pokemon.forEach(c => { if (!fake[c.cor]) fake[c.cor] = c.id; });
+    Object.values(v.slots).forEach(x => { if (x && x.carta && !x.aberta) x.carta = fake[P(x.carta).cor] || x.carta; });
+    v.jogadores.forEach(q => { if (q.id !== j) { q.itens = q.itens.map((_, k) => 'oculto#' + k); q.treinadoresExtra = q.treinadoresExtra.map(() => '?'); } });
+    const pd = v.pend, lado = pd && (pd.a === j ? 'a' : pd.b === j ? 'b' : null);
+    if (pd) {
+      if (pd.tipo === 'duelo' && pd.escolhas) ['a', 'b'].forEach(l => { if (l !== lado && pd.escolhas[l]) pd.escolhas[l] = { oculto: true }; });
+      if (pd.tipo === 'ligaBatalha') ['a', 'b'].forEach(l => { if (l !== lado && pd.esc[l]) pd.esc[l] = { oculto: true }; });
+      if (pd.tipo === 'praca' && !pd.resultado) ['a', 'b'].forEach(l => { if (l !== lado && pd.dupla[l]) { pd.dupla[l] = []; pd.itens[l] = {}; } });
+      if (pd.tipo === 'carta' && pd.reacao && pd.reacao !== 'ok') { const R = pd.reacao, o = {}, r = {}; if (R.opcoes[j]) o[j] = R.opcoes[j]; if (R.resp[j] != null) r[j] = R.resp[j]; R.opcoes = o; R.resp = r; }
+      if (pd.tipo === 'repel') { pd.opcoes = pd.opcoes.filter(x => x === j); const r = {}; if (pd.resp[j] != null) r[j] = pd.resp[j]; pd.resp = r; }
+      if (PEND_PRIVADO.has(pd.tipo) && !quemDecide(st).includes(j)) { if (pd.itens) pd.itens = []; if (pd.cartas) pd.cartas = []; if (pd.pool) pd.pool = []; pd.privado = true; }
+      if (pd.depois && pd.depois.tipo === 'captura') { /* captura pública */ }
+    }
+    v.fila = []; v.vista = j;
+    return v;
+  }
   // ajustes automáticos depois de qualquer ação (no anfitrião)
   function posAcao(st) { const pd = st.pend; if (pd && pd.tipo === 'carta' && !pd.ativado && pd.reacao == null) iniciarReacoes(st); }
   const API = G.Engine = {
     novoJogo, grafo, destinos, rolarMovimento, escolherDado, hiker, ajustarRolagem, mover, trem, encerrarTurno, podeEncerrar, descartarExcesso,
     ativarCarta, concluirCarta, fecharPend, rolarCaptura, escolherCaptura, escolherEvento, escolherTreinador, travar, abrirLider, lutarLider, remedio,
     podeEnfrentar, usarItem, lyra, ferramenta, duelo, forcaBase, forcaEmBatalha, bonusEvolucao, bonusTreinador, obedece, nInsignias, limiteItens, faixaCaptura,
-    nomeEspaco, familiaTravada, posXY, autoTexto, escolherAlvo, responderBoneca, iniciarReacoes, reacaoAberta, reagir, encerrarReacoes, celebiMovimento, celebiCaptura, celebiLider, celebiDuelo, aceitarTabela, celebiTabela, celebiDe, escolherLura, resolverFestival, resolverJuniper, resolverAzalea, distribuirEvento, comprarAqua, resolverMagma, escolherDuelo, quemDecide, podeAgir, acao, posAcao, celebiPraca, reagirRepel, encerrarRepel, temRepel, ligaCelebi, ligaRemedio, responderCynthia, temCynthia, escolherDuplaPraca, fecharPraca, resolverPracaPremio, pracaAptosDe, pracaForca, PREMIOS_PRACA, iniciarLiga, ligaGatilho, resolverLigaOponente, ligaEscolher, ligaSeguir, ligaAptos, porCapturas, FASE_LIGA, resolverWally, wallyOk, resolverCriadores, opcoesCriadores, linhasCriadores, foraDeJogoCriadores, resolverFuchsia, resolverBriney, encrencado, escolherSlot, resolverTipoCor, pegarDeLista, escolherEspaco, escolherLiderFora, pagarItens, resolverNegociador, pegarItem, filtrarSlots, escolherDesempate, descartarDe, resolverTroca, resolverDividir, escolherOpcao, lutarDuelo, fecharDuelo, aptosDuelo, paresTroca, temBoneca, slotInsignia, vantagem, bonusItemBatalha, idx, P, ITEM, J, HW, HH, CORES_PEAO, TIPOS_NOME, ORDEM_FORCA
+    nomeEspaco, familiaTravada, posXY, autoTexto, escolherAlvo, responderBoneca, iniciarReacoes, reacaoAberta, reagir, encerrarReacoes, celebiMovimento, celebiCaptura, celebiLider, celebiDuelo, aceitarTabela, celebiTabela, celebiDe, escolherLura, resolverFestival, resolverJuniper, resolverAzalea, distribuirEvento, comprarAqua, resolverMagma, desistirCaptura, vistaDe, PEND_PRIVADO, escolherDuelo, quemDecide, podeAgir, acao, posAcao, celebiPraca, reagirRepel, encerrarRepel, temRepel, ligaCelebi, ligaRemedio, responderCynthia, temCynthia, escolherDuplaPraca, fecharPraca, resolverPracaPremio, pracaAptosDe, pracaForca, PREMIOS_PRACA, iniciarLiga, ligaGatilho, resolverLigaOponente, ligaEscolher, ligaSeguir, ligaAptos, porCapturas, FASE_LIGA, resolverWally, wallyOk, resolverCriadores, opcoesCriadores, linhasCriadores, foraDeJogoCriadores, resolverFuchsia, resolverBriney, encrencado, escolherSlot, resolverTipoCor, pegarDeLista, escolherEspaco, escolherLiderFora, pagarItens, resolverNegociador, pegarItem, filtrarSlots, escolherDesempate, descartarDe, resolverTroca, resolverDividir, escolherOpcao, lutarDuelo, fecharDuelo, aptosDuelo, paresTroca, temBoneca, slotInsignia, vantagem, bonusItemBatalha, idx, P, ITEM, J, HW, HH, CORES_PEAO, TIPOS_NOME, ORDEM_FORCA
   };
 })(window);

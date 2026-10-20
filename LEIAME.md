@@ -10,6 +10,12 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- **Modo on-line (primeira versão):** na tela inicial, escolha **🌐 On-line**. O primeiro lugar é o seu (anfitrião); os outros podem ser 🌐 jogadores on-line ou 🤖 IA. Clique em **Criar sala** e mande o link (`…/?sala=CÓDIGO`) para os amigos; quem abrir escolhe o nome e entra no lugar livre. Quando você clicar em **Começar**, lugares vazios viram IA.
+  - O seu navegador roda as regras e as IAs; os outros mandam as ações e recebem a partida já filtrada: ninguém vê os Itens dos outros, a ordem dos baralhos, as cartas viradas do tabuleiro, quem tem item de reação nem as escolhas secretas (Duelo, Liga, Festival de Praça) antes da revelação.
+  - Cada um vê a própria ficha e só tem botões nas próprias decisões; nas dos outros aparece "⏳ Aguardando…". As janelas de reação abrem direto para quem tem o item.
+  - Caixa de ferramentas e menu da Partida ficam só com o anfitrião, que também pode passar o lugar de alguém para a IA (e devolver) pelo painel do jogador.
+  - Quem cair ou recarregar a página volta ao mesmo lugar pelo mesmo link; 🔌 marca quem está desconectado. Se o anfitrião fechar o jogo, a partida pausa: ao reabrir, use **Retomar a sala** na tela inicial. Quem entrar com a mesa cheia assiste.
+
 - **Preparação para o modo on-line (etapa 1):** todas as ações da tela agora passam por um despachante único do motor, que sabe quem pode decidir cada coisa (quem joga a vez, o lado de cada um num Duelo, na Liga ou no Festival de Praça, quem tem o item numa janela de reação, e a Caixa de ferramentas só para o anfitrião). No Duelo, cada lado agora confirma a própria escolha. Nada muda no modo local.
 
 - **Festival de Praça com escolha secreta:** as duas duplas são escolhidas ao mesmo tempo; entre dois humanos, cada um abre as próprias opções sem o outro olhar, e nada aparece até as duas serem confirmadas. Quem joga a vez pode usar o **Pedido a Celebi** nos dados do Festival (o adversário pode bloquear com Poké-Boneca).
@@ -136,7 +142,6 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 - **Liga Pokémon:** formato Elite 4.
 - **Cartas que dependem de reação fora do turno:** Pedido a Celebi fora do próprio turno (fora da Liga).
-- **Online entre amigos:** conexão direta entre navegadores (PeerJS). Um jogador cria a sala, os outros entram com um código e o estado da partida já é um JSON pronto para sincronizar.
 - **Avatares dos personagens** na escolha da cor.
 
 ## Estrutura

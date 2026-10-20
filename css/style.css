@@ -263,3 +263,12 @@ button.celebi:hover:not(:disabled){background:rgba(244,114,182,.15);border-color
 /* Pokémon com marcador +1 da Bola GS */
 .pc.gs{outline:3px solid #e5b80b;outline-offset:-3px;box-shadow:0 0 0 2px #b4532a inset,0 0 10px rgba(229,184,11,.55)}
 .gsTag{position:absolute;left:3px;bottom:3px;background:linear-gradient(135deg,#f6d34a,#e5b80b 50%,#b4532a);color:#1a1200;font:800 10px Inter;padding:1px 5px;border-radius:5px;box-shadow:0 1px 3px rgba(0,0,0,.5)}
+/* on-line: quem só está assistindo a uma decisão */
+#modalCard.leitura button,#modalCard.leitura select,#modalCard.leitura .pc,#modalCard.leitura .pj,#modalCard.leitura input{pointer-events:none}
+#modalCard.leitura .mfoot,#modalCard.leitura .lgEsc,#modalCard.leitura .pick{opacity:.6}
+/* on-line */
+.modoTabs{margin:12px 0 4px;gap:8px}
+.salaLista{display:grid;gap:8px}
+#netBar{position:fixed;top:0;left:50%;transform:translateX(-50%);z-index:300;background:#b45309;color:#fff;padding:6px 14px;border-radius:0 0 10px 10px;font-size:13px;box-shadow:var(--shadow)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:300;background:var(--panel);border:1px solid var(--acc);padding:10px 18px;border-radius:12px;box-shadow:var(--shadow);font-weight:700;transition:opacity .5s}
+.toast.fora{opacity:0}

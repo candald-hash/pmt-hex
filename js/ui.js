@@ -19,7 +19,7 @@
   const VEL = { lenta: 1300, normal: 750, rapida: 250 };
 
   // ---------- persistência ----------
-  function salvar() { try { localStorage.setItem(SAVE, JSON.stringify(st)); } catch (e) {} }
+  function salvar() { if (typeof NET !== 'undefined' && NET.modo === 'cliente') return; try { localStorage.setItem(SAVE, JSON.stringify(st)); } catch (e) {} }
   function carregarSalvo() { try { return JSON.parse(localStorage.getItem(SAVE)); } catch (e) { return null; } }
   function act(fn) { return (...a) => { fn(...a); salvar(); render(); }; }
   function run(fn, ...a) { fn(st, ...a); salvar(); render(); }
@@ -27,6 +27,8 @@
   // NET.modo: 'local' (passa-e-joga), 'host' (anfitrião on-line) ou 'cliente'; NET.eu: o meu assento no on-line
   const NET = { modo: 'local', eu: null, enviar: null };
   const souAnfitriao = () => NET.modo !== 'cliente';
+  const online = () => NET.modo !== 'local';
+  const souEu = id => !online() || id === NET.eu; // este assento é jogado nesta tela?
   function agir(nome, ...a) {
     if (NET.modo === 'cliente') { if (NET.enviar) NET.enviar(nome, a); return; }
     const j = NET.modo === 'local' ? 'host' : NET.eu;
@@ -38,12 +40,16 @@
   // ---------- abertura ----------
   function telaAbertura() {
     const salvo = carregarSalvo();
-    const jog = [{ nome: '', cor: 'vermelho' }, { nome: '', cor: 'azul' }];
+    const jog = [{ nome: prefs.nome || '', cor: 'vermelho' }, { nome: '', cor: 'azul' }];
+    let modo = 'local';
     const box = $('#setup'); $('#game').hidden = true; box.hidden = false;
     const draw = () => {
+      if (modo === 'online') jog.forEach((j, i) => { j.tipo = i === 0 ? 'eu' : (j.ia ? 'ia' : 'remoto'); });
       box.innerHTML = `<div class="setupCard">
         <div class="logo"><h1>Pokémon Master Trainer: <b>HEX</b></h1><span class="tag">versão web · protótipo</span></div>
-        <p class="mut">Modo local: todos jogam neste navegador, passando a vez. De 2 a 6 jogadores — humanos ou controlados pelo computador (🤖).</p>
+        <div class="row modoTabs"><button class="${modo === 'local' ? 'pri' : ''}" data-modo="local">🏠 Local (mesmo navegador)</button><button class="${modo === 'online' ? 'pri' : ''}" data-modo="online">🌐 On-line (cada um no seu)</button></div>
+        <p class="mut">${modo === 'local' ? 'Modo local: todos jogam neste navegador, passando a vez. De 2 a 6 jogadores — humanos ou controlados pelo computador (🤖).' : 'Modo on-line: você cria a sala e manda o link para os amigos. O primeiro lugar é o seu; os outros podem ser 🌐 jogadores on-line ou 🤖 IA (que roda no seu navegador).'}</p>
+        ${salvo && salvo.online && salvo.vencedor == null ? `<div class="result" style="margin:10px 0">Há uma partida on-line salva (sala <b>${esc(salvo.online.codigo)}</b>). <button class="sm pri" id="retomar">🌐 Retomar a sala</button></div>` : ''}
         <h3 style="margin-top:18px">Jogadores</h3>
         <div id="pls"></div>
         <div class="row" style="margin-top:10px">
@@ -53,7 +59,7 @@
           <label class="row" style="gap:6px"><span class="mut">IA</span><select id="velIA">${Object.keys(VEL).map(v => `<option value="${v}" ${prefs.velIA === v ? 'selected' : ''}>${{ lenta: 'lenta', normal: 'normal', rapida: 'rápida' }[v]}</option>`).join('')}</select></label>
           <button class="sm" id="temaS" title="Alternar tema">${prefs.tema === 'claro' ? '🌙 Escuro' : '☀️ Claro'}</button>
           <label class="row" style="gap:6px"><span class="mut">Semente</span><input id="seed" placeholder="aleatória" style="width:110px"></label>
-          <button class="pri" id="go">Começar partida</button>
+          <button class="pri" id="go">${modo === 'online' ? '🌐 Criar sala' : 'Começar partida'}</button>
         </div>
         <p class="mut" style="margin-top:14px;font-size:12px">Elenco: Balanceado (padrão). Liga: formato Mata-Mata. Avatares dos personagens chegam depois — por enquanto o peão é a cor.</p>
       </div>`;
@@ -61,11 +67,11 @@
       jog.forEach((j, i) => {
         const usadas = jog.filter((x, k) => k !== i).map(x => x.cor);
         const row = h(`<div class="pl"><span class="dot" style="background:${COR_HEX[j.cor]}"></span>
-          <div class="row" style="flex-wrap:nowrap"><input value="${esc(j.nome)}" placeholder="${j.ia ? 'CPU ' + (i + 1) : 'Jogador ' + (i + 1)}" style="flex:1"><button class="sm iaTog ${j.ia ? 'on' : ''}" data-ia title="Controlado pelo computador">${j.ia ? '🤖 IA' : '🙂 Humano'}</button></div>
+          <div class="row" style="flex-wrap:nowrap"><input value="${esc(j.nome)}" placeholder="${modo === 'online' ? (i === 0 ? 'Seu nome' : j.ia ? 'CPU ' + (i + 1) : 'nome escolhido por quem entrar') : j.ia ? 'CPU ' + (i + 1) : 'Jogador ' + (i + 1)}" style="flex:1" ${modo === 'online' && i > 0 && !j.ia ? 'disabled' : ''}>${modo === 'online' && i === 0 ? '<span class="tag">você · anfitrião</span>' : `<button class="sm iaTog ${j.ia ? 'on' : ''}" data-ia title="Controlado pelo computador">${j.ia ? '🤖 IA' : modo === 'online' ? '🌐 On-line' : '🙂 Humano'}</button>`}</div>
           <div class="row"><div class="swatches">${E.CORES_PEAO.map(c => `<span class="sw ${c === j.cor ? 'on' : ''} ${usadas.includes(c) ? 'taken' : ''}" data-c="${c}" title="${COR_NOME[c]}" style="background:${COR_HEX[c]}"></span>`).join('')}</div>
           ${jog.length > 2 ? `<button class="sm" data-rm>✕</button>` : ''}</div></div>`);
-        $('input', row).oninput = e => j.nome = e.target.value;
-        $('[data-ia]', row).onclick = () => { j.ia = !j.ia; draw(); };
+        $('input', row).oninput = e => { j.nome = e.target.value; if (i === 0) { prefs.nome = j.nome; salvarPrefs(); } };
+        const tg = $('[data-ia]', row); if (tg) tg.onclick = () => { j.ia = !j.ia; draw(); };
         row.querySelectorAll('.sw').forEach(s => s.onclick = () => { if (!usadas.includes(s.dataset.c)) { j.cor = s.dataset.c; draw(); } });
         const rm = $('[data-rm]', row); if (rm) rm.onclick = () => { jog.splice(i, 1); draw(); };
         pls.appendChild(row);
@@ -73,8 +79,11 @@
       $('#velIA').onchange = e => { prefs.velIA = e.target.value; salvarPrefs(); };
       $('#temaS').onclick = () => { prefs.tema = prefs.tema === 'claro' ? 'escuro' : 'claro'; salvarPrefs(); aplicarTema(); draw(); };
       $('#addP').onclick = () => { const livre = E.CORES_PEAO.find(c => !jog.some(j => j.cor === c)); jog.push({ nome: '', cor: livre, ia: true }); draw(); };
+      box.querySelectorAll('[data-modo]').forEach(b => b.onclick = () => { modo = b.dataset.modo; if (modo === 'online') jog.forEach((j, i) => { if (i > 0 && j.ia === undefined) j.ia = false; }); draw(); });
+      const rt = $('#retomar'); if (rt) rt.onclick = () => retomarSala(salvo);
       $('#go').onclick = () => {
         const sv = $('#seed').value.trim(); const seed = sv ? [...sv].reduce((a, c) => (a * 31 + c.charCodeAt(0)) | 0, 7) : (Date.now() ^ (Math.random() * 1e9)) | 0;
+        if (modo === 'online') { jog[0].nome = jog[0].nome.trim() || 'Anfitrião'; return criarSala(jog.map((j, i) => ({ nome: j.nome, cor: j.cor, tipo: i === 0 ? 'eu' : j.ia ? 'ia' : 'remoto', ia: !!j.ia && i > 0 })), seed); }
         st = E.novoJogo({ seed, jogadores: jog.map((j, i) => ({ nome: j.nome.trim() || (j.ia ? 'CPU ' + (i + 1) : 'Jogador ' + (i + 1)), cor: j.cor, ia: !!j.ia })) });
         salvar(); iniciarJogo();
       };
@@ -87,6 +96,7 @@
   function iniciarJogo() {
     rolVista = null; parqueVisto = null;
     $('#setup').hidden = true; $('#game').hidden = false;
+    $('#btnTools').hidden = $('#btnMenu').hidden = NET.modo === 'cliente';
     desenharHexes(); render(); setTimeout(() => focar(E.J(st).pos, 0.55), 30);
   }
   function el(tag, attrs, parent) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
@@ -117,7 +127,7 @@
     svg.addEventListener('pointermove', ev => { if (!drag) return; const r = svg.getBoundingClientRect(), s = view.w / r.width; view.x = drag.vx - (ev.clientX - drag.x) * s; view.y = drag.vy - (ev.clientY - drag.y) * s; setView(); });
     svg.addEventListener('pointerup', () => { drag = null; svg.classList.remove('dragging'); });
     window.addEventListener('resize', () => { if (st) enquadrar(); });
-    $('#zoomFit').onclick = enquadrar; $('#zoomMe').onclick = () => focar(E.J(st).pos, 0.55);
+    $('#zoomFit').onclick = enquadrar; $('#zoomMe').onclick = () => focar((online() && NET.eu >= 0 ? E.J(st, NET.eu) : E.J(st)).pos, 0.55);
   })();
 
   function renderBoard() {
@@ -150,7 +160,7 @@
     const marca = (k, cls, cb) => { const n = g.nodes[k]; const r = n.kind === 'cidade' ? 120 : 70; const c = el('circle', { class: 'dest ' + cls, cx: n.wx, cy: n.wy, r }, gP); c.addEventListener('click', ev => { ev.stopPropagation(); cb(k); }); };
     if (boardMode && boardMode.tipo === 'espaco') Object.values(g.nodes).filter(n => n.kind !== 'porta' && (!boardMode.filtro || boardMode.filtro.includes(n.key))).forEach(n => marca(n.key, 'alvo', k => { const cb = boardMode.cb; boardMode = null; cb(k); }));
     else if (boardMode && boardMode.tipo === 'trem') E.J(st).passou.filter(k => k !== E.J(st).pos).forEach(k => marca(k, 'trem', k => { boardMode = null; agir('trem', k); }));
-    else if (st.fase === 'mover' && st.turno && st.turno.destinos && !pd) Object.entries(st.turno.destinos).forEach(([k, info]) => marca(k, info.custo ? 'custo' : '', k => escolherDestino(k, info)));
+    else if (st.fase === 'mover' && st.turno && st.turno.destinos && !pd && souEu(E.J(st).id)) Object.entries(st.turno.destinos).forEach(([k, info]) => marca(k, info.custo ? 'custo' : '', k => escolherDestino(k, info)));
     // peões
     const porEspaco = {}; st.jogadores.forEach(p => (porEspaco[p.pos] = porEspaco[p.pos] || []).push(p));
     Object.entries(porEspaco).forEach(([k, ps]) => {
@@ -166,7 +176,7 @@
     });
     const hint = $('#boardHint');
     if (boardMode) { hint.hidden = false; hint.innerHTML = `<span>${esc(boardMode.msg)}</span>${boardMode.pend ? '' : '<button>cancelar</button>'}`; const hb = $('button', hint); if (hb) hb.onclick = () => { boardMode = null; render(); }; }
-    else if (st.fase === 'mover' && st.turno.destinos && !pd) { hint.hidden = false; hint.innerHTML = `<span>Escolha o destino no tabuleiro</span>`; }
+    else if (st.fase === 'mover' && st.turno.destinos && !pd && souEu(E.J(st).id)) { hint.hidden = false; hint.innerHTML = `<span>Escolha o destino no tabuleiro</span>`; }
     else hint.hidden = true;
   }
   function rotulo(p) { const ini = q => q.nome.trim().slice(0, 1).toUpperCase(); const rep = st.jogadores.filter(q => ini(q) === ini(p)).length > 1; return rep ? (p.nome.match(/\d+\s*$/) ? p.nome.match(/\d+\s*$/)[0].trim() : ini(p) + (p.id + 1)) : ini(p); }
@@ -228,7 +238,8 @@
     if (st.fase === 'mover' && t.rolagem != null) cordas.forEach(i => { const it = E.ITEM(i), m = it.id === 'corda' ? 1 : 2; for (let d = -m; d <= m; d++) if (d) acoes += `<button class="sm" data-corda="${i}" data-d="${d}">Corda ${d > 0 ? '+' : ''}${d}</button>`; });
     if (L && !t.batalhouLider && st.fase !== 'mover' && E.podeEnfrentar(p, L)) acoes += `<button data-a="lider">⚔ Enfrentar ${esc(L.nome)}</button>`;
     if (st.fase !== 'mover') acoes += `<button data-a="fim" ${E.podeEncerrar(st) ? '' : 'disabled'}>Encerrar turno ▸</button>`;
-    if (p.ia) acoes = `<span class="mut">🤖 ${esc(p.nome)} está jogando…</span><button class="sm" id="pausa">${pausado ? '▶ Retomar IA' : '⏸ Pausar IA'}</button>`;
+    if (p.ia) acoes = `<span class="mut">🤖 ${esc(p.nome)} está jogando…</span>${souAnfitriao() ? `<button class="sm" id="pausa">${pausado ? '▶ Retomar IA' : '⏸ Pausar IA'}</button>` : ''}`;
+    else if (online() && p.id !== NET.eu) acoes = `<span class="mut">⏳ Vez de ${esc(p.nome)}…</span>`;
     tb.innerHTML = `<div class="turnHead"><span class="dot" style="background:${COR_HEX[p.cor]}"></span><h2>${esc(p.nome)}${p.ia ? ' <span class="tag">🤖 IA</span>' : ''}</h2><span class="tag">Rodada ${st.rodada}</span></div>
       <div class="mut" style="margin-bottom:6px">📍 ${esc(E.nomeEspaco(st, p.pos))}${p.pular ? ` · perde ${p.pular} turno(s)` : ''}</div>
       ${L ? `<div class="ldline" data-ld="${p.pos}"><img src="${L.img}"><div><b>${esc(L.nome)}</b> · força ${L.forca}${L.dual ? ' · DUAL' : ''}<br><span class="mut">${E.TIPOS_NOME[L.tipo]} · insígnia ${L.insignias}${p.lideresVencidos.includes(L.id) ? ' · <b style="color:var(--ok)">vencido</b>' : ''}</span></div></div>` : ''}
@@ -251,16 +262,16 @@
     tb.querySelectorAll('[data-corda]').forEach(b => b.onclick = () => agir('ajustarRolagem', +b.dataset.d, b.dataset.corda));
     // --- minha ficha ---
     const mb = $('#meBox');
-    const team = p.pokemon.slice().sort((a, b) => CORES_ORDEM.indexOf(E.P(a).cor) - CORES_ORDEM.indexOf(E.P(b).cor));
-    mb.innerHTML = `<h3>Insígnias</h3>${insignias(p)}
-      <h3 style="margin-top:12px">Time (${p.pokemon.length})</h3>${timeAgrupado(p)}
-      <h3>Itens (${p.itens.length}/${E.limiteItens(p)})</h3><div class="hand">${p.itens.map(i => `<div class="ic" data-i="${i}" title="${esc(E.ITEM(i).nome)}"><img src="${E.ITEM(i).img}"></div>`).join('') || '<span class="mut">Nenhum</span>'}</div>
-      <h3>Treinador</h3>${tr ? `<div class="trainer"><img src="${tr.img}" data-z="${tr.img}"><div><b>${esc(tr.nome)}</b><p>${esc(tr.texto)}</p></div></div>` : '<span class="mut">—</span>'}`;
+    const pm = online() ? (NET.eu != null && NET.eu >= 0 ? E.J(st, NET.eu) : null) : p, trm = pm && pm.treinador && E.idx().tr[pm.treinador];
+    mb.innerHTML = !pm ? '<h3>Assistindo</h3><p class="mut">👀 Você está assistindo a esta partida.</p>' : `${online() ? `<h3>Você: <span class="dot" style="display:inline-block;vertical-align:middle;background:${COR_HEX[pm.cor]}"></span> ${esc(pm.nome)}</h3>` : ''}<h3>Insígnias</h3>${insignias(pm)}
+      <h3 style="margin-top:12px">Time (${pm.pokemon.length})</h3>${timeAgrupado(pm)}
+      <h3>Itens (${pm.itens.length}/${E.limiteItens(pm)})</h3><div class="hand">${pm.itens.map(i => `<div class="ic" data-i="${i}" title="${esc(E.ITEM(i).nome)}"><img src="${E.ITEM(i).img}"></div>`).join('') || '<span class="mut">Nenhum</span>'}</div>
+      <h3>Treinador</h3>${trm ? `<div class="trainer"><img src="${trm.img}" data-z="${trm.img}"><div><b>${esc(trm.nome)}</b><p>${esc(trm.texto)}</p></div></div>` : '<span class="mut">—</span>'}`;
     mb.querySelectorAll('.pc').forEach(c => c.onclick = () => zoom(E.P(c.dataset.id).img));
     mb.querySelectorAll('[data-z]').forEach(c => c.onclick = () => zoom(c.dataset.z));
     mb.querySelectorAll('.ic').forEach(c => c.onclick = () => modalItem(c.dataset.i));
     // --- outros ---
-    $('#othersBox').innerHTML = '<h3>Jogadores</h3>' + st.jogadores.map(q => `<div class="other ${q.id === st.vez ? 'cur' : ''} ${q.eliminado ? 'elim' : ''}" data-p="${q.id}"><span class="dot" style="background:${COR_HEX[q.cor]}"></span><span style="flex:1">${esc(q.nome)}${q.eliminado ? ' <span class="mut">· eliminado</span>' : st.vencedor === q.id ? ' 👑' : ''}</span><span class="mut cnt" title="${q.pokemon.length} Pokémon · ${q.itens.length} Itens">${q.pokemon.length} <img src="img/ui/pokebola.webp" alt="Pokémon"> · ${q.itens.length} <img src="img/ui/item.webp" alt="Itens"></span>${insignias(q, true)}</div>`).join('');
+    $('#othersBox').innerHTML = '<h3>Jogadores</h3>' + st.jogadores.map(q => `<div class="other ${q.id === st.vez ? 'cur' : ''} ${q.eliminado ? 'elim' : ''}" data-p="${q.id}"><span class="dot" style="background:${COR_HEX[q.cor]}"></span><span style="flex:1">${esc(q.nome)}${online() && q.id === NET.eu ? ' <span class="tag">você</span>' : ''}${online() && q.remoto && !q.ia && !(NET.conectados || []).includes(q.id) ? ' <span title="desconectado">🔌</span>' : ''}${q.eliminado ? ' <span class="mut">· eliminado</span>' : st.vencedor === q.id ? ' 👑' : ''}</span><span class="mut cnt" title="${q.pokemon.length} Pokémon · ${q.itens.length} Itens">${q.pokemon.length} <img src="img/ui/pokebola.webp" alt="Pokémon"> · ${q.itens.length} <img src="img/ui/item.webp" alt="Itens"></span>${insignias(q, true)}</div>`).join('');
     $('#othersBox').querySelectorAll('.other').forEach(o => o.onclick = () => modalJogador(+o.dataset.p));
     // --- registro ---
     const lg = $('#log'); const fundo = lg.scrollHeight - lg.scrollTop - lg.clientHeight < 30;
@@ -274,7 +285,7 @@
   }
 
   // ---------- modais ----------
-  function abrirModal(html) { $('#tip').hidden = true; const mc = $('#modalCard'); mc.classList.remove('ia'); if (!st || !st.pend) delete mc.dataset.pend; mc.innerHTML = html; $('#modal').hidden = false; $('#modalCard').querySelectorAll('[data-x]').forEach(b => b.onclick = fecharModal); }
+  function abrirModal(html) { $('#tip').hidden = true; const mc = $('#modalCard'); mc.classList.remove('ia', 'leitura'); if (!st || !st.pend) delete mc.dataset.pend; mc.innerHTML = html; $('#modal').hidden = false; $('#modalCard').querySelectorAll('[data-x]').forEach(b => b.onclick = fecharModal); }
   function fecharModal() { const mc = $('#modalCard'); $('#modal').hidden = true; mc.innerHTML = ''; mc.classList.remove('ia'); delete mc.dataset.pend; if (st) setTimeout(agendarIA, 0); }
   // janelas informativas (sem decisão pendente) fecham com Esc ou clicando fora
   $('#modal').addEventListener('click', e => { if (e.target.id === 'modal' && !$('#modalCard').dataset.pend) fecharModal(); });
@@ -286,11 +297,15 @@
     if (!pd) { if ($('#modalCard').dataset.pend) { delete $('#modalCard').dataset.pend; fecharModal(); } return; }
     $('#modalCard').dataset.pend = pd.tipo;
     const p = E.J(st);
+    const decide = E.quemDecide(st), leitura = online() && !decide.includes(NET.eu);
+    const nomesDec = decide.map(j => esc(E.J(st, j).nome)).join(' e ');
+    if (leitura && (pd.privado || E.PEND_PRIVADO.has(pd.tipo) || pd.tipo === 'espaco')) { abrirModal(`<h2>${esc(pd.titulo || 'Decisão')}</h2><p class="mut">⏳ ${nomesDec || 'Outro jogador'} está decidindo…</p>`); $('#modalCard').classList.add('leitura'); return; }
     const humanoNoDuelo = (pd.tipo === 'duelo' && !E.J(st, pd.b).ia) || (pd.tipo === 'ligaBatalha' && [pd.a, pd.b].some(j => !E.J(st, j).ia)) || (pd.tipo === 'ligaOponente' && !E.J(st, pd.escolhe).ia) || pd.tipo === 'campeao' || (pd.tipo === 'cynthia' && !E.J(st, pd.respondente).ia) || (pd.tipo === 'praca' && [pd.a, pd.b].some(j => !E.J(st, j).ia));
     const iaEsperando = p.ia && ((pd.tipo === 'festival' && !E.J(st, pd.jogador).ia) || (pd.tipo === 'juniper' && !E.J(st, pd.doador).ia) || (pd.tipo === 'treinador' && !E.J(st, pd.jogador).ia) || (pd.tipo === 'carta' && esperandoHumano) || (pd.tipo === 'boneca' && !E.J(st, pd.respondente).ia) || (pd.tipo === 'briney' && !E.J(st, pd.dono).ia) || humanoNoDuelo);
     setTimeout(() => {
-      const mc = $('#modalCard'); mc.classList.toggle('ia', p.ia && !iaEsperando);
+      const mc = $('#modalCard'); mc.classList.toggle('ia', p.ia && !iaEsperando); mc.classList.toggle('leitura', leitura);
       const old = $('.iaBanner', mc); if (old) old.remove();
+      if (leitura && !['repel'].includes(pd.tipo) && !(pd.tipo === 'carta' && E.reacaoAberta(st))) { mc.prepend(h(`<div class="iaBanner">⏳ Aguardando ${nomesDec}…</div>`)); return; }
       if (p.ia && !E.reacaoAberta(st) && pd.tipo !== 'repel') mc.prepend(h(`<div class="iaBanner">${iaEsperando ? (pd.tipo === 'carta' ? `🤖 Vez de ${esc(p.nome)}: esta carta tem efeito manual. Aplique o que faltar pela caixa de ferramentas e clique em <b>Concluir</b>.` : `🤖 ${esc(p.nome)} envolveu você — sua decisão.`) : `🤖 ${esc(p.nome)} está decidindo…`}</div>`));
     }, 0);
     if (pd.tipo === 'captura') return mCaptura(pd, p);
@@ -443,7 +458,7 @@
       const S = sel.praca && sel.praca.k === pd.titulo ? sel.praca : (sel.praca = { k: pd.titulo, aberto: null, ids: { a: [], b: [] }, it: { a: {}, b: {} } });
       // IAs escolhem em segredo (na vez de um humano)
       ['a', 'b'].forEach(l => { const k = 'pr' + pd.titulo + l; if (humanoVez && E.J(st, pd[l]).ia && !pd.dupla[l] && !ligaTimers[k]) ligaTimers[k] = setTimeout(() => { if (st.pend === pd && !pd.dupla[l]) { const d = window.AI.duplaPraca(st, l); agirIA('escolherDuplaPraca', l, d.ids, d.itens); } }, 700); });
-      const humanosP = ['a', 'b'].filter(l => !E.J(st, pd[l]).ia), pend = humanosP.filter(l => !pd.dupla[l]);
+      const humanosP = ['a', 'b'].filter(l => !E.J(st, pd[l]).ia && souEu(pd[l])), pend = humanosP.filter(l => !pd.dupla[l]);
       const painel = l => {
         const q = E.J(st, pd[l]), ap = E.pracaAptosDe(q), n = Math.min(2, ap.length), its = q.itens.filter(i => E.ITEM(i).uso === 'batalha' && E.ITEM(i).bonus), I = S.it[l];
         return `<div class="lgEsc"><h3>${esc(q.nome)}, escolha ${n === 2 ? 'sua dupla' : 'seu Pokémon'} <span class="mut">(em segredo)</span></h3>
@@ -509,12 +524,12 @@
       const giro = setInterval(() => document.querySelectorAll('.arena .die3d span').forEach(x => x.textContent = 1 + Math.floor(Math.random() * 6)), 70);
       animDu.timer = setTimeout(() => { clearInterval(giro); animDu.timer = null; animDu.feito = chave; render(); }, 800);
     }
-    const humanos = ['a', 'b'].filter(l => !E.J(st, pd[l]).ia);
+    const humanosTodos = ['a', 'b'].filter(l => !E.J(st, pd[l]).ia), humanos = humanosTodos.filter(l => souEu(pd[l]));
     // IA escolhe na vez de um humano; entre duas IAs o resultado avança sozinho
     if (humanoVez && !r && !pd.vencLado) ['a', 'b'].forEach(l => { const k = pd.titulo + nD + l; if (E.J(st, pd[l]).ia && !pd.esc[l] && !ligaTimers[k]) ligaTimers[k] = setTimeout(() => { if (st.pend === pd && !pd.esc[l] && !pd.resultado) { const e = window.AI.escolhaLiga(st, l); agirIA('ligaEscolher', l, e.pokemon, e.item); } }, 600); });
     const reIA = r && !animando && humanoVez ? window.AI.reacaoLiga(st) : null;
     if (reIA) { const k = 're' + r.seq + nD + JSON.stringify(reIA); if (!ligaTimers[k]) ligaTimers[k] = setTimeout(() => { if (st.pend === pd && pd.resultado === r) { if (reIA.tipo === 'remedio') agirIA('ligaRemedio', reIA.lado); else agirIA('ligaCelebi', reIA.quem, reIA.lado); } }, 1200); }
-    else if (humanoVez && !humanos.length && (r || pd.vencLado) && !animando) { const k = 'seg' + pd.titulo + nD + (pd.vencLado || '') + (r ? r.seq : ''); if (!ligaTimers[k]) ligaTimers[k] = setTimeout(() => { if (st.pend === pd) agir('ligaSeguir'); }, 1800); }
+    else if (humanoVez && !humanosTodos.length && (r || pd.vencLado) && !animando) { const k = 'seg' + pd.titulo + nD + (pd.vencLado || '') + (r ? r.seq : ''); if (!ligaTimers[k]) ligaTimers[k] = setTimeout(() => { if (st.pend === pd) agir('ligaSeguir'); }, 1800); }
     const S = sel.liga && sel.liga.k === pd.titulo + nD ? sel.liga : (sel.liga = { k: pd.titulo + nD, aberto: null, pk: {}, it: {} });
     // humano com Pokémon já em campo e sem Itens de batalha: nada a decidir
     if (!r && !pd.vencLado) humanos.forEach(l => { const q = E.J(st, pd[l]); const fixo = (pd.forcado && pd.forcado[l]) || pd.ativo[l]; if (!pd.esc[l] && fixo && !q.itens.some(i => E.ITEM(i).uso === 'batalha' && E.ITEM(i).bonus)) { const k = 'auto' + pd.titulo + nD + l + (pd.forcado ? 'f' + st.log.length : ''); if (!ligaTimers[k]) ligaTimers[k] = setTimeout(() => { if (st.pend === pd && !pd.esc[l]) agir('ligaEscolher', l, fixo, null); }, 50); } });
@@ -667,7 +682,7 @@
     const cc = $('#celC'); if (cc) cc.onclick = () => agir('celebiCaptura');
     $('#modalCard').querySelectorAll('[data-b]').forEach(b => b.onclick = () => { sel.bola = sel.bola === b.dataset.b ? null : b.dataset.b; render(); });
     const rol = $('#rol'); if (rol) rol.onclick = () => { const b = escolhida; sel.bola = null; agir('rolarCaptura', b); };
-    const ds = $('[data-desist]'); if (ds) ds.onclick = () => { if (!pd.slot) st.decks[pd.cor].push(pd.carta); agir('fecharPend'); };
+    const ds = $('[data-desist]'); if (ds) ds.onclick = () => { agir('desistirCaptura'); };
     const ok = $('#ok'); if (ok) ok.onclick = () => agir('fecharPend');
   }
   // ---------- janela de reações (Exp. Share / Poké-Flauta) ----------
@@ -682,14 +697,15 @@
         const rest = Math.max(0, Math.ceil((reac.fim - Date.now()) / 1000)); const el = $('#reacSeg'); if (el) el.textContent = rest;
         const pend = Object.keys(st.pend.reacao.opcoes).filter(j => st.pend.reacao.resp[j] == null);
         const humanos = pend.filter(j => !E.J(st, +j).ia);
-        if (Date.now() >= reac.fim || (!humanos.length && !pend.length)) { clearInterval(reac.tick); agir('encerrarReacoes'); }
+        if (Date.now() >= reac.fim || (!humanos.length && !pend.length)) { clearInterval(reac.tick); agirIA('encerrarReacoes'); }
       }, 250);
     }
     // IAs decidem com um pequeno atraso, para não denunciar quem tem o item
     Object.keys(R.opcoes).filter(j => R.resp[j] == null && E.J(st, +j).ia && !reac.iaFeitos[j]).forEach(j => {
       reac.iaFeitos[j] = true; setTimeout(() => { if (E.reacaoAberta(st) && st.pend.reacao.seq === R.seq && st.pend.reacao.resp[j] == null) agirIA('reagir', +j, window.AI.decidirReacao(st, +j)); }, 1200 + Math.random() * 2000);
     });
-    const humanos = st.jogadores.filter(q => !q.ia);
+    const humanos = online() ? [] : st.jogadores.filter(q => !q.ia);
+    if (online() && R.opcoes[NET.eu] && R.resp[NET.eu] == null) reac.quem = NET.eu;
     let painel = '';
     if (reac.quem != null) {
       const q = E.J(st, reac.quem), op = R.opcoes[q.id], ja = R.resp[q.id] != null;
@@ -707,14 +723,15 @@
       rp.tick = setInterval(() => {
         if (!st || !st.pend || st.pend.tipo !== 'repel' || st.pend.seq !== rp.seq) { clearInterval(rp.tick); return; }
         const el = $('#rpSeg'); if (el) el.textContent = Math.max(0, Math.ceil((rp.fim - Date.now()) / 1000));
-        if (Date.now() >= rp.fim) { clearInterval(rp.tick); agir('encerrarRepel'); }
+        if (Date.now() >= rp.fim) { clearInterval(rp.tick); agirIA('encerrarRepel'); }
       }, 250);
     }
     pd.opcoes.filter(j => pd.resp[j] == null && E.J(st, j).ia && !rp.iaFeitos[j]).forEach(j => {
       rp.iaFeitos[j] = true; setTimeout(() => { if (st.pend === pd && pd.resp[j] == null) agirIA('reagirRepel', j, window.AI.decidirRepel(st, j)); }, 1000 + Math.random() * 2000);
     });
     const cartas = pd.slots.map(k => st.slots[k] && st.slots[k].carta).filter(Boolean);
-    const humanos = st.jogadores.filter(q => !q.ia && !q.eliminado);
+    const humanos = online() ? [] : st.jogadores.filter(q => !q.ia && !q.eliminado);
+    if (online() && pd.opcoes.includes(NET.eu) && pd.resp[NET.eu] == null) rp.quem = NET.eu;
     let painel = '';
     if (rp.quem != null) {
       const q = E.J(st, rp.quem), pode = pd.opcoes.includes(q.id) && pd.resp[q.id] == null;
@@ -871,8 +888,9 @@
       animDu.timer = setTimeout(() => { clearInterval(giro); animDu.timer = null; animDu.feito = chave; render(); }, 800);
     }
     ['a', 'b'].forEach(l => { if (E.J(st, pd[l]).ia && !(pd.escolhas && pd.escolhas[l]) && !fim && !animando && !E.J(st).ia) { const k = 'du' + st.log.length + l; if (!ligaTimers[k]) ligaTimers[k] = setTimeout(() => { if (st.pend === pd) agirIA('escolherDuelo', l, window.AI.escolhaDuelo(st, l)); }, 400); } });
-    const ladoPronto = l => (pd.escolhas && pd.escolhas[l]) || E.J(st, pd[l]).ia || S[l].pokemon;
-    const lado = l => { const q = E.J(st, pd[l]); if (q.ia) return `<div><h3>${esc(q.nome)} 🤖</h3><p class="mut">Escolha feita em segredo.</p></div>`;
+    const ladoPronto = l => (pd.escolhas && pd.escolhas[l]) || E.J(st, pd[l]).ia || !souEu(pd[l]) || S[l].pokemon;
+    const meuLadoFeito = online() && ['a', 'b'].some(l => pd[l] === NET.eu && pd.escolhas && pd.escolhas[l]);
+    const lado = l => { const q = E.J(st, pd[l]); if (q.ia || !souEu(q.id) || (online() && pd.escolhas && pd.escolhas[l])) return `<div><h3>${esc(q.nome)}${q.ia ? ' 🤖' : ''}</h3><p class="mut">${pd.escolhas && pd.escolhas[l] ? '✔ Escolha feita.' : q.ia ? 'Escolha feita em segredo.' : 'Escolhendo em segredo…'}</p></div>`;
       const its = q.itens.filter(i => E.ITEM(i).uso === 'batalha' && E.ITEM(i).bonus);
       return `<div><h3>${esc(q.nome)}</h3><div class="pick" style="grid-template-columns:repeat(auto-fill,minmax(70px,1fr))">${E.aptosDuelo(st, pd, l).map(id => `<div class="pc ${S[l].pokemon === id ? 'sel' : ''}" data-l="${l}" data-id="${id}"><img src="${E.P(id).img}"><span class="f">${E.forcaEmBatalha(st, q.id, id, null, [], pd.mods)}</span></div>`).join('')}</div>
         <select data-i="${l}" style="margin-top:8px;width:100%"><option value="">— sem item —</option>${its.map(i => `<option value="${i}" ${S[l].item === i ? 'selected' : ''}>${esc(E.ITEM(i).nome)} (+${E.ITEM(i).bonus})</option>`).join('')}</select></div>`; };
@@ -883,10 +901,10 @@
       ${msg ? `<div class="result surge ${r.venc != null ? 'ok' : ''}"><b class="big">${msg}</b></div>` : ''}
       ${!fim && !animando ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:10px">${lado('a')}${lado('b')}</div>` : ''}
       ${r && r.det && !animando && !E.J(st, pd.a).ia && E.celebiDe(E.J(st, pd.a)) ? `<div class="row celebiRow"><span class="mut">🌸 ${esc(E.J(st, pd.a).nome)}, usar Pedido a Celebi?</span><button class="celebi" data-cd="a">Refazer meu dado (${r.da})</button><button class="celebi" data-cd="b">Refazer o dado de ${esc(E.J(st, pd.b).nome)} (${r.db})</button></div>` : ''}
-      <div class="mfoot">${animando ? '' : fim ? '<button class="pri" id="dc">Continuar</button>' : `<button class="pri" id="dg" ${ladoPronto('a') && ladoPronto('b') ? '' : 'disabled'}>🎲 Batalhar</button>`}</div>`);
+      <div class="mfoot">${animando ? '' : fim ? '<button class="pri" id="dc">Continuar</button>' : (meuLadoFeito ? '<span class="mut">⏳ Aguardando o adversário…</span>' : `<button class="pri" id="dg" ${ladoPronto('a') && ladoPronto('b') ? '' : 'disabled'}>${online() ? '✔ Confirmar minha escolha' : '🎲 Batalhar'}</button>`)}</div>`);
     $('#modalCard').querySelectorAll('[data-l]').forEach(c => c.onclick = () => { S[c.dataset.l].pokemon = c.dataset.id; render(); });
     $('#modalCard').querySelectorAll('[data-i]').forEach(x => x.onchange = () => { S[x.dataset.i].item = x.value || null; });
-    const g = $('#dg'); if (g) g.onclick = () => { const a = S.a, b = S.b; sel.duelo = null; ['a', 'b'].forEach(l => { const e = l === 'a' ? a : b; if (!E.J(st, pd[l]).ia && e.pokemon && !(pd.escolhas && pd.escolhas[l])) agir('escolherDuelo', l, e); }); };
+    const g = $('#dg'); if (g) g.onclick = () => { const a = S.a, b = S.b; sel.duelo = null; ['a', 'b'].forEach(l => { const e = l === 'a' ? a : b; if (!E.J(st, pd[l]).ia && souEu(pd[l]) && e.pokemon && !(pd.escolhas && pd.escolhas[l])) agir('escolherDuelo', l, e); }); };
     const c = $('#dc'); if (c) c.onclick = () => { sel.duelo = null; agir('fecharDuelo'); };
     $('#modalCard').querySelectorAll('[data-cd]').forEach(b => b.onclick = () => agir('celebiDuelo', b.dataset.cd));
   }
@@ -975,7 +993,8 @@
       <div class="row" style="margin:8px 0 14px">${insignias(q)}<span class="mut">${q.itens.length} itens · ${q.capturas} capturas${q.planalto ? ' · chegou ao Planalto' : ''}</span></div>
       ${timeAgrupado(q, 90)}
       ${tr ? `<div class="trainer"><img src="${tr.img}"><div><b>${esc(tr.nome)}</b><p>${esc(tr.texto)}</p></div></div>` : ''}
-      <div class="mfoot"><button class="pri" data-x>Fechar</button></div>`);
+      <div class="mfoot">${NET.modo === 'host' && q.id !== NET.eu ? `<button id="mjIA">${q.ia ? '🙂 Devolver o lugar ao jogador' : '🤖 Passar este lugar para a IA'}</button>` : ''}<button class="pri" data-x>Fechar</button></div>`);
+    const mj = $('#mjIA'); if (mj) mj.onclick = () => { q.ia = !q.ia; if (!q.ia) q.remoto = true; salvar(); fecharModal(); render(); NET.difundir && NET.difundir(); };
     $('#modalCard').querySelectorAll('.pc').forEach(c => c.onclick = () => zoom(E.P(c.dataset.id).img));
   }
 
@@ -1151,6 +1170,141 @@
     draw();
   }
 
+  // ---------- modo on-line (PeerJS): o anfitrião roda o motor; os outros mandam ações e recebem o estado filtrado ----------
+  const PREFIXO = 'pmthex-', ALFA = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const novoCodigo = () => Array.from({ length: 5 }, () => ALFA[Math.floor(Math.random() * ALFA.length)]).join('');
+  function tokenLocal() { let t = null; try { t = localStorage.getItem('pmthex-token'); } catch (e) {} if (!t) { t = Math.random().toString(36).slice(2) + Date.now().toString(36); try { localStorage.setItem('pmthex-token', t); } catch (e) {} } return t; }
+  function opcoesPeer() { const q = new URLSearchParams(location.search).get('peer'); if (!q) return { debug: 1 }; const [host, port] = q.split(':'); return { host, port: +port || 9000, path: '/', secure: false, debug: 1 }; }
+  function linkSala(c) { const u = new URL(location.href); u.search = ''; u.hash = ''; u.searchParams.set('sala', c); const pq = new URLSearchParams(location.search).get('peer'); if (pq) u.searchParams.set('peer', pq); return u.toString(); }
+  function avisoRede(msg) { let b = $('#netBar'); if (!b) { b = h('<div id="netBar"></div>'); document.body.appendChild(b); } b.textContent = msg || ''; b.hidden = !msg; }
+  function toast(msg) { const t = h(`<div class="toast">${msg}</div>`); document.body.appendChild(t); setTimeout(() => t.classList.add('fora'), 2200); setTimeout(() => t.remove(), 2800); }
+  function semPeer() { if (window.Peer) return false; alert('Não consegui carregar a biblioteca de conexão (PeerJS). Verifique a internet e recarregue a página.'); return true; }
+  const H = { peer: null, conns: new Map(), lobby: null, timer: null, redesenhar: null };
+  function abrirSala(codigo, aoAbrir) {
+    NET.modo = 'host'; NET.codigo = codigo;
+    const peer = H.peer = new Peer(PREFIXO + codigo, opcoesPeer());
+    peer.on('open', () => { avisoRede(null); if (aoAbrir) { const f = aoAbrir; aoAbrir = null; f(); } });
+    peer.on('error', e => {
+      if (e.type === 'unavailable-id') { avisoRede('O código da sala ainda está reservado; tentando de novo…'); try { peer.destroy(); } catch (x) {} setTimeout(() => abrirSala(codigo, aoAbrir), 3000); }
+      else if (e.type !== 'peer-unavailable') avisoRede('Conexão: ' + (e.type || e));
+    });
+    peer.on('disconnected', () => { avisoRede('Reconectando ao servidor de salas…'); setTimeout(() => { try { if (!peer.destroyed) peer.reconnect(); } catch (x) {} }, 1500); });
+    peer.on('connection', conn => {
+      conn.on('data', m => hostRecebe(conn, m));
+      conn.on('close', () => { H.conns.delete(conn.peer); atualizarConexoes(); });
+      conn.on('error', () => {});
+    });
+  }
+  function hostRecebe(conn, m) {
+    if (!m || typeof m !== 'object') return;
+    if (m.t === 'oi') {
+      let assento = -1; const tok = String(m.token || '');
+      if (st) { const q = st.jogadores.find(x => x.token && x.token === tok); if (q) assento = q.id; }
+      else if (H.lobby) {
+        const L = H.lobby.jog; let k = L.findIndex(x => x.tipo === 'remoto' && x.token === tok); if (k < 0) k = L.findIndex(x => x.tipo === 'remoto' && !x.token);
+        if (k >= 0) { L[k].token = tok; L[k].nome = String(m.nome || '').trim().slice(0, 20) || 'Jogador ' + (k + 1); assento = k; }
+      }
+      H.conns.set(conn.peer, { conn, token: tok, assento });
+      if (st) { atualizarConexoes(); enviarEstado(H.conns.get(conn.peer)); if (assento >= 0) toast(`🌐 ${esc(E.J(st, assento).nome)} conectou`); }
+      else { difundirLobby(); if (H.redesenhar) H.redesenhar(); }
+      return;
+    }
+    if (m.t === 'acao') {
+      const c = H.conns.get(conn.peer); if (!c || !st || c.assento < 0 || typeof m.nome !== 'string') return;
+      if (E.acao(st, c.assento, m.nome, ...(Array.isArray(m.args) ? m.args : []))) { salvar(); render(); NET.difundir(); }
+      else try { conn.send({ t: 'recusado', nome: m.nome }); } catch (e) {}
+    }
+  }
+  function conectadosIds() { const ids = new Set(); H.conns.forEach(c => { if (c.assento >= 0) ids.add(c.assento); }); if (NET.eu != null) ids.add(NET.eu); return [...ids]; }
+  function enviarEstado(c) { try { c.conn.send({ t: 'estado', v: E.vistaDe(st, c.assento), eu: c.assento, conectados: conectadosIds(), codigo: NET.codigo }); } catch (e) {} }
+  NET.difundir = () => { if (NET.modo !== 'host') return; clearTimeout(H.timer); H.timer = setTimeout(() => H.conns.forEach(enviarEstado), 25); };
+  function atualizarConexoes() { NET.conectados = conectadosIds(); if (st) { render(); NET.difundir(); } else { difundirLobby(); if (H.redesenhar) H.redesenhar(); } }
+  function difundirLobby() {
+    const L = H.lobby; if (!L) return; const con = new Set([...H.conns.values()].map(c => c.assento));
+    H.conns.forEach(c => { try { c.conn.send({ t: 'lobby', codigo: L.codigo, jog: L.jog.map((x, k) => ({ nome: x.nome, cor: x.cor, tipo: x.tipo, ocupado: !!x.token, conectado: x.tipo === 'eu' || con.has(k) })), voce: c.assento }); } catch (e) {} });
+  }
+  function criarSala(jog, seed) {
+    if (semPeer()) return;
+    const codigo = novoCodigo(); H.lobby = { codigo, jog, seed };
+    telaSalaHost();
+    abrirSala(codigo, () => telaSalaHost());
+  }
+  function telaSalaHost() {
+    const L = H.lobby, box = $('#setup'), link = linkSala(L.codigo), con = new Set([...H.conns.values()].map(c => c.assento));
+    const faltam = L.jog.filter(x => x.tipo === 'remoto' && !x.token).length;
+    box.innerHTML = `<div class="setupCard"><div class="logo"><h1>Sala on-line <b>${esc(L.codigo)}</b></h1><span class="tag">${H.peer && H.peer.open ? '🟢 aberta' : '⏳ abrindo…'}</span></div>
+      <p>Mande este link para os amigos:</p>
+      <div class="row" style="flex-wrap:nowrap"><input id="lk" value="${esc(link)}" readonly style="flex:1"><button id="cp">📋 Copiar</button></div>
+      <h3 style="margin-top:18px">Lugares</h3>
+      <div class="salaLista">${L.jog.map((x, k) => `<div class="pl"><span class="dot" style="background:${COR_HEX[x.cor]}"></span><b style="flex:1">${esc(x.nome || (x.tipo === 'ia' ? 'CPU ' + (k + 1) : '—'))}</b>
+        <span class="mut">${x.tipo === 'eu' ? 'você · anfitrião' : x.tipo === 'ia' ? '🤖 IA' : x.token ? (con.has(k) ? '🌐 conectado' : '🔌 saiu') : '⏳ aguardando alguém entrar'}</span></div>`).join('')}</div>
+      <div class="row" style="margin-top:14px"><button id="cancel">Cancelar</button><span style="flex:1"></span><button class="pri" id="start">${faltam ? `Começar (${faltam} lugar${faltam > 1 ? 'es' : ''} vazio${faltam > 1 ? 's' : ''} vira${faltam > 1 ? 'm' : ''} IA)` : 'Começar partida'}</button></div></div>`;
+    $('#cp').onclick = async () => { try { await navigator.clipboard.writeText(link); $('#cp').textContent = '✔ Copiado'; } catch (e) { $('#lk').select(); } };
+    $('#cancel').onclick = () => { try { H.peer.destroy(); } catch (e) {} H.lobby = null; NET.modo = 'local'; telaAbertura(); };
+    $('#start').onclick = () => comecarOnline();
+    H.redesenhar = telaSalaHost;
+  }
+  function comecarOnline() {
+    const L = H.lobby; H.redesenhar = null;
+    L.jog.forEach((x, k) => { if (x.tipo === 'remoto' && !x.token) { x.tipo = 'ia'; x.nome = 'CPU ' + (k + 1); } });
+    st = E.novoJogo({ seed: L.seed, jogadores: L.jog.map((x, k) => ({ nome: (x.nome || '').trim() || (x.tipo === 'ia' ? 'CPU ' + (k + 1) : 'Jogador ' + (k + 1)), cor: x.cor, ia: x.tipo === 'ia' })) });
+    st.jogadores.forEach((q, k) => { if (L.jog[k].tipo === 'remoto') { q.remoto = true; q.token = L.jog[k].token; } });
+    NET.eu = 0; st.online = { codigo: L.codigo, eu: 0 }; H.lobby = null;
+    salvar(); iniciarJogo(); atualizarConexoes();
+  }
+  function retomarSala(salvo) {
+    if (semPeer()) return;
+    st = salvo; NET.eu = salvo.online.eu; iniciarJogo(); avisoRede('Reabrindo a sala…');
+    abrirSala(salvo.online.codigo, () => { avisoRede(null); toast('🌐 Sala reaberta: os jogadores podem voltar pelo mesmo link.'); });
+  }
+  // --- quem entra pelo link
+  const C = { peer: null, conn: null, codigo: null, nome: '', ligando: false, lobby: null };
+  function telaEntrar(codigo) {
+    const box = $('#setup'); $('#game').hidden = true; box.hidden = false;
+    box.innerHTML = `<div class="setupCard"><div class="logo"><h1>Entrar na sala <b>${esc(codigo)}</b></h1><span class="tag">Pokémon Master Trainer: HEX</span></div>
+      <p class="mut">Você foi convidado para uma partida on-line. Escolha seu nome e entre.</p>
+      <div class="row" style="flex-wrap:nowrap"><input id="nm" placeholder="Seu nome" value="${esc(prefs.nome || '')}" style="flex:1" maxlength="20"><button class="pri" id="ent">Entrar</button></div>
+      <p class="mut" id="est" style="margin-top:10px"></p><p class="mut" style="font-size:12px;margin-top:16px"><a href="${location.pathname}">Ou jogar no modo local</a></p></div>`;
+    const ir = () => { const nome = $('#nm').value.trim() || 'Jogador'; prefs.nome = nome; salvarPrefs(); if (semPeer()) return; $('#est').textContent = '⏳ Conectando…'; $('#ent').disabled = true; entrarSala(codigo, nome); };
+    $('#ent').onclick = ir; $('#nm').onkeydown = e => { if (e.key === 'Enter') ir(); };
+  }
+  function entrarSala(codigo, nome) {
+    NET.modo = 'cliente'; C.codigo = codigo; C.nome = nome;
+    const peer = C.peer = C.peer || new Peer(opcoesPeer());
+    const ligar = () => {
+      if (C.ligando) return; C.ligando = true;
+      const conn = C.conn = peer.connect(PREFIXO + codigo, { reliable: true });
+      conn.on('open', () => { C.ligando = false; conn.send({ t: 'oi', token: tokenLocal(), nome }); avisoRede(null); });
+      conn.on('data', clienteRecebe);
+      conn.on('close', () => { C.ligando = false; avisoRede('Conexão perdida com o anfitrião — tentando reconectar…'); setTimeout(ligar, 3000); });
+      conn.on('error', () => { C.ligando = false; });
+      setTimeout(() => { if (C.ligando && !conn.open) { C.ligando = false; try { conn.close(); } catch (e) {} ligar(); } }, 8000);
+    };
+    if (peer.open) ligar(); else peer.on('open', ligar);
+    peer.on('error', e => { if (e.type === 'peer-unavailable') { C.ligando = false; avisoRede('Sala não encontrada — o anfitrião precisa estar com o jogo aberto. Tentando de novo…'); setTimeout(ligar, 4000); } else avisoRede('Conexão: ' + (e.type || e)); });
+    peer.on('disconnected', () => { setTimeout(() => { try { if (!peer.destroyed) peer.reconnect(); } catch (x) {} }, 1500); });
+    NET.enviar = (n, args) => { if (C.conn && C.conn.open) C.conn.send({ t: 'acao', nome: n, args }); else toast('Sem conexão com o anfitrião.'); };
+  }
+  function clienteRecebe(m) {
+    if (!m || typeof m !== 'object') return;
+    if (m.t === 'lobby') { C.lobby = m; NET.eu = m.voce; if (!st) telaSalaCliente(); return; }
+    if (m.t === 'estado') {
+      const antes = st, novoLayout = !antes || JSON.stringify(antes.layout) !== JSON.stringify(m.v.layout);
+      st = m.v; NET.eu = m.eu; NET.conectados = m.conectados || [];
+      if ($('#game').hidden) { iniciarJogo(); return; }
+      if (novoLayout) desenharHexes();
+      render();
+      if (antes && st.vez === NET.eu && (antes.vez !== NET.eu || antes.rodada !== st.rodada) && st.fase === 'inicio') toast('🎲 Sua vez!');
+    }
+  }
+  function telaSalaCliente() {
+    const L = C.lobby, box = $('#setup');
+    box.innerHTML = `<div class="setupCard"><div class="logo"><h1>Sala <b>${esc(L.codigo)}</b></h1><span class="tag">🟢 conectado</span></div>
+      <p>${L.voce >= 0 ? 'Você está na sala. Aguardando o anfitrião começar a partida…' : 'A sala está cheia: você vai <b>assistir</b> à partida.'}</p>
+      <div class="salaLista">${L.jog.map((x, k) => `<div class="pl"><span class="dot" style="background:${COR_HEX[x.cor]}"></span><b style="flex:1">${esc(x.nome || '—')}${k === L.voce ? ' <span class="tag">você</span>' : ''}</b>
+        <span class="mut">${x.tipo === 'eu' ? 'anfitrião' : x.tipo === 'ia' ? '🤖 IA' : x.ocupado ? (x.conectado ? '🌐 conectado' : '🔌 saiu') : '⏳ lugar livre'}</span></div>`).join('')}</div></div>`;
+  }
+
   // ---------- menu da partida ----------
   $('#btnTools').onclick = () => caixaFerramentas();
   $('#btnLideres').onclick = () => modalLideres();
@@ -1171,6 +1325,6 @@
   };
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { $('#zoomCard').hidden = true; if (!$('#modal').hidden && !$('#modalCard').dataset.pend) fecharModal(); if (boardMode && !boardMode.pend) { boardMode = null; render(); } } });
 
-  telaAbertura();
-  window.__pmt = { get st() { return st; }, render, run: (f, ...a) => run(E[f], ...a) };
+  { const sala = new URLSearchParams(location.search).get('sala'); if (sala) telaEntrar(sala.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8)); else telaAbertura(); }
+  window.__pmt = { get st() { return st; }, set st(v) { st = v; }, render, run: (f, ...a) => run(E[f], ...a), agir, NET };
 })();
