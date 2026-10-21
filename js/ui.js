@@ -94,7 +94,7 @@
 
   // ---------- tabuleiro ----------
   function iniciarJogo() {
-    rolVista = null; parqueVisto = null;
+    rolVista = null; parqueVisto = null; movVisto = st && st.mov ? st.mov.seq : null; anim = null;
     $('#setup').hidden = true; $('#game').hidden = false;
     desenharHexes(); render(); setTimeout(() => focar(E.J(st).pos, 0.55), 30);
   }
@@ -195,8 +195,10 @@
       const n = g.nodes[k]; if (!n) return;
       ps.forEach((p, i) => {
         const ang = ps.length > 1 ? (i / ps.length) * Math.PI * 2 : 0, rr = ps.length > 1 ? 52 : 0;
-        const x = n.wx + Math.cos(ang) * rr, y = n.wy + Math.sin(ang) * rr - 20;
-        const gg = el('g', { class: 'pawn', transform: `translate(${x},${y})` }, gW);
+        let x = n.wx + Math.cos(ang) * rr, y = n.wy + Math.sin(ang) * rr - 20;
+        if (anim && anim.j === p.id) { const q = posAnim(); if (q) { x = q.x; y = q.y; } }
+        const gg = el('g', { class: 'pawn' + (p.id === st.vez && st.vencedor == null ? ' vez' : ''), 'data-j': p.id, transform: `translate(${x},${y})` }, gW);
+        if (p.id === st.vez && st.vencedor == null) el('circle', { class: 'pulso', r: 46 }, gg);
         el('ellipse', { cx: 0, cy: 46, rx: 34, ry: 12, fill: 'rgba(0,0,0,.45)' }, gg);
         el('circle', { r: 40, fill: COR_HEX[p.cor], stroke: p.id === st.vez ? '#ffcb05' : '#000', 'stroke-width': p.id === st.vez ? 10 : 6 }, gg);
         const t = el('text', { 'text-anchor': 'middle', y: 16, fill: ['branco', 'amarelo'].includes(p.cor) ? '#111' : '#fff' }, gg); t.textContent = rotulo(p);
@@ -206,6 +208,30 @@
     if (boardMode) { hint.hidden = false; hint.innerHTML = `<span>${esc(boardMode.msg)}</span>${boardMode.pend ? '' : '<button>cancelar</button>'}`; const hb = $('button', hint); if (hb) hb.onclick = () => { boardMode = null; render(); }; }
     else if (st.fase === 'mover' && st.turno.destinos && !pd && souEu(E.J(st).id)) { hint.hidden = false; hint.innerHTML = `<span>Escolha o destino no tabuleiro</span>`; }
     else hint.hidden = true;
+  }
+  // ---------- animação do peão: desliza espaço por espaço, com um pulinho em cada um ----------
+  let anim = null, movVisto = null;
+  const PASSO_MS = 190;
+  function iniciarAnim() {
+    const m = st && st.mov; if (!m || m.seq === movVisto) return;
+    movVisto = m.seq;
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const g = E.grafo(st), pts = m.cam.map(k => g.nodes[k]).filter(Boolean).map(n => ({ x: n.wx, y: n.wy - 20 }));
+    if (pts.length < 2) return;
+    anim = { seq: m.seq, j: m.j, pts, t0: performance.now(), dur: Math.min(3000, Math.max(350, (pts.length - 1) * (m.trem ? 700 : PASSO_MS))) };
+    const passo = () => {
+      if (!anim) return; const q = posAnim(), gp = document.querySelector(`#lPawns .pawn[data-j="${anim.j}"]`);
+      if (gp && q) gp.setAttribute('transform', `translate(${q.x},${q.y})`);
+      if (performance.now() - anim.t0 >= anim.dur) { anim = null; render(); return; }
+      requestAnimationFrame(passo);
+    };
+    requestAnimationFrame(passo);
+  }
+  function posAnim() {
+    if (!anim) return null; const f = Math.min(1, (performance.now() - anim.t0) / anim.dur), n = anim.pts.length - 1;
+    const pos = f * n, i = Math.min(n - 1, Math.floor(pos)), t = pos - i, a = anim.pts[i], b = anim.pts[i + 1];
+    const e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; // suave em cada passo
+    return { x: a.x + (b.x - a.x) * e, y: a.y + (b.y - a.y) * e - Math.sin(Math.PI * t) * 28 };
   }
   function rotulo(p) { const ini = q => q.nome.trim().slice(0, 1).toUpperCase(); const rep = st.jogadores.filter(q => ini(q) === ini(p)).length > 1; return rep ? (p.nome.match(/\d+\s*$/) ? p.nome.match(/\d+\s*$/)[0].trim() : ini(p) + (p.id + 1)) : ini(p); }
   function escolherDestino(k, info) {
@@ -247,6 +273,7 @@
   }
   function render() {
     if (!st) return;
+    iniciarAnim();
     renderBoard();
     const p = E.J(st), t = st.turno || {};
     // --- turno ---
@@ -307,7 +334,8 @@
     const lg = $('#log'); const fundo = lg.scrollHeight - lg.scrollTop - lg.clientHeight < 30;
     lg.innerHTML = st.log.slice(-120).map(l => `<div class="${l.tipo}">${logHtml(l)}</div>`).join(''); if (fundo) lg.scrollTop = lg.scrollHeight;
     ligarRefs(lg);
-    // --- pendências ---
+    // --- pendências (esperam o peão terminar de andar) ---
+    if (anim) return;
     renderPend();
     avisarVez();
     verRolagem();
@@ -1170,6 +1198,7 @@
   let timerIA = null, pausado = false, esperandoHumano = false;
   function agendarIA() {
     if (timerIA || !st || pausado || !souAnfitriao()) return;
+    if (anim) { setTimeout(agendarIA, 250); return; }
     const p = E.J(st); if (!p.ia || !window.AI) { esperandoHumano = false; return; }
     if (!$('#modal').hidden && !$('#modalCard').dataset.pend) return; // um humano está usando outra janela
     if (!$('#parqueFx').hidden) { setTimeout(agendarIA, 600); return; }

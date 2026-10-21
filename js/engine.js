@@ -246,6 +246,7 @@
     const g = grafo(st);
     if (info.custo) { (pagar || []).slice(0, info.custo).forEach(inst => descartarItem(st, p, inst)); log(st, `${p.nome} descarta ${info.custo} Item(ns) para passar.`); }
     info.caminho.forEach(k => { const s = g.nodes[k]; if (s.kind === 'cidade' || s.especial === 'planalto') addU(p.passou, k); if (s.pos === 't3' && g.loopE2.includes(k)) addU(p.e2, k); });
+    st.mov = { j: p.id, cam: [p.pos].concat(info.caminho), seq: ((st.mov && st.mov.seq) || 0) + 1 }; // para a animação do peão
     p.pos = destino; st.turno.destinos = null; st.turno.moveu = true; st.fase = 'acao';
     log(st, `${p.nome} foi para ${nomeEspaco(st, destino)}.`);
     chegar(st, destino);
@@ -253,6 +254,7 @@
   function addU(a, v) { if (!a.includes(v)) a.push(v); }
   function trem(st, cidade) {
     const p = J(st); if (st.fase !== 'inicio' || !p.passou.includes(cidade) || cidade === p.pos) return;
+    st.mov = { j: p.id, cam: [p.pos, cidade], seq: ((st.mov && st.mov.seq) || 0) + 1, trem: true };
     p.pos = cidade; st.fase = 'acao'; st.turno.moveu = true; log(st, `${p.nome} pegou o Trem para ${nomeEspaco(st, cidade)}.`);
     chegar(st, cidade, { trem: true });
   }

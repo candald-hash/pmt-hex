@@ -10,6 +10,9 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- **Peão animado:** ao escolher o destino, o peão desliza espaço por espaço pelo caminho, com um pulinho em cada espaço (no Trem, vai direto e mais devagar). As janelas que aparecem na chegada (captura, Evento…) esperam o peão chegar. No on-line, todos veem a animação das jogadas dos outros. Quem usa "reduzir movimento" no sistema vê o peão pular direto.
+- **Destaque da vez:** o peão de quem joga ganha um anel amarelo pulsando.
+
 - **Celular em pé:** o tabuleiro ocupa a tela inteira; embaixo fica uma barra fixa com o turno (de quem é a vez, dado e botões) e as abas 🎒 Ficha · 👥 Jogadores · 📜 Registro · ⚙. Cada aba abre uma gaveta por cima do tabuleiro; tocar de novo fecha. As janelas sobem da parte de baixo da tela. Computador e tablet continuam como antes (no tablet em pé o painel agora fica ao lado, mais estreito, em vez de embaixo); celular deitado usa o painel compacto ao lado.
 - **Toque:** zoom com dois dedos e duplo toque para aproximar no tabuleiro; tocar numa insígnia mostra o Líder e o prêmio.
 - **Pokémon enfraquecido:** borda vermelha em volta da carta e selo vermelho "±1" no canto (o marcador dá ±1 no dado de captura), no lugar da faixa que cobria a carta.
