@@ -122,10 +122,33 @@
   (function panzoom() {
     const svg = $('#board'); let drag = null;
     svg.addEventListener('wheel', ev => { ev.preventDefault(); const p = toWorld(ev), f = ev.deltaY > 0 ? 1.12 : 1 / 1.12; view.x = p.x - (p.x - view.x) * f; view.y = p.y - (p.y - view.y) * f; view.w *= f; view.h *= f; setView(); }, { passive: false });
-    svg.addEventListener('pointerdown', ev => { if (ev.target.closest('.dest,.slot,.pawn,.city')) return; drag = { x: ev.clientX, y: ev.clientY, vx: view.x, vy: view.y }; svg.classList.add('dragging'); svg.setPointerCapture(ev.pointerId); });
-    svg.addEventListener('pointermove', ev => { if (!drag) return; const r = svg.getBoundingClientRect(), s = view.w / r.width; view.x = drag.vx - (ev.clientX - drag.x) * s; view.y = drag.vy - (ev.clientY - drag.y) * s; setView(); });
-    svg.addEventListener('pointerup', () => { drag = null; svg.classList.remove('dragging'); });
+    const toques = new Map(); let pinca = null, ultimoToque = 0;
+    const zoomEm = (cx, cy, f) => { const p = toWorld({ clientX: cx, clientY: cy }); view.x = p.x - (p.x - view.x) * f; view.y = p.y - (p.y - view.y) * f; view.w *= f; view.h *= f; setView(); };
+    svg.addEventListener('pointerdown', ev => {
+      if (ev.pointerType === 'touch') {
+        toques.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+        if (toques.size === 2) { const [a, b] = [...toques.values()]; pinca = { d: Math.hypot(a.x - b.x, a.y - b.y), v: Object.assign({}, view) }; drag = null; return; }
+        if (!ev.target.closest('.dest,.slot,.pawn,.city')) { const agora = Date.now(); if (agora - ultimoToque < 300) { zoomEm(ev.clientX, ev.clientY, 1 / 1.8); ultimoToque = 0; return; } ultimoToque = agora; }
+      }
+      if (ev.target.closest('.dest,.slot,.pawn,.city')) return; drag = { x: ev.clientX, y: ev.clientY, vx: view.x, vy: view.y }; svg.classList.add('dragging'); try { svg.setPointerCapture(ev.pointerId); } catch (e) {}
+    });
+    svg.addEventListener('pointermove', ev => {
+      if (ev.pointerType === 'touch' && toques.has(ev.pointerId)) toques.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+      if (pinca && toques.size >= 2) {
+        const [a, b] = [...toques.values()], d = Math.hypot(a.x - b.x, a.y - b.y); if (!d) return;
+        const cx = (a.x + b.x) / 2, cy = (a.y + b.y) / 2, f = pinca.d / d;
+        view = Object.assign({}, pinca.v); const r = svg.getBoundingClientRect();
+        const wx = view.x + (cx - r.left) / r.width * view.w, wy = view.y + (cy - r.top) / r.height * view.h;
+        view.w = pinca.v.w * f; view.h = pinca.v.h * f; view.x = wx - (cx - r.left) / r.width * view.w; view.y = wy - (cy - r.top) / r.height * view.h; setView(); return;
+      }
+      if (!drag) return; const r = svg.getBoundingClientRect(), s = view.w / r.width; view.x = drag.vx - (ev.clientX - drag.x) * s; view.y = drag.vy - (ev.clientY - drag.y) * s; setView();
+    });
+    const soltar = ev => { toques.delete(ev.pointerId); if (toques.size < 2) pinca = null; drag = null; svg.classList.remove('dragging'); };
+    svg.addEventListener('pointerup', soltar); svg.addEventListener('pointercancel', soltar);
     window.addEventListener('resize', () => { if (st) enquadrar(); });
+    // quando só a altura da área do tabuleiro muda (barra do celular), mantém o zoom e o centro, sem deixar faixas vazias
+    let tamAnt = null;
+    if (window.ResizeObserver) new ResizeObserver(() => { const r = svg.getBoundingClientRect(); if (!view || !r.width || !r.height) return; if (tamAnt && tamAnt.w === r.width) { const cy = view.y + view.h / 2; view.h = view.w * r.height / r.width; view.y = cy - view.h / 2; setView(); } tamAnt = { w: r.width, h: r.height }; }).observe(svg);
     $('#zoomFit').onclick = enquadrar; $('#zoomMe').onclick = () => focar((online() && NET.eu >= 0 ? E.J(st, NET.eu) : E.J(st)).pos, 0.55);
   })();
 
@@ -141,7 +164,13 @@
       const gg = el('g', { class: 'slot' + (boardMode && boardMode.tipo === 'slot' ? ' alvo' : '') }, gS);
       el('image', { href: c.aberta ? pk.img : D.versos[s.cor], x, y, width: CARD_W, height: CARD_H }, gg);
       el('rect', { class: 'frame', x, y, width: CARD_W, height: CARD_H, rx: 10, fill: 'none', stroke: '#000', 'stroke-width': 5 }, gg);
-      if (c.fraco) { el('rect', { x: x + 8, y: y + CARD_H - 52, width: CARD_W - 16, height: 40, rx: 8, fill: '#7c2d12', stroke: '#fff', 'stroke-width': 3 }, gg); const t = el('text', { class: 'lbl', x: s.wx, y: y + CARD_H - 22, 'text-anchor': 'middle', 'font-size': 26 }, gg); t.textContent = 'ENFRAQUECIDO'; t.setAttribute('style', 'font-size:22px'); }
+      if (c.fraco) {
+        el('rect', { class: 'fracoBorda', x: x - 4, y: y - 4, width: CARD_W + 8, height: CARD_H + 8, rx: 14, fill: 'none', stroke: '#dc2626', 'stroke-width': 12 }, gg);
+        const bx = x + CARD_W - 6, by = y + 6, sg = el('g', { class: 'fracoSelo' }, gg);
+        el('circle', { cx: bx, cy: by, r: 36, fill: '#dc2626', stroke: '#fff', 'stroke-width': 6 }, sg);
+        const t = el('text', { x: bx, y: by + 13, 'text-anchor': 'middle', fill: '#fff', 'font-size': 36, 'font-weight': 800, 'font-family': 'Inter, sans-serif' }, sg); t.textContent = '±1';
+        const ti = el('title', {}, gg); ti.textContent = 'Enfraquecido: ±1 no dado de captura';
+      }
       gg.addEventListener('click', ev => { ev.stopPropagation(); if (boardMode && boardMode.tipo === 'slot') { const cb = boardMode.cb; boardMode = null; cb(s.key); } else if (c.aberta) zoom(pk.img); });
     });
     // cidades: passar o mouse mostra o Líder; clicar abre os detalhes
@@ -1371,6 +1400,17 @@
 
   // ---------- menu da partida ----------
   $('#logMax').onclick = () => { if (st) modalLog(); };
+  // celular: altura da barra de baixo (turno + abas) para o tabuleiro não ficar escondido atrás dela
+  if (window.ResizeObserver) { const ro = new ResizeObserver(() => { const h = $('#turnBox').offsetHeight + $('#mTabs').offsetHeight; document.documentElement.style.setProperty('--barra', h + 'px'); }); ro.observe($('#turnBox')); ro.observe($('#mTabs')); }
+  // celular: abas que abrem uma gaveta com uma seção do painel por vez
+  $('#mTabs').querySelectorAll('[data-tab]').forEach(b => b.onclick = () => {
+    const t = b.dataset.tab, sd = $('#side'); if (t === 'cfg') { if (st) modalConfig(); return; }
+    const ja = sd.dataset.gaveta === t; sd.dataset.gaveta = ja ? '' : t;
+    $('#mTabs').querySelectorAll('[data-tab]').forEach(x => x.classList.toggle('on', !ja && x.dataset.tab === t));
+    if (!ja && t === 'registro') { const lg = $('#log'); lg.scrollTop = lg.scrollHeight; }
+  });
+  // telas de toque: tocar numa insígnia mostra o Líder e o prêmio
+  document.addEventListener('click', e => { const bd = e.target.closest('.badge[title]'); if (bd && matchMedia('(hover: none)').matches) toast(esc(bd.title)); });
   if ((prefs.recolhidas || {}).log) $('#logBox').classList.add('fechada');
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { $('#zoomCard').hidden = true; if (!$('#modal').hidden && !$('#modalCard').dataset.pend) fecharModal(); if (boardMode && !boardMode.pend) { boardMode = null; render(); } } });
 

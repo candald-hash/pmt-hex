@@ -297,3 +297,52 @@ button.celebi:hover:not(:disabled){background:rgba(244,114,182,.15);border-color
 .sec.fechada .secBody{display:none}
 .sec.fechada .secHead{margin-bottom:4px}
 #logBox.sec.fechada{flex:0 0 auto;min-height:0}
+/* ---------- enfraquecido no tabuleiro ---------- */
+.fracoBorda{filter:drop-shadow(0 0 8px rgba(220,38,38,.6))}
+#board{touch-action:none}
+#mTabs{display:none}
+
+/* ---------- tablet em pé: painel ao lado, mais estreito (substitui o layout empilhado) ---------- */
+@media (max-width:980px) and (min-width:761px){
+  #game{grid-template-columns:1fr 330px;grid-template-rows:none}
+  #side{border-left:1px solid var(--line);border-top:0;overflow:hidden}
+  #meBox{max-height:40vh}
+}
+/* ---------- celular em pé: tabuleiro em tela cheia, barra de ação embaixo e gaveta ---------- */
+@media (max-width:760px) and (orientation:portrait){
+  #game{display:block;height:100dvh}
+  #boardWrap{position:fixed;top:0;left:0;right:0;bottom:var(--barra,170px)}
+  #modal{z-index:40}
+  #side{position:fixed;left:0;right:0;bottom:0;z-index:20;max-height:none;border:0;border-top:1px solid var(--line);border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(0,0,0,.45);overflow:hidden;display:flex;flex-direction:column}
+  #side>section{padding:10px 12px}
+  #turnBox{order:2}
+  #mTabs{order:3;display:flex;gap:4px;padding:6px 8px calc(6px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--panel)}
+  #mTabs button{flex:1;padding:8px 4px;font-size:13px}
+  #mTabs button[data-tab="cfg"]{flex:0 0 46px}
+  #mTabs button.on{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+  #meBox,#othersBox,#logBox{order:1;display:none;max-height:56vh;overflow:auto}
+  #side[data-gaveta="ficha"] #meBox,#side[data-gaveta="jogadores"] #othersBox,#side[data-gaveta="registro"] #logBox{display:block}
+  #side[data-gaveta="registro"] #log{max-height:48vh}
+  .turnHead{margin-bottom:4px}.turnHead .dot{width:22px;height:22px}.turnHead h2{font-size:16px}
+  .turnHead #btnCfg{display:none}
+  #turnBox .mut{font-size:12px}
+  .dice{margin:2px 0 6px}.die{width:36px;height:36px;font-size:19px}
+  .ldline{display:none}
+  .ligaLine{font-size:12px;padding:6px 8px}
+  .actions button{padding:8px 10px}
+  #boardTools{top:10px;right:10px}
+  #boardHint{top:10px;max-width:92vw;font-size:13px}
+  #modalCard{width:100%;max-height:88vh;padding:16px;border-radius:16px 16px 0 0;align-self:end}
+  #modal{align-items:end;padding:0}
+  .mgrid>img{max-width:180px}
+  .pick{grid-template-columns:repeat(auto-fill,minmax(84px,1fr))}
+}
+/* ---------- celular deitado: painel compacto ao lado ---------- */
+@media (max-height:500px) and (orientation:landscape){
+  #game{grid-template-columns:1fr 280px;grid-template-rows:none}
+  #side{border-left:1px solid var(--line);border-top:0;overflow:auto}
+  #side>section{padding:8px 10px}
+  .turnHead h2{font-size:15px}.die{width:34px;height:34px;font-size:18px}
+  #meBox{max-height:none}
+  #modalCard{max-height:94vh;padding:14px}
+}

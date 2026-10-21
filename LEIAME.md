@@ -10,6 +10,10 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- **Celular em pé:** o tabuleiro ocupa a tela inteira; embaixo fica uma barra fixa com o turno (de quem é a vez, dado e botões) e as abas 🎒 Ficha · 👥 Jogadores · 📜 Registro · ⚙. Cada aba abre uma gaveta por cima do tabuleiro; tocar de novo fecha. As janelas sobem da parte de baixo da tela. Computador e tablet continuam como antes (no tablet em pé o painel agora fica ao lado, mais estreito, em vez de embaixo); celular deitado usa o painel compacto ao lado.
+- **Toque:** zoom com dois dedos e duplo toque para aproximar no tabuleiro; tocar numa insígnia mostra o Líder e o prêmio.
+- **Pokémon enfraquecido:** borda vermelha em volta da carta e selo vermelho "±1" no canto (o marcador dá ±1 no dado de captura), no lugar da faixa que cobria a carta.
+
 - **Seções recolhíveis:** clique no título de Time, Itens, Treinador, Jogadores ou Registro para recolher ou mostrar (▸/▾). A escolha fica lembrada neste navegador.
 - **Aviso de vez (on-line):** quando chega a sua vez aparece "🎲 Sua vez!"; quando uma decisão sua está esperando no turno de outro (reação, Duelo, Liga…), aparece um aviso. Se você estiver em outra aba, o título da aba fica piscando até você voltar.
 - **Atualizações aparecem sem cache:** cada publicação força o navegador a baixar os arquivos novos.
