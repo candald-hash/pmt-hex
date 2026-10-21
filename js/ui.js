@@ -255,16 +255,18 @@
       <img src="${c.img}" loading="lazy">${E.familiaTravada(p, id) ? '<img class="lock" src="img/ui/plus1.webp">' : ''}${p.mais1 && p.mais1[id] ? `<span class="gsTag" title="Marcador +1 permanente (Bola GS)">GS +${p.mais1[id]}</span>` : ''}<span class="f">${f}</span></div>`;
   }
   // Time agrupado por linha evolutiva: famílias com 2+ Pokémons ganham uma moldura compartilhada
-  function timeAgrupado(p, larg) {
+  // opts.ids: só estes Pokémons (o bônus continua calculado com o time todo); opts.carta: como desenhar cada carta
+  function timeAgrupado(p, larg, opts) {
+    opts = opts || {}; const carta = opts.carta || (id => cartaPokemon(p, id));
     const grupos = {};
-    p.pokemon.forEach(id => { const c = E.P(id), k = c.familia || id; (grupos[k] = grupos[k] || []).push(id); });
+    (opts.ids || p.pokemon).forEach(id => { const c = E.P(id), k = c.familia || id; (grupos[k] = grupos[k] || []).push(id); });
     const ordemCor = ids => Math.max(...ids.map(id => CORES_ORDEM.indexOf(E.P(id).cor)));
     const lista = Object.entries(grupos).map(([fam, ids]) => ({ fam, ids: ids.sort((a, b) => E.P(a).estagio - E.P(b).estagio || CORES_ORDEM.indexOf(E.P(a).cor) - CORES_ORDEM.indexOf(E.P(b).cor)) }))
       .sort((a, b) => (b.ids.length > 1) - (a.ids.length > 1) || ordemCor(a.ids) - ordemCor(b.ids) || E.P(a.ids[0]).nome.localeCompare(E.P(b.ids[0]).nome));
     return `<div class="team2" style="--w:${larg || 62}px">${lista.map(g => {
-      if (g.ids.length === 1) return `<div class="famG solo">${cartaPokemon(p, g.ids[0])}</div>`;
+      if (g.ids.length === 1) return `<div class="famG solo">${carta(g.ids[0])}</div>`;
       const trav = p.travadas.includes(g.fam), bonus = Math.max(...g.ids.map(id => E.bonusEvolucao(p, id)));
-      return `<div class="famG ${trav ? 'trav' : ''}" title="Linha evolutiva${bonus ? ` — bônus de evolução +${bonus} no mais evoluído` : ''}${trav ? ' · família travada (+1)' : ''}"><span class="famTag">${trav ? '🔒 ' : ''}${bonus ? 'evol. +' + bonus : 'mesma linha'}</span>${g.ids.map(id => cartaPokemon(p, id)).join('')}</div>`;
+      return `<div class="famG ${trav ? 'trav' : ''}" title="Linha evolutiva${bonus ? ` — bônus de evolução +${bonus} no mais evoluído` : ''}${trav ? ' · família travada (+1)' : ''}"><span class="famTag">${trav ? '🔒 ' : ''}${bonus ? 'evol. +' + bonus : 'mesma linha'}</span>${g.ids.map(id => carta(id)).join('')}</div>`;
     }).join('')}</div>`;
   }
   const PREMIO_INSIGNIA = ['Pokémons Azuis obedecem', 'Pokémons Vermelhos obedecem', 'ganhe um Pokémon Azul', 'Pokémons Amarelos obedecem', 'ganhe um Pokémon Vermelho', 'trave e melhore (+1) uma família'];
@@ -670,7 +672,7 @@
         const its = q.itens.filter(i => E.ITEM(i).uso === 'batalha' && E.ITEM(i).bonus);
         const pk = at || S.pk[l];
         return `<div class="lgEsc"><h3>${esc(q.nome)}, sua escolha${opAt ? ` <span class="mut">(contra ${esc(E.P(opAt).nome)})</span>` : ''}</h3>
-          ${at ? `<p>Em campo: <b>${esc(E.P(at).nome)}</b> — ${pd.forcado ? 'o duelo será refeito (Remédio).' : 'continua lutando.'}</p>` : `<div class="pick" style="grid-template-columns:repeat(auto-fill,minmax(76px,1fr))">${E.ligaAptos(st, pd, l).map(id => `<div class="pc ${S.pk[l] === id ? 'sel' : ''}" data-lp="${l}" data-id="${id}"><img src="${E.P(id).img}"><span class="f">${E.forcaEmBatalha(st, q.id, id, null, opTipos)}</span></div>`).join('')}</div>`}
+          ${at ? `<p>Em campo: <b>${esc(E.P(at).nome)}</b> — ${pd.forcado ? 'o duelo será refeito (Remédio).' : 'continua lutando.'}</p>` : `<div class="ligaPick">${timeAgrupado(q, 78, { ids: E.ligaAptos(st, pd, l), carta: id => `<div class="pc ${S.pk[l] === id ? 'sel' : ''}" data-lp="${l}" data-id="${id}" title="${esc(E.P(id).nome)}"><img src="${E.P(id).img}"><span class="f">${E.forcaEmBatalha(st, q.id, id, null, opTipos)}</span></div>` })}</div>`}
           <select data-li="${l}" style="margin-top:8px;width:100%"><option value="">— sem Item de batalha —</option>${its.map(i => `<option value="${i}" ${S.it[l] === i ? 'selected' : ''}>${esc(E.ITEM(i).nome)} (+${E.ITEM(i).bonus}${pk && E.bonusItemBatalha(i, pk) !== E.ITEM(i).bonus ? ', vale ' + E.bonusItemBatalha(i, pk) + ' aqui' : ''})</option>`).join('')}</select>
           <div class="mfoot"><button class="pri" data-lc="${l}" ${pk ? '' : 'disabled'}>Confirmar escolha</button></div></div>`;
       };

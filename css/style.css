@@ -350,3 +350,6 @@ button.celebi:hover:not(:disabled){background:rgba(244,114,182,.15);border-color
 .pawn .pulso{fill:none;stroke:#ffcb05;stroke-width:9;transform-box:fill-box;transform-origin:center;animation:pulso 1.5s ease-out infinite;pointer-events:none}
 @keyframes pulso{0%{transform:scale(.92);opacity:.95}70%{transform:scale(1.55);opacity:0}100%{transform:scale(1.55);opacity:0}}
 @media (prefers-reduced-motion:reduce){.pawn .pulso{animation:none;opacity:.6}}
+.ligaPick .pc{cursor:pointer}
+.ligaPick .pc.sel{outline:3px solid var(--acc);outline-offset:-3px}
+.ligaPick .team2{margin-bottom:4px}

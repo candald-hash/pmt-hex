@@ -10,6 +10,8 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- **Escolha de Pokémon na Liga agrupada:** as linhas evolutivas aparecem juntas na moldura com o bônus (evol. +2/+4, 🔒 travada), como na seção Time. Só aparecem os Pokémons que ainda podem lutar; o número em cada carta continua sendo a força contra o adversário em campo.
+
 - **Peão animado:** ao escolher o destino, o peão desliza espaço por espaço pelo caminho, com um pulinho em cada espaço (no Trem, vai direto e mais devagar). As janelas que aparecem na chegada (captura, Evento…) esperam o peão chegar. No on-line, todos veem a animação das jogadas dos outros. Quem usa "reduzir movimento" no sistema vê o peão pular direto.
 - **Destaque da vez:** o peão de quem joga ganha um anel amarelo pulsando.
 
