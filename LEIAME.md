@@ -10,6 +10,10 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- **Painel lateral mais limpo:** os botões Líderes, Tema, Caixa de ferramentas e Partida saíram do rodapé e foram para **⚙ Configurações** (engrenagem ao lado da Rodada). Os convidados on-line veem só Líderes, Registro, Tema e "Sair da sala".
+- **Registro ampliado:** o botão **⤢ ampliar** ao lado de "Registro" abre a partida inteira numa janela maior, com a rodada de cada linha e os nomes de cartas interativos.
+- **Insígnias:** a seção saiu da ficha (elas continuam na lista de Jogadores, um pouco maiores). Passar o mouse mostra o Líder e o prêmio, ex.: "Brawly (Insígnia 1 — Pokémons Azuis obedecem)"; as ainda não conquistadas mostram só o prêmio.
+
 - **Tela do Evento mais simples:** antes de ativar, só o botão **Ativar efeito**; depois, só **Concluir**. Saíram a Caixa de ferramentas e o "Abrir duelo" da janela (os Eventos são todos automáticos); a Caixa de ferramentas continua no rodapé, para o anfitrião.
 - **Cores na sala de espera:** cada convidado (e o anfitrião) pode trocar a própria cor por uma que ninguém esteja usando, até a partida começar.
 

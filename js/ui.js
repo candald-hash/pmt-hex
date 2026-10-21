@@ -96,7 +96,6 @@
   function iniciarJogo() {
     rolVista = null; parqueVisto = null;
     $('#setup').hidden = true; $('#game').hidden = false;
-    $('#btnTools').hidden = $('#btnMenu').hidden = NET.modo === 'cliente';
     desenharHexes(); render(); setTimeout(() => focar(E.J(st).pos, 0.55), 30);
   }
   function el(tag, attrs, parent) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
@@ -213,8 +212,9 @@
       return `<div class="famG ${trav ? 'trav' : ''}" title="Linha evolutiva${bonus ? ` — bônus de evolução +${bonus} no mais evoluído` : ''}${trav ? ' · família travada (+1)' : ''}"><span class="famTag">${trav ? '🔒 ' : ''}${bonus ? 'evol. +' + bonus : 'mesma linha'}</span>${g.ids.map(id => cartaPokemon(p, id)).join('')}</div>`;
     }).join('')}</div>`;
   }
+  const PREMIO_INSIGNIA = ['Pokémons Azuis obedecem', 'Pokémons Vermelhos obedecem', 'ganhe um Pokémon Azul', 'Pokémons Amarelos obedecem', 'ganhe um Pokémon Vermelho', 'trave e melhore (+1) uma família'];
   function insignias(p, mini) {
-    return `<div class="badges">${p.insignias.map((l, i) => l ? `<span class="badge" title="${esc(E.idx().ld[l].nome)}"><img src="${E.idx().ld[l].img}"></span>` : `<span class="badge">${mini ? '' : i + 1}</span>`).join('')}</div>`;
+    return `<div class="badges">${p.insignias.map((l, i) => l ? `<span class="badge" title="${esc(E.idx().ld[l].nome)} (Insígnia ${i + 1} — ${PREMIO_INSIGNIA[i]})"><img src="${E.idx().ld[l].img}"></span>` : `<span class="badge" title="Insígnia ${i + 1} — ${PREMIO_INSIGNIA[i]} (ainda não conquistada)">${mini ? '' : i + 1}</span>`).join('')}</div>`;
   }
   function render() {
     if (!st) return;
@@ -240,7 +240,7 @@
     if (st.fase !== 'mover') acoes += `<button data-a="fim" ${E.podeEncerrar(st) ? '' : 'disabled'}>Encerrar turno ▸</button>`;
     if (p.ia) acoes = `<span class="mut">🤖 ${esc(p.nome)} está jogando…</span>${souAnfitriao() ? `<button class="sm" id="pausa">${pausado ? '▶ Retomar IA' : '⏸ Pausar IA'}</button>` : ''}`;
     else if (online() && p.id !== NET.eu) acoes = `<span class="mut">⏳ Vez de ${esc(p.nome)}…</span>`;
-    tb.innerHTML = `<div class="turnHead"><span class="dot" style="background:${COR_HEX[p.cor]}"></span><h2>${esc(p.nome)}${p.ia ? ' <span class="tag">🤖 IA</span>' : ''}</h2><span class="tag">Rodada ${st.rodada}</span></div>
+    tb.innerHTML = `<div class="turnHead"><span class="dot" style="background:${COR_HEX[p.cor]}"></span><h2>${esc(p.nome)}${p.ia ? ' <span class="tag">🤖 IA</span>' : ''}</h2><span class="tag">Rodada ${st.rodada}</span><button class="gear" id="btnCfg" title="Configurações">⚙</button></div>
       <div class="mut" style="margin-bottom:6px">📍 ${esc(E.nomeEspaco(st, p.pos))}${p.pular ? ` · perde ${p.pular} turno(s)` : ''}</div>
       ${L ? `<div class="ldline" data-ld="${p.pos}"><img src="${L.img}"><div><b>${esc(L.nome)}</b> · força ${L.forca}${L.dual ? ' · DUAL' : ''}<br><span class="mut">${E.TIPOS_NOME[L.tipo]} · insígnia ${L.insignias}${p.lideresVencidos.includes(L.id) ? ' · <b style="color:var(--ok)">vencido</b>' : ''}</span></div></div>` : ''}
       ${t.dados ? `<div class="dice">${(() => { let usado = false; return t.dados.map(d => { const esc0 = t.dados.length > 1 && t.rolagem == null; const este = t.dados.length > 1 && t.rolagem != null && !usado && (d === t.rolagem || d === t.escolhido); if (este) usado = true; return `<div class="die ${esc0 ? 'escolher' : ''} ${t.dados.length > 1 && t.rolagem != null ? (este ? 'usado' : 'off') : ''}" data-d="${d}">${d}</div>`; }).join(''); })()}${t.rolagem != null && !t.dados.includes(t.rolagem) || (t.rolagem != null && t.dados.length === 1 && t.rolagem !== t.dados[0]) ? `<span class="mut">→ ${t.rolagem}</span>` : ''}</div>` : ''}
@@ -248,6 +248,7 @@
       ${st.liga ? `<div class="ligaLine"><span>🏆 ${resumoLiga()}</span><button class="sm" id="btnLiga">Chaveamento</button></div>` : ''}
       <div class="actions">${st.vencedor != null ? `<b>👑 Fim de jogo — ${esc(E.J(st, st.vencedor).nome)} é o Mestre Pokémon.</b>` : acoes}</div>`;
     const bl = $('#btnLiga', tb); if (bl) bl.onclick = modalLiga;
+    $('#btnCfg', tb).onclick = modalConfig;
     const pz = $('#pausa', tb); if (pz) pz.onclick = () => { pausado = !pausado; render(); };
     tb.querySelectorAll('[data-ld]').forEach(d => d.onclick = () => modalLiderInfo(d.dataset.ld));
     tb.querySelectorAll('.die.escolher').forEach(d => d.onclick = () => agir('escolherDado', +d.dataset.d));
@@ -263,8 +264,8 @@
     // --- minha ficha ---
     const mb = $('#meBox');
     const pm = online() ? (NET.eu != null && NET.eu >= 0 ? E.J(st, NET.eu) : null) : p, trm = pm && pm.treinador && E.idx().tr[pm.treinador];
-    mb.innerHTML = !pm ? '<h3>Assistindo</h3><p class="mut">👀 Você está assistindo a esta partida.</p>' : `${online() ? `<h3>Você: <span class="dot" style="display:inline-block;vertical-align:middle;background:${COR_HEX[pm.cor]}"></span> ${esc(pm.nome)}</h3>` : ''}<h3>Insígnias</h3>${insignias(pm)}
-      <h3 style="margin-top:12px">Time (${pm.pokemon.length})</h3>${timeAgrupado(pm)}
+    mb.innerHTML = !pm ? '<h3>Assistindo</h3><p class="mut">👀 Você está assistindo a esta partida.</p>' : `${online() ? `<h3>Você: <span class="dot" style="display:inline-block;vertical-align:middle;background:${COR_HEX[pm.cor]}"></span> ${esc(pm.nome)}</h3>` : ''}
+      <h3>Time (${pm.pokemon.length})</h3>${timeAgrupado(pm)}
       <h3>Itens (${pm.itens.length}/${E.limiteItens(pm)})</h3><div class="hand">${pm.itens.map(i => `<div class="ic" data-i="${i}" title="${esc(E.ITEM(i).nome)}"><img src="${E.ITEM(i).img}"></div>`).join('') || '<span class="mut">Nenhum</span>'}</div>
       <h3>Treinador</h3>${trm ? `<div class="trainer"><img src="${trm.img}" data-z="${trm.img}"><div><b>${esc(trm.nome)}</b><p>${esc(trm.texto)}</p></div></div>` : '<span class="mut">—</span>'}`;
     mb.querySelectorAll('.pc').forEach(c => c.onclick = () => zoom(E.P(c.dataset.id).img));
@@ -276,7 +277,7 @@
     // --- registro ---
     const lg = $('#log'); const fundo = lg.scrollHeight - lg.scrollTop - lg.clientHeight < 30;
     lg.innerHTML = st.log.slice(-120).map(l => `<div class="${l.tipo}">${logHtml(l)}</div>`).join(''); if (fundo) lg.scrollTop = lg.scrollHeight;
-    lg.querySelectorAll('.ref').forEach(r => { r.onmouseenter = ev => dicaCarta(ev, r.dataset.t, r.dataset.id); r.onmousemove = moverDica; r.onmouseleave = () => $('#tip').hidden = true; r.onclick = () => { $('#tip').hidden = true; zoom(refCarta(r.dataset.t, r.dataset.id).img); }; });
+    ligarRefs(lg);
     // --- pendências ---
     renderPend();
     verRolagem();
@@ -284,6 +285,39 @@
     agendarIA();
   }
 
+  function ligarRefs(box) { box.querySelectorAll('.ref').forEach(r => { r.onmouseenter = ev => dicaCarta(ev, r.dataset.t, r.dataset.id); r.onmousemove = moverDica; r.onmouseleave = () => $('#tip').hidden = true; r.onclick = () => { $('#tip').hidden = true; zoom(refCarta(r.dataset.t, r.dataset.id).img); }; }); }
+  function fecharExtra() { fecharModal(); if (st && st.pend) render(); }
+  function modalLog() {
+    abrirModal(`<h2>📜 Registro da partida</h2><p class="mut">Passe o mouse nos nomes sublinhados para ver a carta; clique para ampliar.</p>
+      <div class="logFull">${st.log.map(l => `<div class="${l.tipo}"><span class="rd">R${l.t}</span> ${logHtml(l)}</div>`).join('')}</div>
+      <div class="mfoot"><button class="pri" id="lgOk">Fechar</button></div>`);
+    const lf = $('#modalCard .logFull'); ligarRefs(lf); lf.scrollTop = lf.scrollHeight; $('#lgOk').onclick = fecharExtra;
+  }
+  // ---------- configurações (engrenagem) ----------
+  function modalConfig() {
+    const anf = souAnfitriao();
+    abrirModal(`<h2>⚙ Configurações</h2>
+      <div class="cfgGrid">
+        <fieldset><legend>Jogo</legend><button id="cLid">🏅 Líderes em jogo</button><button id="cLog">📜 Registro completo</button></fieldset>
+        <fieldset><legend>Aparência</legend><button id="cTema">${prefs.tema === 'claro' ? '🌙 Tema escuro' : '☀️ Tema claro'}</button>${anf ? `<label class="row" style="gap:6px"><span class="mut">Velocidade da IA</span><select id="cVel">${Object.keys(VEL).map(v => `<option value="${v}" ${prefs.velIA === v ? 'selected' : ''}>${{ lenta: 'lenta', normal: 'normal', rapida: 'rápida' }[v]}</option>`).join('')}</select></label>` : ''}</fieldset>
+        ${anf ? `<fieldset><legend>Partida${NET.modo === 'host' ? ' (anfitrião)' : ''}</legend><button id="cTools">🧰 Caixa de ferramentas</button><button id="cIA">🤖 Alternar humano/IA da vez</button>
+          <button id="cExp">💾 Exportar partida (.json)</button><label class="row" style="margin-top:2px"><span class="mut">Importar:</span><input type="file" id="cImp" accept=".json" style="flex:1"></label>
+          <button id="cNova">↩ Voltar à tela inicial</button></fieldset>` : `<fieldset><legend>Sala ${esc(C.codigo || '')}</legend><button id="cSair">↩ Sair da sala</button></fieldset>`}
+      </div><p class="mut" style="font-size:12px">${anf ? 'A partida é salva automaticamente neste navegador.' : 'Você está jogando na sala de outra pessoa; a partida fica salva no navegador do anfitrião.'}</p>
+      <div class="mfoot"><button class="pri" id="cOk">Fechar</button></div>`);
+    const on = (id, f) => { const b = $('#' + id); if (b) b.onclick = f; };
+    on('cOk', fecharExtra);
+    on('cLid', () => modalLideres());
+    on('cLog', () => modalLog());
+    on('cTema', () => { prefs.tema = prefs.tema === 'claro' ? 'escuro' : 'claro'; salvarPrefs(); aplicarTema(); modalConfig(); });
+    const vel = $('#cVel'); if (vel) vel.onchange = e => { prefs.velIA = e.target.value; salvarPrefs(); };
+    on('cTools', () => caixaFerramentas());
+    on('cIA', () => { const q = E.J(st); q.ia = !q.ia; salvar(); fecharExtra(); render(); if (NET.difundir) NET.difundir(); });
+    on('cExp', () => { const b = new Blob([JSON.stringify(st)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'pmthex-partida.json'; a.click(); });
+    const imp = $('#cImp'); if (imp) imp.onchange = async e => { try { st = JSON.parse(await e.target.files[0].text()); salvar(); fecharModal(); iniciarJogo(); } catch (er) { alert('Arquivo inválido.'); } };
+    on('cNova', () => { if (confirm('Sair desta partida? (ela continua salva até você começar outra)')) { fecharModal(); st = null; telaAbertura(); } });
+    on('cSair', () => { if (confirm('Sair da sala? Você pode voltar pelo mesmo link.')) location.href = location.pathname; });
+  }
   // ---------- modais ----------
   function abrirModal(html) { $('#tip').hidden = true; const mc = $('#modalCard'); mc.classList.remove('ia', 'leitura'); if (!st || !st.pend) delete mc.dataset.pend; mc.innerHTML = html; $('#modal').hidden = false; $('#modalCard').querySelectorAll('[data-x]').forEach(b => b.onclick = fecharModal); }
   function fecharModal() { const mc = $('#modalCard'); $('#modal').hidden = true; mc.innerHTML = ''; mc.classList.remove('ia'); delete mc.dataset.pend; if (st) setTimeout(agendarIA, 0); }
@@ -1313,23 +1347,7 @@
   }
 
   // ---------- menu da partida ----------
-  $('#btnTools').onclick = () => caixaFerramentas();
-  $('#btnLideres').onclick = () => modalLideres();
-  $('#btnTema').onclick = () => { prefs.tema = prefs.tema === 'claro' ? 'escuro' : 'claro'; salvarPrefs(); aplicarTema(); render(); $('#btnTema').textContent = prefs.tema === 'claro' ? '🌙' : '☀️'; };
-  $('#btnTema').textContent = prefs.tema === 'claro' ? '🌙' : '☀️';
-  $('#btnMenu').onclick = () => {
-    abrirModal(`<h2>Partida</h2><p class="mut">A partida é salva automaticamente neste navegador.</p>
-      <div class="toolgrid"><fieldset><legend>Arquivo</legend><button id="exp">Exportar partida (.json)</button><label class="row" style="margin-top:6px"><input type="file" id="imp" accept=".json" style="width:100%"></label></fieldset>
-      <fieldset><legend>IA e aparência</legend><select id="mvel">${Object.keys(VEL).map(v => `<option value="${v}" ${prefs.velIA === v ? 'selected' : ''}>IA ${{ lenta: 'lenta', normal: 'normal', rapida: 'rápida' }[v]}</option>`).join('')}</select><button id="mtema">${prefs.tema === 'claro' ? '🌙 Tema escuro' : '☀️ Tema claro'}</button><button id="mia">Alternar humano/IA da vez</button></fieldset>
-      <fieldset><legend>Nova</legend><button id="nova">Voltar à tela inicial</button></fieldset></div>
-      <div class="mfoot"><button class="pri" data-x>Fechar</button></div>`);
-    $('#mvel').onchange = e => { prefs.velIA = e.target.value; salvarPrefs(); };
-    $('#mtema').onclick = () => { $('#btnTema').click(); fecharModal(); };
-    $('#mia').onclick = () => { const q = E.J(st); q.ia = !q.ia; salvar(); fecharModal(); render(); };
-    $('#exp').onclick = () => { const b = new Blob([JSON.stringify(st)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'pmthex-partida.json'; a.click(); };
-    $('#imp').onchange = async e => { try { st = JSON.parse(await e.target.files[0].text()); salvar(); fecharModal(); iniciarJogo(); } catch (er) { alert('Arquivo inválido.'); } };
-    $('#nova').onclick = () => { if (confirm('Sair desta partida? (ela continua salva até você começar outra)')) { fecharModal(); st = null; telaAbertura(); } };
-  };
+  $('#logMax').onclick = () => { if (st) modalLog(); };
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { $('#zoomCard').hidden = true; if (!$('#modal').hidden && !$('#modalCard').dataset.pend) fecharModal(); if (boardMode && !boardMode.pend) { boardMode = null; render(); } } });
 
   { const sala = new URLSearchParams(location.search).get('sala'); if (sala) telaEntrar(sala.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8)); else telaAbertura(); }
