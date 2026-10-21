@@ -289,3 +289,11 @@ button.celebi:hover:not(:disabled){background:rgba(244,114,182,.15);border-color
 .cfgGrid button,.cfgGrid select{width:100%}
 .cfgGrid input[type=file]{min-width:0;width:100%;font-size:12px}
 .cfgGrid label.row{flex-wrap:wrap}
+/* seções recolhíveis */
+.secHead{cursor:pointer;user-select:none;display:flex;align-items:center;gap:6px}
+.secHead:hover{color:var(--txt,#fff)}
+.secHead .seta{font-size:11px;transition:transform .15s;opacity:.7}
+.sec.fechada .secHead .seta{transform:rotate(-90deg)}
+.sec.fechada .secBody{display:none}
+.sec.fechada .secHead{margin-bottom:4px}
+#logBox.sec.fechada{flex:0 0 auto;min-height:0}

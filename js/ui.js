@@ -265,14 +265,14 @@
     const mb = $('#meBox');
     const pm = online() ? (NET.eu != null && NET.eu >= 0 ? E.J(st, NET.eu) : null) : p, trm = pm && pm.treinador && E.idx().tr[pm.treinador];
     mb.innerHTML = !pm ? '<h3>Assistindo</h3><p class="mut">👀 Você está assistindo a esta partida.</p>' : `${online() ? `<h3>Você: <span class="dot" style="display:inline-block;vertical-align:middle;background:${COR_HEX[pm.cor]}"></span> ${esc(pm.nome)}</h3>` : ''}
-      <h3>Time (${pm.pokemon.length})</h3>${timeAgrupado(pm)}
-      <h3>Itens (${pm.itens.length}/${E.limiteItens(pm)})</h3><div class="hand">${pm.itens.map(i => `<div class="ic" data-i="${i}" title="${esc(E.ITEM(i).nome)}"><img src="${E.ITEM(i).img}"></div>`).join('') || '<span class="mut">Nenhum</span>'}</div>
-      <h3>Treinador</h3>${trm ? `<div class="trainer"><img src="${trm.img}" data-z="${trm.img}"><div><b>${esc(trm.nome)}</b><p>${esc(trm.texto)}</p></div></div>` : '<span class="mut">—</span>'}`;
+      ${secao('time', `Time (${pm.pokemon.length})`, timeAgrupado(pm))}
+      ${secao('itens', `Itens (${pm.itens.length}/${E.limiteItens(pm)})`, `<div class="hand">${pm.itens.map(i => `<div class="ic" data-i="${i}" title="${esc(E.ITEM(i).nome)}"><img src="${E.ITEM(i).img}"></div>`).join('') || '<span class="mut">Nenhum</span>'}</div>`)}
+      ${secao('treinador', `Treinador${trm ? ': ' + esc(trm.nome) : ''}`, trm ? `<div class="trainer"><img src="${trm.img}" data-z="${trm.img}"><div><b>${esc(trm.nome)}</b><p>${esc(trm.texto)}</p></div></div>` : '<span class="mut">—</span>')}`;
     mb.querySelectorAll('.pc').forEach(c => c.onclick = () => zoom(E.P(c.dataset.id).img));
     mb.querySelectorAll('[data-z]').forEach(c => c.onclick = () => zoom(c.dataset.z));
     mb.querySelectorAll('.ic').forEach(c => c.onclick = () => modalItem(c.dataset.i));
     // --- outros ---
-    $('#othersBox').innerHTML = '<h3>Jogadores</h3>' + st.jogadores.map(q => `<div class="other ${q.id === st.vez ? 'cur' : ''} ${q.eliminado ? 'elim' : ''}" data-p="${q.id}"><span class="dot" style="background:${COR_HEX[q.cor]}"></span><span style="flex:1">${esc(q.nome)}${online() && q.id === NET.eu ? ' <span class="tag">você</span>' : ''}${online() && q.remoto && !q.ia && !(NET.conectados || []).includes(q.id) ? ' <span title="desconectado">🔌</span>' : ''}${q.eliminado ? ' <span class="mut">· eliminado</span>' : st.vencedor === q.id ? ' 👑' : ''}</span><span class="mut cnt" title="${q.pokemon.length} Pokémon · ${q.itens.length} Itens">${q.pokemon.length} <img src="img/ui/pokebola.webp" alt="Pokémon"> · ${q.itens.length} <img src="img/ui/item.webp" alt="Itens"></span>${insignias(q, true)}</div>`).join('');
+    $('#othersBox').innerHTML = secao('jogadores', 'Jogadores', st.jogadores.map(q => `<div class="other ${q.id === st.vez ? 'cur' : ''} ${q.eliminado ? 'elim' : ''}" data-p="${q.id}"><span class="dot" style="background:${COR_HEX[q.cor]}"></span><span style="flex:1">${esc(q.nome)}${online() && q.id === NET.eu ? ' <span class="tag">você</span>' : ''}${online() && q.remoto && !q.ia && !(NET.conectados || []).includes(q.id) ? ' <span title="desconectado">🔌</span>' : ''}${q.eliminado ? ' <span class="mut">· eliminado</span>' : st.vencedor === q.id ? ' 👑' : ''}</span><span class="mut cnt" title="${q.pokemon.length} Pokémon · ${q.itens.length} Itens">${q.pokemon.length} <img src="img/ui/pokebola.webp" alt="Pokémon"> · ${q.itens.length} <img src="img/ui/item.webp" alt="Itens"></span>${insignias(q, true)}</div>`).join(''));
     $('#othersBox').querySelectorAll('.other').forEach(o => o.onclick = () => modalJogador(+o.dataset.p));
     // --- registro ---
     const lg = $('#log'); const fundo = lg.scrollHeight - lg.scrollTop - lg.clientHeight < 30;
@@ -280,6 +280,7 @@
     ligarRefs(lg);
     // --- pendências ---
     renderPend();
+    avisarVez();
     verRolagem();
     verParque();
     agendarIA();
@@ -317,6 +318,29 @@
     const imp = $('#cImp'); if (imp) imp.onchange = async e => { try { st = JSON.parse(await e.target.files[0].text()); salvar(); fecharModal(); iniciarJogo(); } catch (er) { alert('Arquivo inválido.'); } };
     on('cNova', () => { if (confirm('Sair desta partida? (ela continua salva até você começar outra)')) { fecharModal(); st = null; telaAbertura(); } });
     on('cSair', () => { if (confirm('Sair da sala? Você pode voltar pelo mesmo link.')) location.href = location.pathname; });
+  }
+  // ---------- seções recolhíveis do painel (lembradas neste navegador) ----------
+  function secao(k, titulo, corpo) { const f = (prefs.recolhidas || {})[k]; return `<div class="sec ${f ? 'fechada' : ''}" data-sec="${k}"><h3 class="secHead" title="Clique para ${f ? 'mostrar' : 'recolher'}">${titulo}<span class="seta">▾</span></h3><div class="secBody">${corpo}</div></div>`; }
+  document.addEventListener('click', e => {
+    const hd = e.target.closest('.secHead'); if (!hd || e.target.closest('button')) return;
+    const sc = hd.closest('[data-sec]'); if (!sc) return; const k = sc.dataset.sec;
+    prefs.recolhidas = prefs.recolhidas || {}; prefs.recolhidas[k] = !prefs.recolhidas[k]; salvarPrefs();
+    sc.classList.toggle('fechada', !!prefs.recolhidas[k]); hd.title = 'Clique para ' + (prefs.recolhidas[k] ? 'mostrar' : 'recolher');
+  });
+  // ---------- aviso de vez / decisão (on-line): toast e título da aba piscando se estiver em outra aba ----------
+  const TITULO = document.title; let piscar = null, avisoAnt = { vez: false, dec: false };
+  function piscarTitulo(msg) {
+    if (!document.hidden || piscar) return; let on = false;
+    piscar = setInterval(() => { on = !on; document.title = on ? msg : TITULO; }, 900);
+  }
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && piscar) { clearInterval(piscar); piscar = null; document.title = TITULO; } });
+  function avisarVez() {
+    if (!online() || !st || NET.eu == null || NET.eu < 0 || st.vencedor != null) { avisoAnt = { vez: false, dec: false }; return; }
+    const vez = st.vez === NET.eu && st.fase === 'inicio' && !st.pend;
+    const dec = !!st.pend && E.quemDecide(st).includes(NET.eu) && !(st.pend.tipo === 'carta' && !E.reacaoAberta(st) && st.vez === NET.eu);
+    if (vez && !avisoAnt.vez) { toast('🎲 Sua vez!'); piscarTitulo('🎲 Sua vez! — PMT HEX'); }
+    else if (dec && !avisoAnt.dec && st.vez !== NET.eu) { toast('⚠ Uma decisão sua está esperando'); piscarTitulo('⚠ Sua decisão — PMT HEX'); }
+    avisoAnt = { vez, dec };
   }
   // ---------- modais ----------
   function abrirModal(html) { $('#tip').hidden = true; const mc = $('#modalCard'); mc.classList.remove('ia', 'leitura'); if (!st || !st.pend) delete mc.dataset.pend; mc.innerHTML = html; $('#modal').hidden = false; $('#modalCard').querySelectorAll('[data-x]').forEach(b => b.onclick = fecharModal); }
@@ -1334,7 +1358,6 @@
       if ($('#game').hidden) { iniciarJogo(); return; }
       if (novoLayout) desenharHexes();
       render();
-      if (antes && st.vez === NET.eu && (antes.vez !== NET.eu || antes.rodada !== st.rodada) && st.fase === 'inicio') toast('🎲 Sua vez!');
     }
   }
   function telaSalaCliente() {
@@ -1348,6 +1371,7 @@
 
   // ---------- menu da partida ----------
   $('#logMax').onclick = () => { if (st) modalLog(); };
+  if ((prefs.recolhidas || {}).log) $('#logBox').classList.add('fechada');
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { $('#zoomCard').hidden = true; if (!$('#modal').hidden && !$('#modalCard').dataset.pend) fecharModal(); if (boardMode && !boardMode.pend) { boardMode = null; render(); } } });
 
   { const sala = new URLSearchParams(location.search).get('sala'); if (sala) telaEntrar(sala.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8)); else telaAbertura(); }

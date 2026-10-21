@@ -10,6 +10,10 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- **Seções recolhíveis:** clique no título de Time, Itens, Treinador, Jogadores ou Registro para recolher ou mostrar (▸/▾). A escolha fica lembrada neste navegador.
+- **Aviso de vez (on-line):** quando chega a sua vez aparece "🎲 Sua vez!"; quando uma decisão sua está esperando no turno de outro (reação, Duelo, Liga…), aparece um aviso. Se você estiver em outra aba, o título da aba fica piscando até você voltar.
+- **Atualizações aparecem sem cache:** cada publicação força o navegador a baixar os arquivos novos.
+
 - **Painel lateral mais limpo:** os botões Líderes, Tema, Caixa de ferramentas e Partida saíram do rodapé e foram para **⚙ Configurações** (engrenagem ao lado da Rodada). Os convidados on-line veem só Líderes, Registro, Tema e "Sair da sala".
 - **Registro ampliado:** o botão **⤢ ampliar** ao lado de "Registro" abre a partida inteira numa janela maior, com a rodada de cada linha e os nomes de cartas interativos.
 - **Insígnias:** a seção saiu da ficha (elas continuam na lista de Jogadores, um pouco maiores). Passar o mouse mostra o Líder e o prêmio, ex.: "Brawly (Insígnia 1 — Pokémons Azuis obedecem)"; as ainda não conquistadas mostram só o prêmio.
