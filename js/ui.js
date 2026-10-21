@@ -764,18 +764,15 @@
       <p style="font-size:16px;margin:14px 0">${esc(card.texto)}</p>
       ${card.duelo ? `<p class="mut">Duelo — +1: ${card.duelo.mais1.map(t => E.TIPOS_NOME[t]).join(', ')} · −1: ${card.duelo.menos1.map(t => E.TIPOS_NOME[t]).join(', ')}</p>` : ''}
       ${pd.ativado && (st.ganhosCarta || []).length ? `<div class="ganhos surge"><div class="mut">Pokémon${st.ganhosCarta.length > 1 ? 's' : ''} recebido${st.ganhosCarta.length > 1 ? 's' : ''}:</div><div class="row" style="gap:12px;flex-wrap:wrap">${st.ganhosCarta.map(([j, id]) => `<div class="gpk"><img src="${E.P(id).img}" data-z="${E.P(id).img}"><div><b>${esc(E.P(id).nome)}</b>${j !== p.id || st.ganhosCarta.some(x => x[0] !== p.id) ? `<br><span class="mut">${esc(E.J(st, j).nome)}</span>` : ''}</div></div>`).join('')}</div></div>` : ''}
-      ${pd.ativado ? `<div class="result">${auto ? (card.autoCompleto ? 'Efeito aplicado.' : 'Efeitos automáticos aplicados. Use a caixa de ferramentas para o que faltar.') : 'Este efeito é aplicado à mão. Use a caixa de ferramentas.'}</div>` : ''}
+      ${pd.ativado ? `<div class="result">${card.autoCompleto ? 'Efeito aplicado.' : auto ? 'Efeitos automáticos aplicados. O anfitrião pode completar o que faltar pela caixa de ferramentas.' : 'Este efeito é aplicado à mão pela caixa de ferramentas.'}</div>` : ''}
       <div class="mfoot">
-        <button id="tools">Caixa de ferramentas</button>
-        ${card.duelo ? '<button id="duel">⚔ Abrir duelo</button>' : ''}
-        ${!pd.ativado && auto ? '<button class="pri" id="atv">Ativar efeito</button>' : ''}
-        <button ${!pd.ativado && auto ? '' : 'class="pri"'} id="fim">Concluir ${pd.baralho === 'evento' ? 'Evento' : 'Super Evento'}</button>
+        ${!card.autoCompleto && souAnfitriao() ? '<button id="tools">Caixa de ferramentas</button>' : ''}
+        ${!pd.ativado && auto ? '<button class="pri" id="atv">Ativar efeito</button>' : `<button class="pri" id="fim">Concluir ${pd.baralho === 'evento' ? 'Evento' : 'Super Evento'}</button>`}
       </div></div></div>`);
     const a = $('#atv'); if (a) a.onclick = () => agir('ativarCarta');
     $('#modalCard').querySelectorAll('.gpk img').forEach(i => i.onclick = () => zoom(i.dataset.z));
-    $('#fim').onclick = () => { esperandoHumano = false; agir('concluirCarta'); };
-    $('#tools').onclick = () => caixaFerramentas();
-    const du = $('#duel'); if (du) du.onclick = () => modalDuelo(card.duelo);
+    const fm = $('#fim'); if (fm) fm.onclick = () => { esperandoHumano = false; agir('concluirCarta'); };
+    const tl = $('#tools'); if (tl) tl.onclick = () => caixaFerramentas();
   }
   function mTravar(pd) {
     const p = E.J(st, pd.jogador != null ? pd.jogador : st.vez);
@@ -1209,6 +1206,11 @@
       else { difundirLobby(); if (H.redesenhar) H.redesenhar(); }
       return;
     }
+    if (m.t === 'cor') {
+      const c = H.conns.get(conn.peer); if (!H.lobby || !c || c.assento < 0) return;
+      if (trocarCorLobby(c.assento, m.cor)) { difundirLobby(); if (H.redesenhar) H.redesenhar(); }
+      return;
+    }
     if (m.t === 'acao') {
       const c = H.conns.get(conn.peer); if (!c || !st || c.assento < 0 || typeof m.nome !== 'string') return;
       if (E.acao(st, c.assento, m.nome, ...(Array.isArray(m.args) ? m.args : []))) { salvar(); render(); NET.difundir(); }
@@ -1223,6 +1225,9 @@
     const L = H.lobby; if (!L) return; const con = new Set([...H.conns.values()].map(c => c.assento));
     H.conns.forEach(c => { try { c.conn.send({ t: 'lobby', codigo: L.codigo, jog: L.jog.map((x, k) => ({ nome: x.nome, cor: x.cor, tipo: x.tipo, ocupado: !!x.token, conectado: x.tipo === 'eu' || con.has(k) })), voce: c.assento }); } catch (e) {} });
   }
+  // troca de cor na sala de espera: só para uma cor que ninguém está usando
+  function trocarCorLobby(k, cor) { const L = H.lobby && H.lobby.jog; if (!L || !L[k] || !E.CORES_PEAO.includes(cor) || L.some((x, i) => i !== k && x.cor === cor)) return false; L[k].cor = cor; return true; }
+  const swatchesLobby = (jog, k) => `<div class="swatches">${E.CORES_PEAO.map(c => { const usada = jog.some((x, i) => i !== k && x.cor === c); return `<span class="sw ${c === jog[k].cor ? 'on' : ''} ${usada ? 'taken' : ''}" data-cor="${c}" title="${COR_NOME[c]}${usada ? ' (em uso)' : ''}" style="background:${COR_HEX[c]}"></span>`; }).join('')}</div>`;
   function criarSala(jog, seed) {
     if (semPeer()) return;
     const codigo = novoCodigo(); H.lobby = { codigo, jog, seed };
@@ -1236,9 +1241,10 @@
       <p>Mande este link para os amigos:</p>
       <div class="row" style="flex-wrap:nowrap"><input id="lk" value="${esc(link)}" readonly style="flex:1"><button id="cp">📋 Copiar</button></div>
       <h3 style="margin-top:18px">Lugares</h3>
-      <div class="salaLista">${L.jog.map((x, k) => `<div class="pl"><span class="dot" style="background:${COR_HEX[x.cor]}"></span><b style="flex:1">${esc(x.nome || (x.tipo === 'ia' ? 'CPU ' + (k + 1) : '—'))}</b>
-        <span class="mut">${x.tipo === 'eu' ? 'você · anfitrião' : x.tipo === 'ia' ? '🤖 IA' : x.token ? (con.has(k) ? '🌐 conectado' : '🔌 saiu') : '⏳ aguardando alguém entrar'}</span></div>`).join('')}</div>
+      <div class="salaLista">${L.jog.map((x, k) => `<div class="salaRow"><span class="dot" style="background:${COR_HEX[x.cor]}"></span><b style="flex:1">${esc(x.nome || (x.tipo === 'ia' ? 'CPU ' + (k + 1) : '—'))}</b>
+        ${x.tipo === 'eu' ? swatchesLobby(L.jog, k) : ''}<span class="mut">${x.tipo === 'eu' ? 'você · anfitrião' : x.tipo === 'ia' ? '🤖 IA' : x.token ? (con.has(k) ? '🌐 conectado' : '🔌 saiu') : '⏳ aguardando alguém entrar'}</span></div>`).join('')}</div>
       <div class="row" style="margin-top:14px"><button id="cancel">Cancelar</button><span style="flex:1"></span><button class="pri" id="start">${faltam ? `Começar (${faltam} lugar${faltam > 1 ? 'es' : ''} vazio${faltam > 1 ? 's' : ''} vira${faltam > 1 ? 'm' : ''} IA)` : 'Começar partida'}</button></div></div>`;
+    box.querySelectorAll('[data-cor]').forEach(sw => sw.onclick = () => { const k = L.jog.findIndex(x => x.tipo === 'eu'); if (trocarCorLobby(k, sw.dataset.cor)) { difundirLobby(); telaSalaHost(); } });
     $('#cp').onclick = async () => { try { await navigator.clipboard.writeText(link); $('#cp').textContent = '✔ Copiado'; } catch (e) { $('#lk').select(); } };
     $('#cancel').onclick = () => { try { H.peer.destroy(); } catch (e) {} H.lobby = null; NET.modo = 'local'; telaAbertura(); };
     $('#start').onclick = () => comecarOnline();
@@ -1300,9 +1306,10 @@
   function telaSalaCliente() {
     const L = C.lobby, box = $('#setup');
     box.innerHTML = `<div class="setupCard"><div class="logo"><h1>Sala <b>${esc(L.codigo)}</b></h1><span class="tag">🟢 conectado</span></div>
-      <p>${L.voce >= 0 ? 'Você está na sala. Aguardando o anfitrião começar a partida…' : 'A sala está cheia: você vai <b>assistir</b> à partida.'}</p>
-      <div class="salaLista">${L.jog.map((x, k) => `<div class="pl"><span class="dot" style="background:${COR_HEX[x.cor]}"></span><b style="flex:1">${esc(x.nome || '—')}${k === L.voce ? ' <span class="tag">você</span>' : ''}</b>
-        <span class="mut">${x.tipo === 'eu' ? 'anfitrião' : x.tipo === 'ia' ? '🤖 IA' : x.ocupado ? (x.conectado ? '🌐 conectado' : '🔌 saiu') : '⏳ lugar livre'}</span></div>`).join('')}</div></div>`;
+      <p>${L.voce >= 0 ? 'Você está na sala. Aguardando o anfitrião começar a partida…' : 'A sala está cheia: você vai <b>assistir</b> à partida.'}</p>${L.voce >= 0 ? '<p class="mut">Clique numa cor livre para trocar a sua.</p>' : ''}
+      <div class="salaLista">${L.jog.map((x, k) => `<div class="salaRow"><span class="dot" style="background:${COR_HEX[x.cor]}"></span><b style="flex:1">${esc(x.nome || '—')}${k === L.voce ? ' <span class="tag">você</span>' : ''}</b>
+        ${k === L.voce ? swatchesLobby(L.jog, k) : ''}<span class="mut">${x.tipo === 'eu' ? 'anfitrião' : x.tipo === 'ia' ? '🤖 IA' : x.ocupado ? (x.conectado ? '🌐 conectado' : '🔌 saiu') : '⏳ lugar livre'}</span></div>`).join('')}</div></div>`;
+    box.querySelectorAll('[data-cor]').forEach(sw => sw.onclick = () => { if (sw.classList.contains('taken') || !C.conn || !C.conn.open) return; C.conn.send({ t: 'cor', cor: sw.dataset.cor }); });
   }
 
   // ---------- menu da partida ----------

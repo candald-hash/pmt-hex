@@ -10,6 +10,9 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- **Tela do Evento mais simples:** antes de ativar, só o botão **Ativar efeito**; depois, só **Concluir**. Saíram a Caixa de ferramentas e o "Abrir duelo" da janela (os Eventos são todos automáticos); a Caixa de ferramentas continua no rodapé, para o anfitrião.
+- **Cores na sala de espera:** cada convidado (e o anfitrião) pode trocar a própria cor por uma que ninguém esteja usando, até a partida começar.
+
 - **Modo on-line (primeira versão):** na tela inicial, escolha **🌐 On-line**. O primeiro lugar é o seu (anfitrião); os outros podem ser 🌐 jogadores on-line ou 🤖 IA. Clique em **Criar sala** e mande o link (`…/?sala=CÓDIGO`) para os amigos; quem abrir escolhe o nome e entra no lugar livre. Quando você clicar em **Começar**, lugares vazios viram IA.
   - O seu navegador roda as regras e as IAs; os outros mandam as ações e recebem a partida já filtrada: ninguém vê os Itens dos outros, a ordem dos baralhos, as cartas viradas do tabuleiro, quem tem item de reação nem as escolhas secretas (Duelo, Liga, Festival de Praça) antes da revelação.
   - Cada um vê a própria ficha e só tem botões nas próprias decisões; nas dos outros aparece "⏳ Aguardando…". As janelas de reação abrem direto para quem tem o item.
