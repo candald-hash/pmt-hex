@@ -471,7 +471,7 @@
     if (reacaoAberta(st)) return;
     pd.ativado = true;
     const card = (pd.baralho === 'evento' ? idx().ev : idx().sev)[pd.carta];
-    st.cartaAtiva = card.nome; st.ganhosCarta = [];
+    st.cartaAtiva = card.nome; st.ganhosCarta = []; st.trocasCarta = [];
     const passos = passosCarta(card);
     if (!passos.length) { log(st, 'Efeito manual: use a caixa de ferramentas para aplicar.'); return; }
     const resto = { pend: st.pend }; st.pend = null; executar(st, passos.concat([['voltarCarta', resto.pend]]));
@@ -483,7 +483,7 @@
     if (st.pend !== pd) return; // a Flauta trocou o Evento
     pd = st.pend;
     if (pd.carta !== 'gsball') st.descartes[pd.baralho].push(pd.carta);
-    st.pend = null; st.ganhosCarta = null;
+    st.pend = null; st.ganhosCarta = null; st.trocasCarta = null;
     const card = (pd.baralho === 'evento' ? idx().ev : idx().sev)[pd.carta];
     (st.efeitos || []).filter(e => e.tipo === 'suborno' && e.dono !== atv(st)).forEach(e => {
       const d = J(st, e.dono); e.copiou = true;
@@ -748,7 +748,7 @@
   const CORES_PRACA = ['inicial', 'rosa', 'verde'];
   const pracaAptosDe = q => q.pokemon.filter(id => CORES_PRACA.includes(P(id).cor) && obedece(q, P(id).cor));
   function iniciarPraca(st, a, b) {
-    st.pend = { tipo: 'praca', a, b, dupla: { a: null, b: null }, itens: { a: {}, b: {} }, resultado: null, titulo: `Festival de Praça: ${J(st, a).nome} × ${J(st, b).nome}` };
+    st.pend = { tipo: 'praca', uid: (st.uid = (st.uid || 0) + 1), a, b, dupla: { a: null, b: null }, itens: { a: {}, b: {} }, resultado: null, titulo: `Festival de Praça: ${J(st, a).nome} × ${J(st, b).nome}` };
     log(st, `Festival de Praça: ${J(st, a).nome} desafia ${J(st, b).nome}. Os dois escolhem as duplas em segredo.`, 'destaque');
   }
   function pracaForca(st, pi, id, inst, opTipos) {
@@ -876,7 +876,7 @@
   }
   function ligaAptos(st, pd, lado) { const q = J(st, pd[lado]); return q.pokemon.filter(id => obedece(q, P(id).cor) && !pd.mortos[lado].includes(id) && id !== pd.ativo[lado]); }
   function novaBatalhaLiga(st, a, b, fase) {
-    const pd = { tipo: 'ligaBatalha', a, b, fase, titulo: `Liga — ${FASE_LIGA[fase]}: ${J(st, a).nome} × ${J(st, b).nome}`, ativo: { a: null, b: null }, mortos: { a: [], b: [] }, esc: { a: null, b: null }, duelos: [], resultado: null, vencLado: null, extra: false };
+    const pd = { tipo: 'ligaBatalha', uid: (st.uid = (st.uid || 0) + 1), a, b, fase, titulo: `Liga — ${FASE_LIGA[fase]}: ${J(st, a).nome} × ${J(st, b).nome}`, ativo: { a: null, b: null }, mortos: { a: [], b: [] }, esc: { a: null, b: null }, duelos: [], resultado: null, vencLado: null, extra: false };
     st.pend = pd;
     log(st, `Batalha da Liga (${FASE_LIGA[fase]}): ${J(st, a).nome} × ${J(st, b).nome} — 3 contra 3.`, 'destaque');
     const sa = ligaAptos(st, pd, 'a').length, sb = ligaAptos(st, pd, 'b').length;
@@ -1179,6 +1179,7 @@
     if (!paresTroca(p, q, pd.cores).some(([a, b]) => a === meu && b === dele)) return;
     p.pokemon[p.pokemon.indexOf(meu)] = dele; q.pokemon[q.pokemon.indexOf(dele)] = meu;
     moverMais1(p, q, meu); moverMais1(q, p, dele);
+    if (st.trocasCarta) st.trocasCarta.push({ a: p.id, b: q.id, pa: meu, pb: dele });
     log(st, `${p.nome} trocou ${P(meu).nome} por ${P(dele).nome} de ${q.nome}.`, 'destaque');
     if (pd.ssanne) comprarItem(st, q, 2);
     st.pend = null; continuar(st);
@@ -1626,6 +1627,7 @@
       if (!q.pokemon.includes(id) || pd.trocados.includes(id)) return;
       const cor = P(id).cor, novo = tirar(st, cor); if (!novo) return;
       q.pokemon[q.pokemon.indexOf(id)] = novo; delete q.mais1[id]; devolver(st, cor, id); pd.trocados.push(novo);
+      if (st.trocasCarta) st.trocasCarta.push({ j: q.id, saiu: id, entrou: novo });
       log(st, `Festival Pokémon: ${q.nome} trocou ${P(id).nome} por ${P(novo).nome}.`, '', [['pk', id], ['pk', novo]]);
       pd.restam--;
     } else pd.restam = 0;

@@ -368,3 +368,11 @@ button.celebi:hover:not(:disabled){background:rgba(244,114,182,.15);border-color
 .propLin>span{flex:1}
 .aviso{background:rgba(255,200,0,.1);border:1px solid rgba(255,200,0,.35);border-radius:8px;padding:6px 10px;font-size:13px}
 @media (max-width:760px){.propGrid{grid-template-columns:1fr}.propSeta{justify-self:center;transform:rotate(90deg)}}
+.tcLin{display:flex;align-items:center;gap:12px;margin:8px 0;flex-wrap:wrap}
+.tcPk{display:flex;flex-direction:column;align-items:center;gap:2px;width:96px;text-align:center;font-size:13px}
+.tcPk img{width:84px;border-radius:6px;cursor:zoom-in}
+.tcPk .mut{font-size:12px}
+.tcPk .dot{display:inline-block;width:9px;height:9px;vertical-align:middle;margin-right:3px}
+.tcPk.saiu img{opacity:.5;filter:grayscale(.6)}
+.tcSeta{font-size:26px;color:var(--acc)}
+.tcWrap{display:flex;flex-wrap:wrap;gap:0 30px}

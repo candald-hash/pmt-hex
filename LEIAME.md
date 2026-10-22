@@ -10,6 +10,8 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- Correção: a IA travava ao escolher Pokémon na Liga quando havia revanche (mesmo confronto de novo) ou Remédio, na vez de um humano; também no Festival de Praça repetido.
+- Eventos de troca (Troca Pokémon, S.S. Anne, Festival Pokémon): a tela de resultado mostra as cartas trocadas e os novos donos.
 - Propostas de troca entre jogadores humanos: no seu turno, "🤝 Propor troca" (até 3 Pokémon de cada lado); o alvo aceita ou recusa no início da própria vez. Famílias travadas não entram; propostas que perderam a validade são anuladas.
 - Tela do Mestre Pokémon: time agrupado por linha evolutiva, insígnias e estatísticas do campeão (batalhas vencidas/enfrentadas por tipo, Eventos e Super Eventos comprados, capturas).
 - Mapa: caminho que faltava no hexágono de Eterna (B5) adicionado.

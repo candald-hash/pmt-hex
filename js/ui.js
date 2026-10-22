@@ -581,7 +581,7 @@
     } else {
       const S = sel.praca && sel.praca.k === pd.titulo ? sel.praca : (sel.praca = { k: pd.titulo, aberto: null, ids: { a: [], b: [] }, it: { a: {}, b: {} } });
       // IAs escolhem em segredo (na vez de um humano)
-      ['a', 'b'].forEach(l => { const k = 'pr' + pd.titulo + l; if (humanoVez && E.J(st, pd[l]).ia && !pd.dupla[l] && !ligaTimers[k]) ligaTimers[k] = setTimeout(() => { if (st.pend === pd && !pd.dupla[l]) { const d = window.AI.duplaPraca(st, l); agirIA('escolherDuplaPraca', l, d.ids, d.itens); } }, 700); });
+      ['a', 'b'].forEach(l => { const k = 'pr' + (pd.uid != null ? pd.uid : pd.titulo + st.log.length) + l; if (humanoVez && E.J(st, pd[l]).ia && !pd.dupla[l] && !ligaTimers[k]) ligaTimers[k] = setTimeout(() => { if (st.pend === pd && !pd.dupla[l]) { const d = window.AI.duplaPraca(st, l); agirIA('escolherDuplaPraca', l, d.ids, d.itens); } }, 700); });
       const humanosP = ['a', 'b'].filter(l => !E.J(st, pd[l]).ia && souEu(pd[l])), pend = humanosP.filter(l => !pd.dupla[l]);
       const painel = l => {
         const q = E.J(st, pd[l]), ap = E.pracaAptosDe(q), n = Math.min(2, ap.length), its = q.itens.filter(i => E.ITEM(i).uso === 'batalha' && E.ITEM(i).bonus), I = S.it[l];
@@ -643,6 +643,8 @@
   }
   function mLiga(pd) {
     const r = pd.resultado, nD = pd.duelos.length, humanoVez = !E.J(st).ia;
+    if (pd.uid == null) pd.uid = 'x' + st.log.length; // partidas salvas antes do identificador
+    const kB = 'L' + pd.uid + ':' + nD + ':' + (pd.forcado ? 'f' + st.log.length : '') + ':'; // chave única por batalha/duelo (revanches têm o mesmo título)
     const chave = r ? 'L' + r.seq + ':' + nD : null, animando = !!(r && animDu.feito !== chave);
     if (animando && !animDu.timer) {
       const giro = setInterval(() => document.querySelectorAll('.arena .die3d span').forEach(x => x.textContent = 1 + Math.floor(Math.random() * 6)), 70);
@@ -650,13 +652,13 @@
     }
     const humanosTodos = ['a', 'b'].filter(l => !E.J(st, pd[l]).ia), humanos = humanosTodos.filter(l => souEu(pd[l]));
     // IA escolhe na vez de um humano; entre duas IAs o resultado avança sozinho
-    if (humanoVez && !r && !pd.vencLado) ['a', 'b'].forEach(l => { const k = pd.titulo + nD + l; if (E.J(st, pd[l]).ia && !pd.esc[l] && !ligaTimers[k]) ligaTimers[k] = setTimeout(() => { if (st.pend === pd && !pd.esc[l] && !pd.resultado) { const e = window.AI.escolhaLiga(st, l); agirIA('ligaEscolher', l, e.pokemon, e.item); } }, 600); });
+    if (humanoVez && !r && !pd.vencLado) ['a', 'b'].forEach(l => { const k = kB + l; if (E.J(st, pd[l]).ia && !pd.esc[l] && !ligaTimers[k]) ligaTimers[k] = setTimeout(() => { delete ligaTimers[k]; if (st.pend && st.pend.tipo === 'ligaBatalha' && st.pend.uid === pd.uid && !st.pend.esc[l] && !st.pend.resultado && !st.pend.vencLado) { const e = window.AI.escolhaLiga(st, l); if (e.pokemon) agirIA('ligaEscolher', l, e.pokemon, e.item); } }, 600); });
     const reIA = r && !animando && humanoVez ? window.AI.reacaoLiga(st) : null;
     if (reIA) { const k = 're' + r.seq + nD + JSON.stringify(reIA); if (!ligaTimers[k]) ligaTimers[k] = setTimeout(() => { if (st.pend === pd && pd.resultado === r) { if (reIA.tipo === 'remedio') agirIA('ligaRemedio', reIA.lado); else agirIA('ligaCelebi', reIA.quem, reIA.lado); } }, 1200); }
-    else if (humanoVez && !humanosTodos.length && (r || pd.vencLado) && !animando) { const k = 'seg' + pd.titulo + nD + (pd.vencLado || '') + (r ? r.seq : ''); if (!ligaTimers[k]) ligaTimers[k] = setTimeout(() => { if (st.pend === pd) agir('ligaSeguir'); }, 1800); }
-    const S = sel.liga && sel.liga.k === pd.titulo + nD ? sel.liga : (sel.liga = { k: pd.titulo + nD, aberto: null, pk: {}, it: {} });
+    else if (humanoVez && !humanosTodos.length && (r || pd.vencLado) && !animando) { const k = 'seg' + kB + (pd.vencLado || '') + (r ? r.seq : ''); if (!ligaTimers[k]) ligaTimers[k] = setTimeout(() => { if (st.pend === pd) agir('ligaSeguir'); }, 1800); }
+    const S = sel.liga && sel.liga.k === kB ? sel.liga : (sel.liga = { k: kB, aberto: null, pk: {}, it: {} });
     // humano com Pokémon já em campo e sem Itens de batalha: nada a decidir
-    if (!r && !pd.vencLado) humanos.forEach(l => { const q = E.J(st, pd[l]); const fixo = (pd.forcado && pd.forcado[l]) || pd.ativo[l]; if (!pd.esc[l] && fixo && !q.itens.some(i => E.ITEM(i).uso === 'batalha' && E.ITEM(i).bonus)) { const k = 'auto' + pd.titulo + nD + l + (pd.forcado ? 'f' + st.log.length : ''); if (!ligaTimers[k]) ligaTimers[k] = setTimeout(() => { if (st.pend === pd && !pd.esc[l]) agir('ligaEscolher', l, fixo, null); }, 50); } });
+    if (!r && !pd.vencLado) humanos.forEach(l => { const q = E.J(st, pd[l]); const fixo = (pd.forcado && pd.forcado[l]) || pd.ativo[l]; if (!pd.esc[l] && fixo && !q.itens.some(i => E.ITEM(i).uso === 'batalha' && E.ITEM(i).bonus)) { const k = 'auto' + kB + l; if (!ligaTimers[k]) ligaTimers[k] = setTimeout(() => { if (st.pend === pd && !pd.esc[l]) agir('ligaEscolher', l, fixo, null); }, 50); } });
     let corpo = '';
     if (r) {
       const msg = animando ? '' : r.venc == null ? 'Empate — os dois Pokémons desmaiam.' : `${esc(E.J(st, r.venc).nome)} vence o duelo${pd.vencLado ? ' e a batalha!' : ' — o Pokémon vencedor continua em campo.'}`;
@@ -729,6 +731,15 @@
       ${L.elim.length ? `<p class="mut">Eliminados: ${L.elim.map(id => esc(E.J(st, id).nome)).join(', ')}.</p>` : ''}
       <h3>Batalhas</h3>${histBatalhas()}<div class="mfoot"><button class="pri" id="ok">Fechar</button></div>`);
     $('#ok').onclick = fecharModal;
+  }
+  // trocas feitas pelo efeito da carta (Troca Pokémon, S.S. Anne, Festival Pokémon…): cartas com os novos donos
+  function blocoTrocasCarta() {
+    const l = st.trocasCarta || []; if (!l.length) return '';
+    const dono = j => { const q = E.J(st, j); return `<span class="dot" style="background:${COR_HEX[q.cor]}"></span>${esc(q.nome)}`; };
+    const pk = (id, sub, cls) => `<div class="tcPk ${cls || ''}"><img src="${E.P(id).img}" data-z="${E.P(id).img}"><b>${esc(E.P(id).nome)}</b><span class="mut">${sub}</span></div>`;
+    return `<div class="ganhos surge"><div class="mut">Troca${l.length > 1 ? 's' : ''} realizada${l.length > 1 ? 's' : ''}:</div><div class="tcWrap">${l.map(t => t.a != null
+      ? `<div class="tcLin">${pk(t.pa, 'agora de ' + dono(t.b))}<div class="tcSeta">⇄</div>${pk(t.pb, 'agora de ' + dono(t.a))}</div>`
+      : `<div class="tcLin">${pk(t.saiu, 'devolvido à pilha', 'saiu')}<div class="tcSeta">→</div>${pk(t.entrou, 'agora de ' + dono(t.j))}</div>`).join('')}</div></div>`;
   }
   // ---------- Propostas de troca entre humanos ----------
   let selProp = null, trocaVista = null;
@@ -951,14 +962,14 @@
       <h2>${esc(card.nome)}</h2><span class="tag">${pd.baralho === 'evento' ? 'Evento' : 'Super Evento'}</span>${card.bloqueavel ? ' <span class="tag" style="color:#fca5a5">bloqueável por Poké-Boneca</span>' : ''}${card.continuado ? ` <span class="tag">continuado: ${card.continuado} turnos</span>` : ''}
       <p style="font-size:16px;margin:14px 0">${esc(card.texto)}</p>
       ${card.duelo ? `<p class="mut">Duelo — +1: ${card.duelo.mais1.map(t => E.TIPOS_NOME[t]).join(', ')} · −1: ${card.duelo.menos1.map(t => E.TIPOS_NOME[t]).join(', ')}</p>` : ''}
-      ${pd.ativado && (st.ganhosCarta || []).length ? `<div class="ganhos surge"><div class="mut">Pokémon${st.ganhosCarta.length > 1 ? 's' : ''} recebido${st.ganhosCarta.length > 1 ? 's' : ''}:</div><div class="row" style="gap:12px;flex-wrap:wrap">${st.ganhosCarta.map(([j, id]) => `<div class="gpk"><img src="${E.P(id).img}" data-z="${E.P(id).img}"><div><b>${esc(E.P(id).nome)}</b>${j !== p.id || st.ganhosCarta.some(x => x[0] !== p.id) ? `<br><span class="mut">${esc(E.J(st, j).nome)}</span>` : ''}</div></div>`).join('')}</div></div>` : ''}
+      ${pd.ativado ? blocoTrocasCarta() : ''}${pd.ativado && (st.ganhosCarta || []).length ? `<div class="ganhos surge"><div class="mut">Pokémon${st.ganhosCarta.length > 1 ? 's' : ''} recebido${st.ganhosCarta.length > 1 ? 's' : ''}:</div><div class="row" style="gap:12px;flex-wrap:wrap">${st.ganhosCarta.map(([j, id]) => `<div class="gpk"><img src="${E.P(id).img}" data-z="${E.P(id).img}"><div><b>${esc(E.P(id).nome)}</b>${j !== p.id || st.ganhosCarta.some(x => x[0] !== p.id) ? `<br><span class="mut">${esc(E.J(st, j).nome)}</span>` : ''}</div></div>`).join('')}</div></div>` : ''}
       ${pd.ativado ? `<div class="result">${card.autoCompleto ? 'Efeito aplicado.' : auto ? 'Efeitos automáticos aplicados. O anfitrião pode completar o que faltar pela caixa de ferramentas.' : 'Este efeito é aplicado à mão pela caixa de ferramentas.'}</div>` : ''}
       <div class="mfoot">
         ${!card.autoCompleto && souAnfitriao() ? '<button id="tools">Caixa de ferramentas</button>' : ''}
         ${!pd.ativado && auto ? '<button class="pri" id="atv">Ativar efeito</button>' : `<button class="pri" id="fim">Concluir ${pd.baralho === 'evento' ? 'Evento' : 'Super Evento'}</button>`}
       </div></div></div>`);
     const a = $('#atv'); if (a) a.onclick = () => agir('ativarCarta');
-    $('#modalCard').querySelectorAll('.gpk img').forEach(i => i.onclick = () => zoom(i.dataset.z));
+    $('#modalCard').querySelectorAll('.gpk img, .tcPk img').forEach(i => i.onclick = () => zoom(i.dataset.z));
     const fm = $('#fim'); if (fm) fm.onclick = () => { esperandoHumano = false; agir('concluirCarta'); };
     const tl = $('#tools'); if (tl) tl.onclick = () => caixaFerramentas();
   }
