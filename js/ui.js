@@ -1405,7 +1405,7 @@
         const L = H.lobby.jog; let k = L.findIndex(x => x.tipo === 'remoto' && x.token === tok); if (k < 0) k = L.findIndex(x => x.tipo === 'remoto' && !x.token);
         if (k >= 0) { L[k].token = tok; L[k].nome = String(m.nome || '').trim().slice(0, 20) || 'Jogador ' + (k + 1); assento = k; }
       }
-      H.conns.set(conn.peer, { conn, token: tok, assento });
+      H.conns.set(conn.peer, { conn, token: tok, assento, nome: String(m.nome || '').trim().slice(0, 20) });
       if (st) { atualizarConexoes(); enviarEstado(H.conns.get(conn.peer)); if (assento >= 0) toast(`🌐 ${esc(E.J(st, assento).nome)} conectou`); }
       else { difundirLobby(); if (H.redesenhar) H.redesenhar(); }
       return;
@@ -1432,6 +1432,32 @@
   // troca de cor na sala de espera: só para uma cor que ninguém está usando
   function trocarCorLobby(k, cor) { const L = H.lobby && H.lobby.jog; if (!L || !L[k] || !E.CORES_PEAO.includes(cor) || L.some((x, i) => i !== k && x.cor === cor)) return false; L[k].cor = cor; return true; }
   const swatchesLobby = (jog, k) => `<div class="swatches">${E.CORES_PEAO.map(c => { const usada = jog.some((x, i) => i !== k && x.cor === c); return `<span class="sw ${c === jog[k].cor ? 'on' : ''} ${usada ? 'taken' : ''}" data-cor="${c}" title="${COR_NOME[c]}${usada ? ' (em uso)' : ''}" style="background:${COR_HEX[c]}"></span>`; }).join('')}</div>`;
+  // ---- edição dos lugares na sala de espera (só o anfitrião) ----
+  const MAX_LUGARES = 6;
+  function corLivre(jog) { return E.CORES_PEAO.find(c => !jog.some(x => x.cor === c)); }
+  // espectadores (sem lugar) ocupam lugares humanos que ficarem livres
+  function sentarEspectadores() {
+    const L = H.lobby.jog;
+    H.conns.forEach(c => { if (c.assento >= 0) return; const k = L.findIndex(x => x.tipo === 'remoto' && !x.token); if (k < 0) return; L[k].token = c.token; L[k].nome = c.nome || 'Jogador ' + (k + 1); c.assento = k; });
+  }
+  function liberarLugar(k) { H.conns.forEach(c => { if (c.assento === k) c.assento = -1; }); }
+  function editarLugar(acao, k) {
+    const L = H.lobby; if (!L) return; const J = L.jog;
+    if (acao === 'add' || acao === 'addIA') {
+      if (J.length >= MAX_LUGARES) return;
+      J.push({ nome: acao === 'addIA' ? 'CPU ' + (J.length + 1) : '', cor: corLivre(J), tipo: acao === 'addIA' ? 'ia' : 'remoto', ia: acao === 'addIA' });
+    } else if (acao === 'rem') {
+      if (!J[k] || J[k].tipo === 'eu' || J.length <= 2) return;
+      liberarLugar(k); J.splice(k, 1);
+      H.conns.forEach(c => { if (c.assento > k) c.assento--; });
+      J.forEach((x, i) => { if (x.tipo === 'ia' && /^CPU \d+$/.test(x.nome || '')) x.nome = 'CPU ' + (i + 1); });
+    } else if (acao === 'tipo') {
+      const x = J[k]; if (!x || x.tipo === 'eu') return;
+      if (x.tipo === 'ia') { x.tipo = 'remoto'; x.ia = false; x.nome = ''; }
+      else { liberarLugar(k); x.tipo = 'ia'; x.ia = true; x.token = null; x.nome = 'CPU ' + (k + 1); }
+    }
+    sentarEspectadores(); difundirLobby(); telaSalaHost();
+  }
   function criarSala(jog, seed) {
     if (semPeer()) return;
     const codigo = novoCodigo(); H.lobby = { codigo, jog, seed };
@@ -1444,14 +1470,19 @@
     box.innerHTML = `<div class="setupCard"><div class="logo"><h1>Sala on-line <b>${esc(L.codigo)}</b></h1><span class="tag">${H.peer && H.peer.open ? '🟢 aberta' : '⏳ abrindo…'}</span></div>
       <p>Mande este link para os amigos:</p>
       <div class="row" style="flex-wrap:nowrap"><input id="lk" value="${esc(link)}" readonly style="flex:1"><button id="cp">📋 Copiar</button></div>
-      <h3 style="margin-top:18px">Lugares</h3>
+      <h3 style="margin-top:18px">Lugares (${L.jog.length}/${MAX_LUGARES})</h3>
       <div class="salaLista">${L.jog.map((x, k) => `<div class="salaRow"><span class="dot" style="background:${COR_HEX[x.cor]}"></span><b style="flex:1">${esc(x.nome || (x.tipo === 'ia' ? 'CPU ' + (k + 1) : '—'))}</b>
-        ${x.tipo === 'eu' ? swatchesLobby(L.jog, k) : ''}<span class="mut">${x.tipo === 'eu' ? 'você · anfitrião' : x.tipo === 'ia' ? '🤖 IA' : x.token ? (con.has(k) ? '🌐 conectado' : '🔌 saiu') : '⏳ aguardando alguém entrar'}</span></div>`).join('')}</div>
+        ${x.tipo === 'eu' ? swatchesLobby(L.jog, k) : ''}<span class="mut">${x.tipo === 'eu' ? 'você · anfitrião' : x.tipo === 'ia' ? '🤖 IA' : x.token ? (con.has(k) ? '🌐 conectado' : '🔌 saiu') : '⏳ aguardando alguém entrar'}</span>
+        ${x.tipo !== 'eu' ? `<span class="salaBts"><button class="sm" data-lt="${k}" title="${x.tipo === 'ia' ? 'Abrir este lugar para uma pessoa entrar pelo link' : 'Passar este lugar para a IA' + (x.token ? ' (quem está nele passa a assistir)' : '')}">${x.tipo === 'ia' ? '→ 🌐 Pessoa' : '→ 🤖 IA'}</button><button class="sm" data-lr="${k}" ${L.jog.length <= 2 ? 'disabled' : ''} title="Remover este lugar${x.token ? ' (quem está nele passa a assistir)' : ''}">✖</button></span>` : ''}</div>`).join('')}</div>
+      <div class="row" style="margin-top:8px;gap:8px"><button class="sm" id="addR" ${L.jog.length >= MAX_LUGARES ? 'disabled' : ''}>+ Lugar para pessoa</button><button class="sm" id="addI" ${L.jog.length >= MAX_LUGARES ? 'disabled' : ''}>+ Lugar para IA</button>${[...H.conns.values()].filter(c => c.assento < 0).length ? `<span class="mut">👀 ${[...H.conns.values()].filter(c => c.assento < 0).length} assistindo (entra(m) se você abrir um lugar)</span>` : ''}</div>
       <div class="row" style="margin-top:14px"><button id="cancel">Cancelar</button><span style="flex:1"></span><button class="pri" id="start">${faltam ? `Começar (${faltam} lugar${faltam > 1 ? 'es' : ''} vazio${faltam > 1 ? 's' : ''} vira${faltam > 1 ? 'm' : ''} IA)` : 'Começar partida'}</button></div></div>`;
     box.querySelectorAll('[data-cor]').forEach(sw => sw.onclick = () => { const k = L.jog.findIndex(x => x.tipo === 'eu'); if (trocarCorLobby(k, sw.dataset.cor)) { difundirLobby(); telaSalaHost(); } });
     $('#cp').onclick = async () => { try { await navigator.clipboard.writeText(link); $('#cp').textContent = '✔ Copiado'; } catch (e) { $('#lk').select(); } };
     $('#cancel').onclick = () => { try { H.peer.destroy(); } catch (e) {} H.lobby = null; NET.modo = 'local'; telaAbertura(); };
     $('#start').onclick = () => comecarOnline();
+    box.querySelectorAll('[data-lt]').forEach(b => b.onclick = () => editarLugar('tipo', +b.dataset.lt));
+    box.querySelectorAll('[data-lr]').forEach(b => b.onclick = () => editarLugar('rem', +b.dataset.lr));
+    $('#addR').onclick = () => editarLugar('add'); $('#addI').onclick = () => editarLugar('addIA');
     H.redesenhar = telaSalaHost;
   }
   function comecarOnline() {
@@ -1509,7 +1540,7 @@
   function telaSalaCliente() {
     const L = C.lobby, box = $('#setup');
     box.innerHTML = `<div class="setupCard"><div class="logo"><h1>Sala <b>${esc(L.codigo)}</b></h1><span class="tag">🟢 conectado</span></div>
-      <p>${L.voce >= 0 ? 'Você está na sala. Aguardando o anfitrião começar a partida…' : 'A sala está cheia: você vai <b>assistir</b> à partida.'}</p>${L.voce >= 0 ? '<p class="mut">Clique numa cor livre para trocar a sua.</p>' : ''}
+      <p>${L.voce >= 0 ? 'Você está na sala. Aguardando o anfitrião começar a partida…' : 'Não há lugar livre para você: você vai <b>assistir</b> à partida. Se o anfitrião abrir um lugar, você entra nele automaticamente.'}</p>${L.voce >= 0 ? '<p class="mut">Clique numa cor livre para trocar a sua.</p>' : ''}
       <div class="salaLista">${L.jog.map((x, k) => `<div class="salaRow"><span class="dot" style="background:${COR_HEX[x.cor]}"></span><b style="flex:1">${esc(x.nome || '—')}${k === L.voce ? ' <span class="tag">você</span>' : ''}</b>
         ${k === L.voce ? swatchesLobby(L.jog, k) : ''}<span class="mut">${x.tipo === 'eu' ? 'anfitrião' : x.tipo === 'ia' ? '🤖 IA' : x.ocupado ? (x.conectado ? '🌐 conectado' : '🔌 saiu') : '⏳ lugar livre'}</span></div>`).join('')}</div></div>`;
     box.querySelectorAll('[data-cor]').forEach(sw => sw.onclick = () => { if (sw.classList.contains('taken') || !C.conn || !C.conn.open) return; C.conn.send({ t: 'cor', cor: sw.dataset.cor }); });

@@ -10,6 +10,7 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- Sala on-line: com a sala já criada, o anfitrião pode adicionar lugares (pessoa ou IA), remover lugares e alternar cada lugar entre pessoa e IA. Quem perde o lugar passa a assistir e entra sozinho no próximo lugar aberto.
 - Botões Rolar dado · Propor troca · Encerrar turno sempre lado a lado, no mesmo lugar (ações extras ficam numa linha abaixo).
 - Poké-Fans e Esconderijo Rocket: a tela de resultado mostra os Treinadores trocados e os novos donos.
 - Cassino (e outras tabelas de dado): o resultado de Itens aparecia como "itensEv"; agora mostra "N Cartas Item".
