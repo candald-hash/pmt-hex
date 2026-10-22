@@ -10,7 +10,7 @@
   const COR_HEX = { branco: '#f3f4f6', preto: '#1f2937', vermelho: '#e3202b', azul: '#2563eb', verde: '#16a34a', amarelo: '#facc15' };
   const COR_NOME = { branco: 'Branco', preto: 'Preto', vermelho: 'Vermelho', azul: 'Azul', verde: 'Verde', amarelo: 'Amarelo' };
   const CARD_W = E.HW * 0.148, CARD_H = CARD_W / 0.86;
-  let st = null, view = null, boardMode = null, sel = {};
+  let st = null, view = null, boardMode = null, sel = {}, luraEnq = false;
   const PREF = 'pmthex-prefs';
   let prefs = (() => { try { return Object.assign({ tema: 'escuro', velIA: 'normal' }, JSON.parse(localStorage.getItem(PREF)) || {}); } catch (e) { return { tema: 'escuro', velIA: 'normal' }; } })();
   function salvarPrefs() { try { localStorage.setItem(PREF, JSON.stringify(prefs)); } catch (e) {} }
@@ -161,7 +161,8 @@
     Object.values(g.slots).forEach(s => {
       const c = st.slots[s.key]; if (!c || !c.carta) return;
       const pk = E.P(c.carta), x = s.wx - CARD_W / 2, y = s.wy - CARD_H / 2;
-      const gg = el('g', { class: 'slot' + (boardMode && boardMode.tipo === 'slot' ? ' alvo' : '') }, gS);
+      const bmS = boardMode && boardMode.tipo === 'slot', ehAlvo = bmS && (!boardMode.filtro || boardMode.filtro.includes(s.key)), marcado = bmS && boardMode.marcado === s.key;
+      const gg = el('g', { class: 'slot' + (ehAlvo ? ' alvo' : '') + (marcado ? ' marcado' : '') + (bmS && boardMode.filtro && !ehAlvo && !marcado ? ' apagado' : '') }, gS);
       el('image', { href: c.aberta ? pk.img : D.versos[s.cor], x, y, width: CARD_W, height: CARD_H }, gg);
       el('rect', { class: 'frame', x, y, width: CARD_W, height: CARD_H, rx: 10, fill: 'none', stroke: '#000', 'stroke-width': 5 }, gg);
       if (c.fraco) {
@@ -171,7 +172,7 @@
         const t = el('text', { x: bx, y: by + 13, 'text-anchor': 'middle', fill: '#fff', 'font-size': 36, 'font-weight': 800, 'font-family': 'Inter, sans-serif' }, sg); t.textContent = '±1';
         const ti = el('title', {}, gg); ti.textContent = 'Enfraquecido: ±1 no dado de captura';
       }
-      gg.addEventListener('click', ev => { ev.stopPropagation(); if (boardMode && boardMode.tipo === 'slot') { const cb = boardMode.cb; boardMode = null; cb(s.key); } else if (c.aberta) zoom(pk.img); });
+      gg.addEventListener('click', ev => { ev.stopPropagation(); if (ehAlvo || marcado) { const cb = boardMode.cb; boardMode = null; cb(s.key); } else if (c.aberta) zoom(pk.img); });
     });
     // cidades: passar o mouse mostra o Líder; clicar abre os detalhes
     const eu = E.J(st);
@@ -285,8 +286,10 @@
     const noCidade = E.grafo(st).nodes[p.pos].kind === 'cidade' || E.grafo(st).nodes[p.pos].especial === 'planalto';
     const cordas = p.itens.filter(i => ['corda', 'escaperope'].includes(i.split('#')[0]));
     let acoes = '';
+    // botões fixos, sempre no mesmo lugar: Rolar dado · Propor troca · Encerrar turno
+    const comTroca = E.alvosProposta(st).length > 0 && !p.ia;
+    const fixos = `<div class="acoesFixas ${comTroca ? 'tres' : ''}"><button class="${st.fase === 'inicio' ? 'pri' : ''}" data-a="rolar" ${st.fase === 'inicio' ? '' : 'disabled'}>🎲 Rolar dado</button>${comTroca ? `<button data-a="propor" ${E.podeProporTroca(st) ? '' : 'disabled'} title="Proponha uma troca de até ${E.MAX_PROPOSTA} Pokémon com outro jogador humano">🤝 Propor troca</button>` : ''}<button data-a="fim" ${st.fase !== 'mover' && E.podeEncerrar(st) ? '' : 'disabled'}>Encerrar turno ▸</button></div>`;
     if (st.fase === 'inicio') {
-      acoes += `<button class="pri" data-a="rolar">🎲 Rolar dado</button>`;
       if (tr && tr.efeito === 'hiker') acoes += `<button data-a="hiker">Hiker: andar até 2</button>`;
       if (noCidade && p.passou.length > 1) acoes += `<button data-a="trem">🚆 Trem</button>`;
       if (tr && tr.efeito === 'lyra') acoes += `<button data-a="lyra">Lyra: pular e comprar 2 Itens</button>`;
@@ -295,8 +298,7 @@
     if (st.fase === 'mover' && t.dados && E.celebiDe(p) && !p.ia) acoes += t.dados.length > 1 ? t.dados.map((d, k) => `<button class="sm celebi" data-celebi="${k}">🌸 Celebi: refazer ${k + 1}º (${d})</button>`).join('') : `<button class="sm celebi" data-celebi="0">🌸 Celebi: refazer o dado</button>`;
     if (st.fase === 'mover' && t.rolagem != null) cordas.forEach(i => { const it = E.ITEM(i), m = it.id === 'corda' ? 1 : 2; for (let d = -m; d <= m; d++) if (d) acoes += `<button class="sm" data-corda="${i}" data-d="${d}">Corda ${d > 0 ? '+' : ''}${d}</button>`; });
     if (L && !t.batalhouLider && st.fase !== 'mover' && E.podeEnfrentar(p, L)) acoes += `<button data-a="lider">⚔ Enfrentar ${esc(L.nome)}</button>`;
-    if (E.podeProporTroca(st)) acoes += `<button data-a="propor" title="Proponha uma troca de até ${E.MAX_PROPOSTA} Pokémon com outro jogador humano">🤝 Propor troca</button>`;
-    if (st.fase !== 'mover') acoes += `<button data-a="fim" ${E.podeEncerrar(st) ? '' : 'disabled'}>Encerrar turno ▸</button>`;
+    acoes = fixos + (acoes ? `<div class="actions">${acoes}</div>` : '');
     if (p.ia) acoes = `<span class="mut">🤖 ${esc(p.nome)} está jogando…</span>${souAnfitriao() ? `<button class="sm" id="pausa">${pausado ? '▶ Retomar IA' : '⏸ Pausar IA'}</button>` : ''}`;
     else if (online() && p.id !== NET.eu) acoes = `<span class="mut">⏳ Vez de ${esc(p.nome)}…</span>`;
     tb.innerHTML = `<div class="turnHead"><span class="dot" style="background:${COR_HEX[p.cor]}"></span><h2>${esc(p.nome)}${p.ia ? ' <span class="tag">🤖 IA</span>' : ''}</h2><span class="tag">Rodada ${st.rodada}</span><button class="gear" id="btnCfg" title="Configurações">⚙</button></div>
@@ -305,7 +307,7 @@
       ${t.dados ? `<div class="dice">${(() => { let usado = false; return t.dados.map(d => { const esc0 = t.dados.length > 1 && t.rolagem == null; const este = t.dados.length > 1 && t.rolagem != null && !usado && (d === t.rolagem || d === t.escolhido); if (este) usado = true; return `<div class="die ${esc0 ? 'escolher' : ''} ${t.dados.length > 1 && t.rolagem != null ? (este ? 'usado' : 'off') : ''}" data-d="${d}">${d}</div>`; }).join(''); })()}${t.rolagem != null && !t.dados.includes(t.rolagem) || (t.rolagem != null && t.dados.length === 1 && t.rolagem !== t.dados[0]) ? `<span class="mut">→ ${t.rolagem}</span>` : ''}</div>` : ''}
       ${(st.efeitos || []).length ? `<div class="efeitos">${st.efeitos.map(e => `<span class="tag" title="Ativado por ${esc(E.J(st, e.dono).nome)}">⏳ ${esc(e.nome)} · ${esc(E.J(st, e.dono).nome)} · ${e.rest} rodada${e.rest > 1 ? 's' : ''}${e.tipo === 'parque' ? ' · ' + st.jogadores.filter(q => (e.ganhos[q.id] || []).length).map(q => esc(q.nome) + ' ' + e.ganhos[q.id].length).join(', ') : ''}</span>`).join(' ')}</div>` : ''}
       ${st.liga ? `<div class="ligaLine"><span>🏆 ${resumoLiga()}</span><button class="sm" id="btnLiga">Chaveamento</button></div>` : ''}
-      <div class="actions">${st.vencedor != null ? `<b>👑 Fim de jogo — ${esc(E.J(st, st.vencedor).nome)} é o Mestre Pokémon.</b>` : acoes}</div>`;
+      <div class="acoesBox">${st.vencedor != null ? `<b>👑 Fim de jogo — ${esc(E.J(st, st.vencedor).nome)} é o Mestre Pokémon.</b>` : acoes}</div>`;
     const bl = $('#btnLiga', tb); if (bl) bl.onclick = modalLiga;
     $('#btnCfg', tb).onclick = modalConfig;
     const pz = $('#pausa', tb); if (pz) pz.onclick = () => { pausado = !pausado; render(); };
@@ -417,6 +419,7 @@
 
   function renderPend() {
     const pd = st.pend;
+    if (!pd || pd.tipo !== 'lura') { luraEnq = false; if (boardMode && boardMode.lura) { boardMode = null; renderBoard(); } }
     if (!pd) { if ($('#modalCard').dataset.pend) { delete $('#modalCard').dataset.pend; fecharModal(); } return; }
     $('#modalCard').dataset.pend = pd.tipo;
     const p = E.J(st);
@@ -508,11 +511,12 @@
     }
     if (pd.tipo === 'slot') return mSlot(pd, p);
     if (pd.tipo === 'lura') {
-      const cartaHtml = k => { const c = st.slots[k], pk = E.P(c.carta); return `<div class="pc" data-k="${k}" title="Hexágono ${nomeHex(k)}"><img src="${c.aberta ? pk.img : D.versos[E.grafo(st).slots[k].cor]}"><span class="f">${nomeHex(k)}${c.fraco ? ' · enfraq.' : ''}</span></div>`; };
-      const porCor = {}; pd.opcoes.forEach(k => { const cor = E.P(st.slots[k].carta).cor; (porCor[cor] = porCor[cor] || []).push(k); });
-      abrirModal(`<h2>${esc(pd.titulo)}</h2>${pd.primeiro ? `<div class="row" style="margin:6px 0 12px"><span class="mut">Primeiro:</span><div style="width:90px">${cartaHtml(pd.primeiro).replace('class="pc"', 'class="pc sel"')}</div></div>` : '<p class="mut">Os dois precisam ser da mesma cor, e pelo menos um deve estar revelado.</p>'}
-        ${Object.entries(porCor).map(([cor, ks]) => `<h3 style="margin-top:10px">${esc(cor)}</h3><div class="pick" style="grid-template-columns:repeat(auto-fill,minmax(90px,1fr))">${ks.map(cartaHtml).join('')}</div>`).join('')}`);
-      $('#modalCard').querySelectorAll('.pick .pc').forEach(c => c.onclick = () => agir('escolherLura', c.dataset.k)); return;
+      // escolha direto no tabuleiro: os dois Pokémons precisam ser da mesma cor (um deles revelado)
+      if (p.ia || (online() && NET.eu !== p.id)) { if (boardMode && boardMode.lura) boardMode = null; abrirModal(`<h2>${esc(pd.titulo)}</h2><p class="mut">${p.ia ? '🤖 ' : '⏳ '}${esc(p.nome)} está escolhendo no tabuleiro…</p>`); return; }
+      fecharModal(); $('#modalCard').dataset.pend = 'lura';
+      boardMode = { tipo: 'slot', lura: true, pend: true, filtro: pd.opcoes, marcado: pd.primeiro, msg: pd.primeiro ? 'Módulo de Lura: clique no Pokémon da mesma cor para trocar de lugar (ou no destacado para desfazer)' : 'Módulo de Lura: clique no primeiro Pokémon (mesma cor do segundo; um deles revelado)', cb: k => agir('escolherLura', k) };
+      if (!pd.primeiro && !luraEnq) { luraEnq = true; enquadrar(); }
+      renderBoard(); return;
     }
     if (pd.tipo === 'tipoCor') return mTipoCor(pd);
     if (pd.tipo === 'pegarDeLista') return mEscolher(pd, pd.cartas.map(id => ({ id, img: E.P(id).img })), id => agir('pegarDeLista', id), 'Clique para pegar');
@@ -736,10 +740,10 @@
   function blocoTrocasCarta() {
     const l = st.trocasCarta || []; if (!l.length) return '';
     const dono = j => { const q = E.J(st, j); return `<span class="dot" style="background:${COR_HEX[q.cor]}"></span>${esc(q.nome)}`; };
-    const pk = (id, sub, cls) => `<div class="tcPk ${cls || ''}"><img src="${E.P(id).img}" data-z="${E.P(id).img}"><b>${esc(E.P(id).nome)}</b><span class="mut">${sub}</span></div>`;
-    return `<div class="ganhos surge"><div class="mut">Troca${l.length > 1 ? 's' : ''} realizada${l.length > 1 ? 's' : ''}:</div><div class="tcWrap">${l.map(t => t.a != null
-      ? `<div class="tcLin">${pk(t.pa, 'agora de ' + dono(t.b))}<div class="tcSeta">⇄</div>${pk(t.pb, 'agora de ' + dono(t.a))}</div>`
-      : `<div class="tcLin">${pk(t.saiu, 'devolvido à pilha', 'saiu')}<div class="tcSeta">→</div>${pk(t.entrou, 'agora de ' + dono(t.j))}</div>`).join('')}</div></div>`;
+    const pk = (id, sub, cls, tr) => { if (!id) return `<div class="tcPk ${cls || ''}"><div class="tcVazio">sem Treinador</div><span class="mut">${sub}</span></div>`; const c = tr ? E.idx().tr[id] : E.P(id); return `<div class="tcPk ${tr ? 'tr' : ''} ${cls || ''}"><img src="${c.img}" data-z="${c.img}"><b>${esc(c.nome)}</b><span class="mut">${sub}</span></div>`; };
+    return `<div class="ganhos surge"><div class="mut">Troca${l.length > 1 ? 's' : ''} realizada${l.length > 1 ? 's' : ''}${l.every(t => t.tr) ? ' (Treinadores)' : ''}:</div><div class="tcWrap">${l.map(t => t.a != null
+      ? `<div class="tcLin">${pk(t.pa, 'agora de ' + dono(t.b), '', t.tr)}<div class="tcSeta">⇄</div>${pk(t.pb, 'agora de ' + dono(t.a), '', t.tr)}</div>`
+      : `<div class="tcLin">${pk(t.saiu, t.tr ? 'descartado' : 'devolvido à pilha', 'saiu', t.tr)}<div class="tcSeta">→</div>${pk(t.entrou, 'agora de ' + dono(t.j), '', t.tr)}</div>`).join('')}</div></div>`;
   }
   // ---------- Propostas de troca entre humanos ----------
   let selProp = null, trocaVista = null;

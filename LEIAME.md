@@ -10,6 +10,10 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- Botões Rolar dado · Propor troca · Encerrar turno sempre lado a lado, no mesmo lugar (ações extras ficam numa linha abaixo).
+- Poké-Fans e Esconderijo Rocket: a tela de resultado mostra os Treinadores trocados e os novos donos.
+- Cassino (e outras tabelas de dado): o resultado de Itens aparecia como "itensEv"; agora mostra "N Cartas Item".
+- Módulo de Lura: a escolha dos dois Pokémons é feita direto no tabuleiro (clique de novo no primeiro para desfazer).
 - Correção: a IA travava ao escolher Pokémon na Liga quando havia revanche (mesmo confronto de novo) ou Remédio, na vez de um humano; também no Festival de Praça repetido.
 - Eventos de troca (Troca Pokémon, S.S. Anne, Festival Pokémon): a tela de resultado mostra as cartas trocadas e os novos donos.
 - Propostas de troca entre jogadores humanos: no seu turno, "🤝 Propor troca" (até 3 Pokémon de cada lado); o alvo aceita ou recusa no início da própria vez. Famílias travadas não entram; propostas que perderam a validade são anuladas.

@@ -583,7 +583,8 @@
   }
   function descreverPassos(ps) {
     if (!ps || !ps.length) return 'nada acontece';
-    return ps.map(([op, a, b]) => op === 'itens' ? `${a} Carta${a > 1 ? 's' : ''} Item` : op === 'ganhar' ? `ganha ${b > 1 ? b + ' ' : 'um '}Pokémon ${a === 'espaco' ? 'da cor do espaço' : a}` : op === 'capturar' ? `tenta capturar um Pokémon ${a}` : op).join(' + ');
+    const NOME = { evento: 'compra um Evento', superevento: 'compra um Super Evento' };
+    return ps.map(([op, a, b]) => op === 'itens' || op === 'itensEv' ? `${a} Carta${a > 1 ? 's' : ''} Item` : op === 'ganhar' ? `ganha ${b > 1 ? b + ' ' : 'um '}Pokémon ${a === 'espaco' ? 'da cor do espaço' : a}` : op === 'capturar' ? `tenta capturar um Pokémon ${a}` : op === 'treinador' ? `${a} Carta${a > 1 ? 's' : ''} de Treinador` : NOME[op] || op).join(' + ');
   }
   function corEspaco(st) { const s = grafo(st).nodes[J(st).pos]; if (s.kind === 'cidade') return ({ t1: 'verde', t2: 'azul', t3: 'vermelho' })[D().hexes[s.hex].tier] || 'rosa'; return s.color === 'cinza' ? 'rosa' : s.color; }
 
@@ -1144,10 +1145,11 @@
         [p, q].forEach(x => { x.itens.slice().forEach(i => descartarItem(st, x, i)); });
         comprarItem(st, p, 2); comprarItem(st, q, 2); log(st, `${p.nome} e ${q.nome} descartaram seus Itens e compraram 2.`); break;
       case 'pokefans':
+        if (st.trocasCarta && (p.treinador || q.treinador)) st.trocasCarta.push({ tr: true, a: p.id, b: q.id, pa: p.treinador, pb: q.treinador });
         [p.treinador, q.treinador] = [q.treinador, p.treinador]; comprarItem(st, p, 2); comprarItem(st, q, 2);
         log(st, `${p.nome} e ${q.nome} trocaram de Treinador e compraram 2 Itens.`); break;
       case 'esconderijo':
-        [p, q].forEach(x => { if (x.treinador) st.descartes.treinador.push(x.treinador); reporBaralho(st, 'treinador'); x.treinador = st.decks.treinador.shift() || null; });
+        [p, q].forEach(x => { const velho = x.treinador; if (x.treinador) st.descartes.treinador.push(x.treinador); reporBaralho(st, 'treinador'); x.treinador = st.decks.treinador.shift() || null; if (st.trocasCarta && x.treinador) st.trocasCarta.push({ tr: true, j: x.id, saiu: velho, entrou: x.treinador }); });
         log(st, `${p.nome} e ${q.nome} trocaram de Treinador por um novo do baralho.`); break;
       case 'roubar1': roubar(st, p, q, 1); break;
       case 'roubar2': roubar(st, p, q, 2); break;
@@ -1643,7 +1645,9 @@
   }
   function luraOpcoes(st) { return Object.keys(st.slots).filter(k => luraParceiros(st, k).length); }
   function escolherLura(st, k) {
-    const pd = st.pend; if (!pd || pd.tipo !== 'lura' || !pd.opcoes.includes(k)) return;
+    const pd = st.pend; if (!pd || pd.tipo !== 'lura') return;
+    if (pd.primeiro && k === pd.primeiro) { pd.primeiro = null; pd.opcoes = luraOpcoes(st); pd.titulo = 'Módulo de Lura: escolha o primeiro Pokémon'; return; }
+    if (!pd.opcoes.includes(k)) return;
     if (!pd.primeiro) { pd.primeiro = k; pd.opcoes = luraParceiros(st, k); pd.titulo = 'Módulo de Lura: escolha com qual trocar de lugar'; return; }
     const a = pd.primeiro; [st.slots[a], st.slots[k]] = [st.slots[k], st.slots[a]];
     const nome = x => st.slots[x].aberta ? P(st.slots[x].carta).nome : 'um Pokémon virado';
