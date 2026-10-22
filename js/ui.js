@@ -724,10 +724,18 @@
     $('#ok').onclick = fecharModal;
   }
   function mCampeao(pd) {
-    const q = E.J(st, pd.jogador);
+    const q = E.J(st, pd.jogador), es = q.stats || { eventos: 0, superEventos: 0, bat: {} }, B = es.bat || {};
+    const NOMES_BAT = { lider: 'Ginásios', duelo: 'Duelos', praca: 'Festival de Praça', liga: 'Liga' };
+    const tot = Object.values(B).reduce((a, x) => [a[0] + x[0], a[1] + x[1]], [0, 0]);
+    const det = Object.keys(NOMES_BAT).filter(k => B[k]).map(k => `${NOMES_BAT[k]} ${B[k][0]}/${B[k][1]}`).join(' · ');
+    const stat = (v, r) => `<div class="cpStat"><b>${v}</b><span>${r}</span></div>`;
     abrirModal(`<div class="campeao"><div class="coroa">👑</div><h2>${esc(q.nome)} é o novo Mestre Pokémon!</h2>
-      <div class="team" style="justify-content:center">${q.pokemon.map(id => `<img src="${E.P(id).img}" style="width:70px;border-radius:6px">`).join('')}</div></div>
+      <div class="cpStats">${stat(`${tot[0]}/${tot[1]}`, 'batalhas vencidas')}${stat(es.eventos || 0, 'Eventos comprados')}${stat(es.superEventos || 0, 'Super Eventos comprados')}${stat(q.capturas, 'capturas')}${stat(q.pokemon.length, 'Pokémons no time')}</div>
+      ${det ? `<p class="mut" style="margin:4px 0 10px">Vitórias/batalhas — ${det}</p>` : ''}
+      <div class="row" style="justify-content:center;margin:6px 0 10px">${insignias(q)}</div>
+      <div class="cpTime">${timeAgrupado(q, 70)}</div></div>
       <h3>Caminho na Liga</h3>${histBatalhas()}<div class="mfoot"><button class="pri" id="ok">Ver o tabuleiro</button></div>`);
+    $('#modalCard').querySelectorAll('.cpTime .pc').forEach(c => c.onclick = () => zoom(E.P(c.dataset.id).img));
     $('#ok').onclick = () => agir('fecharPend');
   }
   function mCriadores(pd, p) {

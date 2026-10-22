@@ -2827,6 +2827,13 @@
      "b": "s18",
      "dir": "both",
      "itemCost": 0
+    },
+    {
+     "id": "e45",
+     "a": "s6",
+     "b": "s14",
+     "dir": "both",
+     "itemCost": 0
     }
    ],
    "seq": 52,

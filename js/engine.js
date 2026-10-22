@@ -311,7 +311,7 @@
       if (!cartas.length) { log(st, `Não há Pokémons ${m[0]}s (nem mais fracos) nas pilhas.`); return; }
       if (usadas.size) log(st, `A pilha ${m[0]} acabou: completando com Pokémons ${[...usadas].join(', ')} (mais fracos).`);
       st.pend = { tipo: 'escolherCaptura', cartas, cor: m[0], titulo: `Compre os ${m[1]} próximos Pokémons ${m[0]}s e tente capturar um` }; return; }
-    if (e === 'compre_2_eventos') { const a = []; for (let i = 0; i < 2; i++) { reporBaralho(st, 'evento'); const c = st.decks.evento.shift(); if (c) a.push(c); } if (!a.length) return; st.pend = { tipo: 'escolherEvento', cartas: a, titulo: 'Compre 2 Cartas Evento e escolha uma para ativar' }; return; }
+    if (e === 'compre_2_eventos') { const a = []; for (let i = 0; i < 2; i++) { reporBaralho(st, 'evento'); const c = st.decks.evento.shift(); if (c) a.push(c); } est(p).eventos += a.length; if (!a.length) return; st.pend = { tipo: 'escolherEvento', cartas: a, titulo: 'Compre 2 Cartas Evento e escolha uma para ativar' }; return; }
     if (e === 'planalto') {
       if (!p.planalto) { p.planalto = true; if (st.pioneiroPlanalto == null) st.pioneiroPlanalto = p.id; log(st, `${p.nome} chegou ao Planalto Índigo!`, 'destaque'); if (p.pokemon.length) st.pend = { tipo: 'travar', titulo: 'Chegada ao Planalto: trave e melhore (+1) uma família de Pokémon' }; }
       addU(p.passou, k); return;
@@ -405,8 +405,12 @@
     if (!st.pend) continuar(st);
   }
 
+  // estatísticas por jogador (tela do Mestre Pokémon)
+  function est(p) { return p.stats || (p.stats = { eventos: 0, superEventos: 0, bat: {} }); }
+  function contaBatalha(st, tipo, ids, venc) { ids.forEach(id => { const b = est(J(st, id)).bat; const x = b[tipo] || (b[tipo] = [0, 0]); x[1]++; if (id === venc) x[0]++; }); }
   function comprarEvento(st, tipo) {
     reporBaralho(st, tipo); const c = st.decks[tipo].shift(); if (!c) { log(st, 'Sem cartas.'); return; }
+    est(J(st))[tipo === 'evento' ? 'eventos' : 'superEventos']++;
     const card = (tipo === 'evento' ? idx().ev : idx().sev)[c];
     log(st, `${J(st).nome} comprou ${tipo === 'evento' ? 'o Evento' : 'o Super Evento'} "${card.nome}".`, '', [[tipo === 'evento' ? 'ev' : 'sev', c]]);
     st.pend = { tipo: 'carta', baralho: tipo, carta: c, ativado: false, titulo: card.nome };
@@ -678,7 +682,7 @@
     pd.resultado = Object.assign({}, r, { dado: nd, total, ok, seq: st.log.length, celebi: (r.celebi || 0) + 1 });
     if (ok) vencerLider(st, p, L, pd.cidade);
   }
-  function fecharPend(st) { const pd = st.pend; if (!pd) return; if (pd.tipo === 'captura' && pd.resultado && !pd.resultado.ok && cynthia(st, pd)) return; if (pd.tipo === 'carta') return concluirCarta(st); if (pd.tipo === 'liga') { st.pend = null; iniciarLiga(st, atv(st)); if (!st.pend) continuar(st); return; } st.pend = null; continuar(st); }
+  function fecharPend(st) { const pd = st.pend; if (!pd) return; if (pd.tipo === 'lider' && pd.resultado && pd.resultado.ok != null) contaBatalha(st, 'lider', [atv(st)], pd.resultado.ok ? atv(st) : null); if (pd.tipo === 'captura' && pd.resultado && !pd.resultado.ok && cynthia(st, pd)) return; if (pd.tipo === 'carta') return concluirCarta(st); if (pd.tipo === 'liga') { st.pend = null; iniciarLiga(st, atv(st)); if (!st.pend) continuar(st); return; } st.pend = null; continuar(st); }
   function escolherCaptura(st, id) {
     const pd = st.pend; if (!pd || pd.tipo !== 'escolherCaptura' || !pd.cartas.includes(id)) return;
     pd.cartas.filter(c => c !== id).forEach(c => devolver(st, P(c).cor, c)); st.pend = null; iniciarCaptura(st, { carta: id, cor: P(id).cor });
@@ -792,6 +796,7 @@
   }
   function fecharPraca(st) {
     const pd = st.pend; if (!pd || pd.tipo !== 'praca' || !pd.resultado) return;
+    contaBatalha(st, 'praca', [pd.a, pd.b], pd.resultado.venc);
     st.pend = null; st.fila = [['comoJogador', pd.resultado.venc, [['pracaPremio']]]].concat(st.fila || []); continuar(st);
   }
   const PREMIOS_PRACA = { itens: ['3 Itens', [['itensEv', 3]]], evento: ['1 Evento', [['evento']]], azul: ['1 Pokémon Azul', [['ganhar', 'azul', 1]]], verde: ['2 Pokémons Verdes', [['ganhar', 'verde', 2]]], rosa: ['3 Pokémons Rosas', [['ganhar', 'rosa', 3]]] };
@@ -950,6 +955,7 @@
   function ligaFimBatalha(st) {
     const pd = st.pend, L = st.liga, w = pd[pd.vencLado], l = pd[pd.vencLado === 'a' ? 'b' : 'a'], W = J(st, w);
     L.hist.push({ fase: pd.fase, a: pd.a, b: pd.b, venc: w, duelos: pd.duelos, wo: !!pd.wo });
+    contaBatalha(st, 'liga', [pd.a, pd.b], w);
     log(st, `🏆 ${W.nome} vence ${J(st, l).nome} na Liga (${FASE_LIGA[pd.fase]}).`, 'destaque');
     st.pend = null;
     const elim = id => { J(st, id).eliminado = true; L.ativos = L.ativos.filter(x => x !== id); L.elim.push(id); log(st, `${J(st, id).nome} foi eliminado da Liga.`); };
@@ -1245,7 +1251,7 @@
       st.fila.unshift(['comoJogador', w.id, [['especialE', 'compre_2_eventos']]]);
     }
   }
-  function fecharDuelo(st) { const pd = st.pend; if (!pd || pd.tipo !== 'duelo') return; const r = pd.resultado; st.pend = null; if (r && r.venc != null) premiarDuelo(st, J(st, r.venc), pd.premio); continuar(st); }
+  function fecharDuelo(st) { const pd = st.pend; if (!pd || pd.tipo !== 'duelo') return; if (pd.resultado && pd.resultado.det) contaBatalha(st, 'duelo', [pd.a, pd.b], pd.resultado.venc); const r = pd.resultado; st.pend = null; if (r && r.venc != null) premiarDuelo(st, J(st, r.venc), pd.premio); continuar(st); }
 
   // ---------- Grupo 2: efeitos para todos / por regra ----------
   const TODOS_NOME = { aqua: 'Invasão Aqua', magma: 'Invasão Magma', rocket: 'Invasão Rocket', opaqua: 'Operação Aqua', opmagma: 'Operação Magma' };
@@ -1712,6 +1718,6 @@
     novoJogo, grafo, destinos, rolarMovimento, escolherDado, hiker, ajustarRolagem, mover, trem, encerrarTurno, podeEncerrar, descartarExcesso,
     ativarCarta, concluirCarta, fecharPend, rolarCaptura, escolherCaptura, escolherEvento, escolherTreinador, travar, abrirLider, lutarLider, remedio,
     podeEnfrentar, usarItem, lyra, ferramenta, duelo, forcaBase, forcaEmBatalha, bonusEvolucao, bonusTreinador, obedece, nInsignias, limiteItens, faixaCaptura,
-    nomeEspaco, familiaTravada, posXY, autoTexto, escolherAlvo, responderBoneca, iniciarReacoes, reacaoAberta, reagir, encerrarReacoes, celebiMovimento, celebiCaptura, celebiLider, celebiDuelo, aceitarTabela, celebiTabela, celebiDe, escolherLura, resolverFestival, resolverJuniper, resolverAzalea, distribuirEvento, comprarAqua, resolverMagma, desistirCaptura, vistaDe, PEND_PRIVADO, escolherDuelo, quemDecide, podeAgir, acao, posAcao, celebiPraca, reagirRepel, encerrarRepel, temRepel, ligaCelebi, ligaRemedio, responderCynthia, temCynthia, escolherDuplaPraca, fecharPraca, resolverPracaPremio, pracaAptosDe, pracaForca, PREMIOS_PRACA, iniciarLiga, ligaGatilho, resolverLigaOponente, ligaEscolher, ligaSeguir, ligaAptos, porCapturas, FASE_LIGA, resolverWally, wallyOk, resolverCriadores, opcoesCriadores, linhasCriadores, foraDeJogoCriadores, resolverFuchsia, resolverBriney, encrencado, escolherSlot, resolverTipoCor, pegarDeLista, escolherEspaco, escolherLiderFora, pagarItens, resolverNegociador, pegarItem, filtrarSlots, escolherDesempate, descartarDe, resolverTroca, resolverDividir, escolherOpcao, lutarDuelo, fecharDuelo, aptosDuelo, paresTroca, temBoneca, slotInsignia, vantagem, bonusItemBatalha, idx, P, ITEM, J, HW, HH, CORES_PEAO, TIPOS_NOME, ORDEM_FORCA
+    nomeEspaco, familiaTravada, posXY, autoTexto, escolherAlvo, responderBoneca, iniciarReacoes, reacaoAberta, reagir, encerrarReacoes, celebiMovimento, celebiCaptura, celebiLider, celebiDuelo, aceitarTabela, celebiTabela, celebiDe, escolherLura, resolverFestival, resolverJuniper, resolverAzalea, distribuirEvento, comprarAqua, resolverMagma, est, desistirCaptura, vistaDe, PEND_PRIVADO, escolherDuelo, quemDecide, podeAgir, acao, posAcao, celebiPraca, reagirRepel, encerrarRepel, temRepel, ligaCelebi, ligaRemedio, responderCynthia, temCynthia, escolherDuplaPraca, fecharPraca, resolverPracaPremio, pracaAptosDe, pracaForca, PREMIOS_PRACA, iniciarLiga, ligaGatilho, resolverLigaOponente, ligaEscolher, ligaSeguir, ligaAptos, porCapturas, FASE_LIGA, resolverWally, wallyOk, resolverCriadores, opcoesCriadores, linhasCriadores, foraDeJogoCriadores, resolverFuchsia, resolverBriney, encrencado, escolherSlot, resolverTipoCor, pegarDeLista, escolherEspaco, escolherLiderFora, pagarItens, resolverNegociador, pegarItem, filtrarSlots, escolherDesempate, descartarDe, resolverTroca, resolverDividir, escolherOpcao, lutarDuelo, fecharDuelo, aptosDuelo, paresTroca, temBoneca, slotInsignia, vantagem, bonusItemBatalha, idx, P, ITEM, J, HW, HH, CORES_PEAO, TIPOS_NOME, ORDEM_FORCA
   };
 })(window);
