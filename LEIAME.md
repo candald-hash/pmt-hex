@@ -10,6 +10,7 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- Propostas de troca entre jogadores humanos: no seu turno, "🤝 Propor troca" (até 3 Pokémon de cada lado); o alvo aceita ou recusa no início da própria vez. Famílias travadas não entram; propostas que perderam a validade são anuladas.
 - Tela do Mestre Pokémon: time agrupado por linha evolutiva, insígnias e estatísticas do campeão (batalhas vencidas/enfrentadas por tipo, Eventos e Super Eventos comprados, capturas).
 - Mapa: caminho que faltava no hexágono de Eterna (B5) adicionado.
 - **Escolha de Pokémon agrupada (Liga, Duelos, Ginásio e Festival de Praça):** as linhas evolutivas aparecem juntas na moldura com o bônus (evol. +2/+4, 🔒 travada), como na seção Time. Só aparecem os Pokémons que podem lutar; o número em cada carta continua sendo a força prevista. No Festival de Praça, a etiqueta conta só Rosas, Verdes e Iniciais, como a regra.

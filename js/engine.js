@@ -197,6 +197,7 @@
       L.finalMarcada = true; const [f1, f2] = L.ativos; log(st, `Os finalistas jogaram seus 3 turnos: começa a FINAL da Liga, ${J(st, f1).nome} × ${J(st, f2).nome}!`, 'destaque');
       L.fila.push([f1, f2, 'final']); ligaProxima(st);
     }
+    abrirProposta(st);
   }
   function proximo(st) {
     const L = st.liga;
@@ -1649,6 +1650,57 @@
   }
 
 
+  // ---------- Propostas de troca entre jogadores humanos ----------
+  // no seu turno, o jogador propõe trocar até 3 Pokémon seus por até 3 do alvo; o alvo responde no início do turno dele
+  const MAX_PROPOSTA = 3;
+  function trocavel(p, id) { return p.pokemon.includes(id) && !familiaTravada(p, id); }
+  function propostaValida(st, pr) {
+    const a = J(st, pr.de), b = J(st, pr.para);
+    return !!a && !!b && !a.eliminado && !b.eliminado && !b.ia && pr.meus.every(id => trocavel(a, id)) && pr.deles.every(id => trocavel(b, id));
+  }
+  function alvosProposta(st) { const p = J(st); return st.jogadores.filter(q => q.id !== p.id && !q.ia && !q.eliminado).map(q => q.id); }
+  function podeProporTroca(st) { const p = J(st); return st.vencedor == null && !st.pend && st.ator == null && !p.ia && !p.eliminado && alvosProposta(st).length > 0; }
+  function proporTroca(st, para, meus, deles) {
+    const p = J(st), q = J(st, para); if (!podeProporTroca(st) || !q || !alvosProposta(st).includes(para)) return;
+    meus = [...new Set(meus || [])]; deles = [...new Set(deles || [])];
+    if (meus.length > MAX_PROPOSTA || deles.length > MAX_PROPOSTA || !(meus.length + deles.length)) return;
+    const pr = { id: (st.propSeq = (st.propSeq || 0) + 1), de: p.id, para, meus, deles, rodada: st.rodada };
+    if (!propostaValida(st, pr)) return;
+    const antes = (st.propostas || []).some(x => x.de === p.id && x.para === para);
+    st.propostas = (st.propostas || []).filter(x => !(x.de === p.id && x.para === para)); st.propostas.push(pr);
+    log(st, `${p.nome} ${antes ? 'refez sua' : 'enviou uma'} proposta de troca para ${q.nome}.`);
+  }
+  // o próprio autor pode retirar a proposta enquanto ela não estiver sendo avaliada
+  function cancelarProposta(st, quem, id) {
+    const pr = (st.propostas || []).find(x => x.id === id); if (!pr || pr.de !== quem || (st.pend && st.pend.tipo === 'proposta' && st.pend.id === id)) return;
+    st.propostas = st.propostas.filter(x => x !== pr); log(st, `${J(st, quem).nome} retirou a proposta de troca para ${J(st, pr.para).nome}.`);
+  }
+  // no início do turno do alvo: descarta as que perderam a validade e abre a próxima
+  function abrirProposta(st) {
+    if (st.pend || !st.propostas || !st.propostas.length) return; const p = J(st);
+    st.propostas = st.propostas.filter(pr => {
+      if (pr.para !== p.id || propostaValida(st, pr)) return true;
+      log(st, `A proposta de troca de ${J(st, pr.de).nome} para ${p.nome} perdeu a validade (os Pokémon mudaram).`); return false;
+    });
+    const pr = st.propostas.find(x => x.para === p.id); if (!pr) return;
+    st.pend = { tipo: 'proposta', id: pr.id, de: pr.de, para: pr.para, meus: pr.meus.slice(), deles: pr.deles.slice(), titulo: `Proposta de troca de ${J(st, pr.de).nome}` };
+  }
+  function responderProposta(st, aceita) {
+    const pd = st.pend; if (!pd || pd.tipo !== 'proposta') return;
+    const pr = (st.propostas || []).find(x => x.id === pd.id); st.propostas = (st.propostas || []).filter(x => x.id !== pd.id);
+    const a = J(st, pd.de), b = J(st, pd.para), nomes = l => !l.length ? 'nada' : l.length === 1 ? P(l[0]).nome : l.slice(0, -1).map(id => P(id).nome).join(', ') + ' e ' + P(l[l.length - 1]).nome;
+    let feita = false;
+    if (aceita && pr && propostaValida(st, pr)) {
+      pr.meus.forEach(id => { a.pokemon.splice(a.pokemon.indexOf(id), 1); b.pokemon.push(id); moverMais1(a, b, id); });
+      pr.deles.forEach(id => { b.pokemon.splice(b.pokemon.indexOf(id), 1); a.pokemon.push(id); moverMais1(b, a, id); });
+      feita = true;
+      log(st, `${b.nome} aceitou a troca: ${a.nome} entregou ${nomes(pr.meus)} e recebeu ${nomes(pr.deles)}.`, 'destaque', [...pr.meus, ...pr.deles].map(id => ['pk', id]));
+    } else if (aceita) log(st, `A proposta de troca de ${a.nome} perdeu a validade.`);
+    else log(st, `${b.nome} recusou a proposta de troca de ${a.nome}.`);
+    st.trocaAviso = { seq: (st.trocaAviso ? st.trocaAviso.seq : 0) + 1, de: a.id, para: b.id, aceita: feita };
+    st.pend = null; abrirProposta(st); if (!st.pend) continuar(st);
+  }
+
   // ---------- Despachante de ações (base do modo on-line) ----------
   // quem pode responder à decisão pendente agora
   function quemDecide(st) {
@@ -1663,12 +1715,13 @@
       case 'ligaOponente': return [pd.escolhe];
       case 'repel': return pd.opcoes.filter(j => pd.resp[j] == null);
       case 'campeao': return st.jogadores.map(q => q.id);
+      case 'proposta': return [pd.para];
       case 'carta': if (reacaoAberta(st)) return Object.keys(pd.reacao.opcoes).map(Number).filter(j => pd.reacao.resp[j] == null); return [atv(st)];
       default: return [atv(st)];
     }
   }
   const ACOES_TURNO = new Set(['rolarMovimento', 'escolherDado', 'hiker', 'ajustarRolagem', 'mover', 'trem', 'encerrarTurno', 'lyra', 'abrirLider', 'usarItem', 'celebiMovimento', 'descartarExcesso',
-    'rolarCaptura', 'celebiCaptura', 'lutarLider', 'remedio', 'celebiLider', 'aceitarTabela', 'celebiTabela', 'celebiDuelo', 'celebiPraca', 'ativarCarta', 'concluirCarta']);
+    'rolarCaptura', 'celebiCaptura', 'lutarLider', 'remedio', 'celebiLider', 'aceitarTabela', 'celebiTabela', 'celebiDuelo', 'celebiPraca', 'ativarCarta', 'concluirCarta', 'proporTroca']);
   const ACOES_LADO = new Set(['escolherDuelo', 'ligaEscolher', 'escolherDuplaPraca', 'ligaCelebi', 'ligaRemedio']);
   const ACOES_JOGADOR = new Set(['reagir', 'reagirRepel']); // o 1º argumento é o próprio jogador
   const ACOES_ANFITRIAO = new Set(['ferramenta', 'encerrarReacoes', 'encerrarRepel', 'iniciarLiga']);
@@ -1677,6 +1730,7 @@
     if (ACOES_ANFITRIAO.has(nome)) return false;
     const pd = st.pend;
     if (ACOES_JOGADOR.has(nome)) return args[0] === j && quemDecide(st).includes(j);
+    if (nome === 'cancelarProposta') return args[0] === j;
     if (ACOES_LADO.has(nome)) return !!pd && ['a', 'b'].includes(args[0]) && pd[args[0]] === j;
     if (['ligaSeguir', 'fecharPraca', 'fecharDuelo'].includes(nome)) return !!pd && (pd.a === j || pd.b === j || atv(st) === j);
     if (ACOES_TURNO.has(nome)) return atv(st) === j;
@@ -1708,7 +1762,9 @@
       if (pd.tipo === 'repel') { pd.opcoes = pd.opcoes.filter(x => x === j); const r = {}; if (pd.resp[j] != null) r[j] = pd.resp[j]; pd.resp = r; }
       if (PEND_PRIVADO.has(pd.tipo) && !quemDecide(st).includes(j)) { if (pd.itens) pd.itens = []; if (pd.cartas) pd.cartas = []; if (pd.pool) pd.pool = []; pd.privado = true; }
       if (pd.depois && pd.depois.tipo === 'captura') { /* captura pública */ }
+      if (pd.tipo === 'proposta' && pd.de !== j && pd.para !== j) { pd.meus = []; pd.deles = []; pd.privado = true; }
     }
+    if (v.propostas) v.propostas = v.propostas.filter(pr => pr.de === j || pr.para === j);
     v.fila = []; v.vista = j;
     return v;
   }
@@ -1718,6 +1774,6 @@
     novoJogo, grafo, destinos, rolarMovimento, escolherDado, hiker, ajustarRolagem, mover, trem, encerrarTurno, podeEncerrar, descartarExcesso,
     ativarCarta, concluirCarta, fecharPend, rolarCaptura, escolherCaptura, escolherEvento, escolherTreinador, travar, abrirLider, lutarLider, remedio,
     podeEnfrentar, usarItem, lyra, ferramenta, duelo, forcaBase, forcaEmBatalha, bonusEvolucao, bonusTreinador, obedece, nInsignias, limiteItens, faixaCaptura,
-    nomeEspaco, familiaTravada, posXY, autoTexto, escolherAlvo, responderBoneca, iniciarReacoes, reacaoAberta, reagir, encerrarReacoes, celebiMovimento, celebiCaptura, celebiLider, celebiDuelo, aceitarTabela, celebiTabela, celebiDe, escolherLura, resolverFestival, resolverJuniper, resolverAzalea, distribuirEvento, comprarAqua, resolverMagma, est, desistirCaptura, vistaDe, PEND_PRIVADO, escolherDuelo, quemDecide, podeAgir, acao, posAcao, celebiPraca, reagirRepel, encerrarRepel, temRepel, ligaCelebi, ligaRemedio, responderCynthia, temCynthia, escolherDuplaPraca, fecharPraca, resolverPracaPremio, pracaAptosDe, pracaForca, PREMIOS_PRACA, iniciarLiga, ligaGatilho, resolverLigaOponente, ligaEscolher, ligaSeguir, ligaAptos, porCapturas, FASE_LIGA, resolverWally, wallyOk, resolverCriadores, opcoesCriadores, linhasCriadores, foraDeJogoCriadores, resolverFuchsia, resolverBriney, encrencado, escolherSlot, resolverTipoCor, pegarDeLista, escolherEspaco, escolherLiderFora, pagarItens, resolverNegociador, pegarItem, filtrarSlots, escolherDesempate, descartarDe, resolverTroca, resolverDividir, escolherOpcao, lutarDuelo, fecharDuelo, aptosDuelo, paresTroca, temBoneca, slotInsignia, vantagem, bonusItemBatalha, idx, P, ITEM, J, HW, HH, CORES_PEAO, TIPOS_NOME, ORDEM_FORCA
+    nomeEspaco, familiaTravada, posXY, autoTexto, escolherAlvo, responderBoneca, iniciarReacoes, reacaoAberta, reagir, encerrarReacoes, celebiMovimento, celebiCaptura, celebiLider, celebiDuelo, aceitarTabela, celebiTabela, celebiDe, escolherLura, resolverFestival, resolverJuniper, resolverAzalea, distribuirEvento, comprarAqua, resolverMagma, est, desistirCaptura, vistaDe, PEND_PRIVADO, escolherDuelo, proporTroca, cancelarProposta, responderProposta, podeProporTroca, alvosProposta, trocavel, MAX_PROPOSTA, quemDecide, podeAgir, acao, posAcao, celebiPraca, reagirRepel, encerrarRepel, temRepel, ligaCelebi, ligaRemedio, responderCynthia, temCynthia, escolherDuplaPraca, fecharPraca, resolverPracaPremio, pracaAptosDe, pracaForca, PREMIOS_PRACA, iniciarLiga, ligaGatilho, resolverLigaOponente, ligaEscolher, ligaSeguir, ligaAptos, porCapturas, FASE_LIGA, resolverWally, wallyOk, resolverCriadores, opcoesCriadores, linhasCriadores, foraDeJogoCriadores, resolverFuchsia, resolverBriney, encrencado, escolherSlot, resolverTipoCor, pegarDeLista, escolherEspaco, escolherLiderFora, pagarItens, resolverNegociador, pegarItem, filtrarSlots, escolherDesempate, descartarDe, resolverTroca, resolverDividir, escolherOpcao, lutarDuelo, fecharDuelo, aptosDuelo, paresTroca, temBoneca, slotInsignia, vantagem, bonusItemBatalha, idx, P, ITEM, J, HW, HH, CORES_PEAO, TIPOS_NOME, ORDEM_FORCA
   };
 })(window);

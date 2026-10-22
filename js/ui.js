@@ -295,6 +295,7 @@
     if (st.fase === 'mover' && t.dados && E.celebiDe(p) && !p.ia) acoes += t.dados.length > 1 ? t.dados.map((d, k) => `<button class="sm celebi" data-celebi="${k}">🌸 Celebi: refazer ${k + 1}º (${d})</button>`).join('') : `<button class="sm celebi" data-celebi="0">🌸 Celebi: refazer o dado</button>`;
     if (st.fase === 'mover' && t.rolagem != null) cordas.forEach(i => { const it = E.ITEM(i), m = it.id === 'corda' ? 1 : 2; for (let d = -m; d <= m; d++) if (d) acoes += `<button class="sm" data-corda="${i}" data-d="${d}">Corda ${d > 0 ? '+' : ''}${d}</button>`; });
     if (L && !t.batalhouLider && st.fase !== 'mover' && E.podeEnfrentar(p, L)) acoes += `<button data-a="lider">⚔ Enfrentar ${esc(L.nome)}</button>`;
+    if (E.podeProporTroca(st)) acoes += `<button data-a="propor" title="Proponha uma troca de até ${E.MAX_PROPOSTA} Pokémon com outro jogador humano">🤝 Propor troca</button>`;
     if (st.fase !== 'mover') acoes += `<button data-a="fim" ${E.podeEncerrar(st) ? '' : 'disabled'}>Encerrar turno ▸</button>`;
     if (p.ia) acoes = `<span class="mut">🤖 ${esc(p.nome)} está jogando…</span>${souAnfitriao() ? `<button class="sm" id="pausa">${pausado ? '▶ Retomar IA' : '⏸ Pausar IA'}</button>` : ''}`;
     else if (online() && p.id !== NET.eu) acoes = `<span class="mut">⏳ Vez de ${esc(p.nome)}…</span>`;
@@ -315,6 +316,7 @@
       if (a === 'rolar') agir('rolarMovimento'); else if (a === 'hiker') agir('hiker'); else if (a === 'lyra') agir('lyra');
       else if (a === 'trem') { boardMode = { tipo: 'trem', msg: 'Escolha uma cidade já visitada para ir de Trem' }; enquadrar(); render(); }
       else if (a === 'lider') agir('abrirLider');
+      else if (a === 'propor') { selProp = null; mProporTroca(); }
       else if (a === 'fim') { agir('encerrarTurno'); if (!st.pend) setTimeout(() => focar(E.J(st).pos, 0.55), 20); }
     });
     tb.querySelectorAll('[data-celebi]').forEach(b => b.onclick = () => agir('celebiMovimento', +b.dataset.celebi));
@@ -324,10 +326,13 @@
     const pm = online() ? (NET.eu != null && NET.eu >= 0 ? E.J(st, NET.eu) : null) : p, trm = pm && pm.treinador && E.idx().tr[pm.treinador];
     mb.innerHTML = !pm ? '<h3>Assistindo</h3><p class="mut">👀 Você está assistindo a esta partida.</p>' : `${online() ? `<h3>Você: <span class="dot" style="display:inline-block;vertical-align:middle;background:${COR_HEX[pm.cor]}"></span> ${esc(pm.nome)}</h3>` : ''}
       ${secao('time', `Time (${pm.pokemon.length})`, timeAgrupado(pm))}
-      ${secao('itens', `Itens (${pm.itens.length}/${E.limiteItens(pm)})`, `<div class="hand">${pm.itens.map(i => `<div class="ic" data-i="${i}" title="${esc(E.ITEM(i).nome)}"><img src="${E.ITEM(i).img}"></div>`).join('') || '<span class="mut">Nenhum</span>'}</div>`)}
+      ${propostasFicha(pm)}${secao('itens', `Itens (${pm.itens.length}/${E.limiteItens(pm)})`, `<div class="hand">${pm.itens.map(i => `<div class="ic" data-i="${i}" title="${esc(E.ITEM(i).nome)}"><img src="${E.ITEM(i).img}"></div>`).join('') || '<span class="mut">Nenhum</span>'}</div>`)}
       ${secao('treinador', `Treinador${trm ? ': ' + esc(trm.nome) : ''}`, trm ? `<div class="trainer"><img src="${trm.img}" data-z="${trm.img}"><div><b>${esc(trm.nome)}</b><p>${esc(trm.texto)}</p></div></div>` : '<span class="mut">—</span>')}`;
     mb.querySelectorAll('.pc').forEach(c => c.onclick = () => zoom(E.P(c.dataset.id).img));
     mb.querySelectorAll('[data-z]').forEach(c => c.onclick = () => zoom(c.dataset.z));
+    mb.querySelectorAll('[data-cprop]').forEach(b => b.onclick = () => agir('cancelarProposta', +b.dataset.quem, +b.dataset.cprop));
+    mb.querySelectorAll('[data-vprop]').forEach(b => b.onclick = () => verProposta(+b.dataset.vprop));
+    avisoTroca();
     mb.querySelectorAll('.ic').forEach(c => c.onclick = () => modalItem(c.dataset.i));
     // --- outros ---
     $('#othersBox').innerHTML = secao('jogadores', 'Jogadores', st.jogadores.map(q => `<div class="other ${q.id === st.vez ? 'cur' : ''} ${q.eliminado ? 'elim' : ''}" data-p="${q.id}"><span class="dot" style="background:${COR_HEX[q.cor]}"></span><span style="flex:1">${esc(q.nome)}${online() && q.id === NET.eu ? ' <span class="tag">você</span>' : ''}${online() && q.remoto && !q.ia && !(NET.conectados || []).includes(q.id) ? ' <span title="desconectado">🔌</span>' : ''}${q.eliminado ? ' <span class="mut">· eliminado</span>' : st.vencedor === q.id ? ' 👑' : ''}</span><span class="mut cnt" title="${q.pokemon.length} Pokémon · ${q.itens.length} Itens">${q.pokemon.length} <img src="img/ui/pokebola.webp" alt="Pokémon"> · ${q.itens.length} <img src="img/ui/item.webp" alt="Itens"></span>${insignias(q, true)}</div>`).join(''));
@@ -398,6 +403,7 @@
     const vez = st.vez === NET.eu && st.fase === 'inicio' && !st.pend;
     const dec = !!st.pend && E.quemDecide(st).includes(NET.eu) && !(st.pend.tipo === 'carta' && !E.reacaoAberta(st) && st.vez === NET.eu);
     if (vez && !avisoAnt.vez) { toast('🎲 Sua vez!'); piscarTitulo('🎲 Sua vez! — PMT HEX'); }
+    else if (dec && !avisoAnt.dec && st.pend.tipo === 'proposta') { toast('🤝 Você recebeu uma proposta de troca!'); piscarTitulo('🤝 Proposta de troca — PMT HEX'); }
     else if (dec && !avisoAnt.dec && st.vez !== NET.eu) { toast('⚠ Uma decisão sua está esperando'); piscarTitulo('⚠ Sua decisão — PMT HEX'); }
     avisoAnt = { vez, dec };
   }
@@ -530,6 +536,7 @@
     if (pd.tipo === 'pracaPremio') return mPracaPremio(pd, p);
     if (pd.tipo === 'ligaBatalha') return mLiga(pd);
     if (pd.tipo === 'campeao') return mCampeao(pd);
+    if (pd.tipo === 'proposta') return mProposta(pd);
   }
   function mCynthia(pd) {
     const q = E.J(st, pd.respondente), c = E.P(pd.carta), cap = E.J(st, pd.capturador);
@@ -722,6 +729,62 @@
       ${L.elim.length ? `<p class="mut">Eliminados: ${L.elim.map(id => esc(E.J(st, id).nome)).join(', ')}.</p>` : ''}
       <h3>Batalhas</h3>${histBatalhas()}<div class="mfoot"><button class="pri" id="ok">Fechar</button></div>`);
     $('#ok').onclick = fecharModal;
+  }
+  // ---------- Propostas de troca entre humanos ----------
+  let selProp = null, trocaVista = null;
+  const nomesPk = l => l.map(id => esc(E.P(id).nome)).join(', ') || '<span class="mut">nada</span>';
+  function propostasFicha(pm) {
+    const l = (st.propostas || []).filter(pr => pr.de === pm.id || pr.para === pm.id); if (!l.length) return '';
+    return secao('propostas', `Propostas de troca (${l.length})`, l.map(pr => {
+      const env = pr.de === pm.id, outro = E.J(st, env ? pr.para : pr.de);
+      return `<div class="propLin"><span>${env ? `Para <b>${esc(outro.nome)}</b>` : `De <b>${esc(outro.nome)}</b>`} · ${env ? 'dá' : 'oferece'} ${pr.meus.length} · pede ${pr.deles.length}<br><span class="mut">${env ? 'aguardando a vez de ' + esc(outro.nome) : 'você responde no início da sua vez'}</span></span>
+        <button class="sm" data-vprop="${pr.id}">Ver</button>${env && !(st.pend && st.pend.tipo === 'proposta' && st.pend.id === pr.id) ? `<button class="sm" data-cprop="${pr.id}" data-quem="${pm.id}">Retirar</button>` : ''}</div>`;
+    }).join(''));
+  }
+  function blocoTroca(a, b, meus, deles, quemVe) {
+    const lado = (q, ids, rot) => `<div class="propLado"><h3>${rot}</h3>${ids.length ? `<div class="ligaPick">${timeAgrupado(q, 78, { ids })}</div>` : '<p class="mut">Nada</p>'}</div>`;
+    const eB = quemVe === b.id;
+    return `<div class="propGrid">${lado(a, meus, eB ? `Você recebe (de ${esc(a.nome)})` : `${esc(a.nome)} dá`)}<div class="propSeta">⇄</div>${lado(b, deles, eB ? 'Você entrega' : `${esc(b.nome)} dá`)}</div>`;
+  }
+  function verProposta(id) {
+    const pr = (st.propostas || []).find(x => x.id === id); if (!pr) return;
+    const a = E.J(st, pr.de), b = E.J(st, pr.para), eu = online() ? NET.eu : null;
+    abrirModal(`<h2>🤝 Proposta de ${esc(a.nome)} para ${esc(b.nome)}</h2>${blocoTroca(a, b, pr.meus, pr.deles, eu)}
+      <p class="mut">${esc(b.nome)} responde no início da própria vez. Pokémon que mudarem de dono até lá anulam a proposta.</p><div class="mfoot"><button class="pri" data-x>Fechar</button></div>`);
+    $('#modalCard').querySelectorAll('.pc').forEach(c => c.onclick = () => zoom(E.P(c.dataset.id).img));
+  }
+  function mProporTroca() {
+    if (!E.podeProporTroca(st)) return fecharModal();
+    const p = E.J(st), alvos = E.alvosProposta(st), M = E.MAX_PROPOSTA;
+    const S = selProp || (selProp = { para: alvos.length === 1 ? alvos[0] : null, meus: [], deles: [] });
+    if (S.para != null && !alvos.includes(S.para)) S.para = null;
+    const q = S.para != null ? E.J(st, S.para) : null, ja = q && (st.propostas || []).find(x => x.de === p.id && x.para === q.id);
+    const pick = (dono, l, ids) => ids.length ? `<div class="ligaPick">${timeAgrupado(dono, 70, { ids, carta: id => `<div class="pc ${S[l].includes(id) ? 'sel' : ''} ${S[l].length >= M && !S[l].includes(id) ? 'off' : ''}" data-pl="${l}" data-id="${id}" title="${esc(E.P(id).nome)}"><img src="${E.P(id).img}" loading="lazy"><span class="f">${E.forcaBase(dono, id) + E.bonusTreinador(dono, id)}</span></div>` })}</div>` : '<p class="mut">Nenhum Pokémon disponível.</p>';
+    const ok = q && S.meus.length + S.deles.length > 0;
+    abrirModal(`<h2>🤝 Propor troca</h2><p class="mut">Escolha um jogador e até ${M} Pokémon de cada lado (pode deixar um lado vazio). ${q ? esc(q.nome) : 'O outro jogador'} responde no início da própria vez. Famílias travadas não entram em trocas.</p>
+      <div class="propAlvos">${alvos.map(j => { const x = E.J(st, j); return `<button class="${S.para === j ? 'pri' : ''}" data-alvo="${j}"><span class="dot" style="background:${COR_HEX[x.cor]}"></span> ${esc(x.nome)}</button>`; }).join('')}</div>
+      ${q ? `${ja ? `<p class="aviso">Você já tem uma proposta pendente para ${esc(q.nome)}; enviar outra substitui a anterior.</p>` : ''}
+        <h3>Você dá (${S.meus.length}/${M})</h3>${pick(p, 'meus', p.pokemon.filter(id => E.trocavel(p, id)))}
+        <h3>Você pede de ${esc(q.nome)} (${S.deles.length}/${M})</h3>${pick(q, 'deles', q.pokemon.filter(id => E.trocavel(q, id)))}` : ''}
+      <div class="mfoot"><button data-x>Cancelar</button><button class="pri" id="envProp" ${ok ? '' : 'disabled'}>Enviar proposta</button></div>`);
+    const mc = $('#modalCard');
+    mc.querySelectorAll('[data-alvo]').forEach(b => b.onclick = () => { S.para = +b.dataset.alvo; S.deles = []; mProporTroca(); });
+    mc.querySelectorAll('[data-pl]').forEach(c => c.onclick = () => { const l = S[c.dataset.pl], id = c.dataset.id, i = l.indexOf(id); if (i >= 0) l.splice(i, 1); else if (l.length < M) l.push(id); mProporTroca(); });
+    $('#envProp').onclick = () => { const x = selProp; selProp = null; fecharModal(); agir('proporTroca', x.para, x.meus, x.deles); toast('🤝 Proposta enviada para ' + esc(E.J(st, x.para).nome)); };
+  }
+  function mProposta(pd) {
+    const a = E.J(st, pd.de), b = E.J(st, pd.para), sou = !online() || NET.eu === b.id;
+    if (!sou) return abrirModal(`<h2>🤝 ${esc(pd.titulo)}</h2><p class="mut">⏳ ${esc(b.nome)} está avaliando uma proposta de troca${online() && NET.eu === a.id ? ' sua' : ' de ' + esc(a.nome)}…</p>${online() && NET.eu === a.id ? blocoTroca(a, b, pd.meus, pd.deles, NET.eu) : ''}`);
+    abrirModal(`<h2>🤝 ${esc(a.nome)} propõe uma troca</h2>${!online() ? `<p class="mut">Passe o dispositivo para ${esc(b.nome)}.</p>` : ''}${blocoTroca(a, b, pd.meus, pd.deles, b.id)}
+      <div class="mfoot"><button id="recProp">✖ Recusar</button><button class="pri" id="aceProp">✔ Aceitar troca</button></div>`);
+    $('#modalCard').querySelectorAll('.pc').forEach(c => c.onclick = () => zoom(E.P(c.dataset.id).img));
+    $('#recProp').onclick = () => agir('responderProposta', false);
+    $('#aceProp').onclick = () => agir('responderProposta', true);
+  }
+  function avisoTroca() {
+    const av = st.trocaAviso; if (!av) return; if (trocaVista == null) { trocaVista = av.seq; return; } if (av.seq === trocaVista) return; trocaVista = av.seq;
+    if (online() && NET.eu !== av.de) return;
+    toast(av.aceita ? `🤝 ${esc(E.J(st, av.para).nome)} aceitou sua troca!` : `✖ ${esc(E.J(st, av.para).nome)} recusou sua proposta de troca.`);
   }
   function mCampeao(pd) {
     const q = E.J(st, pd.jogador), es = q.stats || { eventos: 0, superEventos: 0, bat: {} }, B = es.bat || {};

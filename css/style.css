@@ -358,3 +358,13 @@ button.celebi:hover:not(:disabled){background:rgba(244,114,182,.15);border-color
 .cpStat b{font:400 24px "Russo One";color:var(--acc)}
 .cpStat span{font-size:12px;color:var(--mut)}
 .cpTime .team2{justify-content:center}
+.propAlvos{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.propAlvos .dot{display:inline-block;vertical-align:middle}
+.propGrid{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:start;margin:10px 0}
+.propSeta{font-size:28px;color:var(--acc);align-self:center}
+.propLado{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:8px 10px;min-width:0}
+.propLado h3{margin:2px 0 8px}
+.propLin{display:flex;gap:6px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px}
+.propLin>span{flex:1}
+.aviso{background:rgba(255,200,0,.1);border:1px solid rgba(255,200,0,.35);border-radius:8px;padding:6px 10px;font-size:13px}
+@media (max-width:760px){.propGrid{grid-template-columns:1fr}.propSeta{justify-self:center;transform:rotate(90deg)}}
