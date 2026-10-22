@@ -257,7 +257,7 @@
   // Time agrupado por linha evolutiva: famílias com 2+ Pokémons ganham uma moldura compartilhada
   // opts.ids: só estes Pokémons (o bônus continua calculado com o time todo); opts.carta: como desenhar cada carta
   function timeAgrupado(p, larg, opts) {
-    opts = opts || {}; const carta = opts.carta || (id => cartaPokemon(p, id));
+    opts = opts || {}; const carta = opts.carta || (id => cartaPokemon(p, id)), bonusDe = opts.bonus || (id => E.bonusEvolucao(p, id));
     const grupos = {};
     (opts.ids || p.pokemon).forEach(id => { const c = E.P(id), k = c.familia || id; (grupos[k] = grupos[k] || []).push(id); });
     const ordemCor = ids => Math.max(...ids.map(id => CORES_ORDEM.indexOf(E.P(id).cor)));
@@ -265,7 +265,7 @@
       .sort((a, b) => (b.ids.length > 1) - (a.ids.length > 1) || ordemCor(a.ids) - ordemCor(b.ids) || E.P(a.ids[0]).nome.localeCompare(E.P(b.ids[0]).nome));
     return `<div class="team2" style="--w:${larg || 62}px">${lista.map(g => {
       if (g.ids.length === 1) return `<div class="famG solo">${carta(g.ids[0])}</div>`;
-      const trav = p.travadas.includes(g.fam), bonus = Math.max(...g.ids.map(id => E.bonusEvolucao(p, id)));
+      const trav = p.travadas.includes(g.fam), bonus = Math.max(...g.ids.map(bonusDe));
       return `<div class="famG ${trav ? 'trav' : ''}" title="Linha evolutiva${bonus ? ` — bônus de evolução +${bonus} no mais evoluído` : ''}${trav ? ' · família travada (+1)' : ''}"><span class="famTag">${trav ? '🔒 ' : ''}${bonus ? 'evol. +' + bonus : 'mesma linha'}</span>${g.ids.map(id => carta(id)).join('')}</div>`;
     }).join('')}</div>`;
   }
@@ -579,7 +579,7 @@
       const painel = l => {
         const q = E.J(st, pd[l]), ap = E.pracaAptosDe(q), n = Math.min(2, ap.length), its = q.itens.filter(i => E.ITEM(i).uso === 'batalha' && E.ITEM(i).bonus), I = S.it[l];
         return `<div class="lgEsc"><h3>${esc(q.nome)}, escolha ${n === 2 ? 'sua dupla' : 'seu Pokémon'} <span class="mut">(em segredo)</span></h3>
-          <div class="pick" style="grid-template-columns:repeat(auto-fill,minmax(76px,1fr))">${ap.map(id => `<div class="pc ${S.ids[l].includes(id) ? 'sel' : ''}" data-pp="${id}" data-pl="${l}"><img src="${E.P(id).img}"><span class="f">${E.pracaForca(st, q.id, id, null, []).forca}</span></div>`).join('')}</div>
+          <div class="ligaPick">${timeAgrupado(q, 78, { ids: ap, bonus: id => E.bonusEvolucao(q, id, ['inicial', 'rosa', 'verde']), carta: id => `<div class="pc ${S.ids[l].includes(id) ? 'sel' : ''}" data-pp="${id}" data-pl="${l}" title="${esc(E.P(id).nome)}"><img src="${E.P(id).img}"><span class="f">${E.pracaForca(st, q.id, id, null, []).forca}</span></div>` })}</div>
           ${S.ids[l].map(id => `<div class="row" style="margin-top:6px"><span style="min-width:120px">${esc(E.P(id).nome)}:</span><select data-pi="${id}" data-pl="${l}" style="flex:1"><option value="">— sem Item —</option>${its.filter(i => i === I[id] || !Object.values(I).includes(i)).map(i => `<option value="${i}" ${I[id] === i ? 'selected' : ''}>${esc(E.ITEM(i).nome)} (+${E.bonusItemBatalha(i, id)})</option>`).join('')}</select></div>`).join('')}
           <div class="mfoot"><button class="pri" data-pc="${l}" ${S.ids[l].length === n ? '' : 'disabled'}>Confirmar</button></div></div>`;
       };
@@ -1006,7 +1006,7 @@
     const meuLadoFeito = online() && ['a', 'b'].some(l => pd[l] === NET.eu && pd.escolhas && pd.escolhas[l]);
     const lado = l => { const q = E.J(st, pd[l]); if (q.ia || !souEu(q.id) || (online() && pd.escolhas && pd.escolhas[l])) return `<div><h3>${esc(q.nome)}${q.ia ? ' 🤖' : ''}</h3><p class="mut">${pd.escolhas && pd.escolhas[l] ? '✔ Escolha feita.' : q.ia ? 'Escolha feita em segredo.' : 'Escolhendo em segredo…'}</p></div>`;
       const its = q.itens.filter(i => E.ITEM(i).uso === 'batalha' && E.ITEM(i).bonus);
-      return `<div><h3>${esc(q.nome)}</h3><div class="pick" style="grid-template-columns:repeat(auto-fill,minmax(70px,1fr))">${E.aptosDuelo(st, pd, l).map(id => `<div class="pc ${S[l].pokemon === id ? 'sel' : ''}" data-l="${l}" data-id="${id}"><img src="${E.P(id).img}"><span class="f">${E.forcaEmBatalha(st, q.id, id, null, [], pd.mods)}</span></div>`).join('')}</div>
+      return `<div><h3>${esc(q.nome)}</h3><div class="ligaPick">${timeAgrupado(q, 70, { ids: E.aptosDuelo(st, pd, l), carta: id => `<div class="pc ${S[l].pokemon === id ? 'sel' : ''}" data-l="${l}" data-id="${id}" title="${esc(E.P(id).nome)}"><img src="${E.P(id).img}"><span class="f">${E.forcaEmBatalha(st, q.id, id, null, [], pd.mods)}</span></div>` })}</div>
         <select data-i="${l}" style="margin-top:8px;width:100%"><option value="">— sem item —</option>${its.map(i => `<option value="${i}" ${S[l].item === i ? 'selected' : ''}>${esc(E.ITEM(i).nome)} (+${E.ITEM(i).bonus})</option>`).join('')}</select></div>`; };
     const premioTxt = { dojo: 'um Pokémon Azul aleatório', estufa: 'dois Pokémons Verdes aleatórios', gelo: 'escolher entre os 2 próximos Eventos', vulcao: '3 Itens e 1 Treinador' }[pd.premio];
     const msg = !r || animando ? '' : r.venc != null ? `🏆 ${esc(E.J(st, r.venc).nome)} vence o duelo!${premioTxt ? ' Prêmio: ' + premioTxt + '.' : ''}` : r.fim ? 'Ninguém tem mais Pokémons: duelo sem vencedor.' : 'Empate — os dois Pokémons desmaiam. Escolham outros.';
@@ -1072,7 +1072,7 @@
     abrirModal(`<div class="mgrid"><img src="${L.img}"><div>
       <h2>${esc(pd.titulo)}</h2><div class="mut">Tipo ${E.TIPOS_NOME[L.tipo]} · força fixa ${L.forca}${L.dual ? ' · <b>DUAL</b>: envie 2 Pokémons, 1 dado, até 2 itens' : ''} · vantagem contra ${L.vantagens.map(t => E.TIPOS_NOME[t]).join(', ') || '—'}</div>
       ${!r ? `<p style="margin:12px 0 6px">Escolha ${n} Pokémon${n > 1 ? 's' : ''} <span class="mut">(só os que obedecem)</span>:</p>
-        <div class="pick" style="grid-template-columns:repeat(auto-fill,minmax(84px,1fr))">${aptos.map(id => `<div class="pc ${S.pk.includes(id) ? 'sel' : ''}" data-id="${id}"><img src="${E.P(id).img}"><span class="f">${prev(id)}</span></div>`).join('') || '<span class="mut">Nenhum Pokémon apto.</span>'}</div>
+        <div class="ligaPick">${aptos.length ? timeAgrupado(p, 84, { ids: aptos, carta: id => `<div class="pc ${S.pk.includes(id) ? 'sel' : ''}" data-id="${id}" title="${esc(E.P(id).nome)}"><img src="${E.P(id).img}"><span class="f">${prev(id)}</span></div>` }) : '<span class="mut">Nenhum Pokémon apto.</span>'}</div>
         ${S.pk.length && itensBat.length ? `<p style="margin:12px 0 6px">Item de batalha (um por Pokémon):</p>${S.pk.map(id => `<div class="row" style="margin-bottom:6px"><span style="width:110px">${esc(E.P(id).nome)}</span><select data-it="${id}"><option value="">— nenhum —</option>${itensBat.filter(i => !usados.includes(i) || S.it[id] === i).map(i => `<option value="${i}" ${S.it[id] === i ? 'selected' : ''}>${esc(E.ITEM(i).nome)} (+${E.ITEM(i).bonus}${E.ITEM(i).tipos ? ' ' + E.ITEM(i).tipos.map(t => E.TIPOS_NOME[t]).join('/') : ''})</option>`).join('')}</select></div>`).join('')}` : ''}
         ${S.pk.length === n ? `<div class="result">Sua força antes do dado: <b>${S.pk.reduce((s, id) => s + prev(id), 0)}</b> · Líder: <b>${L.forca + liderVs}</b>${liderVs ? ` (inclui +${liderVs} de vantagem)` : ''}. Empate = vitória sua.</div>` : ''}` : ''}
       ${r && false ? `<div class="result ${r.ok ? 'ok' : 'no'}"><b class="big">${r.ok ? 'Vitória!' : 'Derrota'}</b>
