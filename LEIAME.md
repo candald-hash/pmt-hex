@@ -10,6 +10,7 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- Elenco alternativo de Pokémons (225 cartas): escolha "Elenco de Pokémons" ao criar a partida (local) ou na sala on-line (o anfitrião escolhe). Página de conferência das cartas: elenco.html.
 - Correção: o efeito de Pioneiro (ex.: Mahogany) se repetia a cada visita quando o pioneiro era o 1º jogador.
 - Liga: o jogador eliminado devolve seus Pokémons às pilhas e descarta Itens e Treinador; eliminados não são mais afetados nem escolhidos por efeitos.
 - Captura: chance de captura (%) sempre visível, atualizada com a Bola escolhida (cada Bola mostra a chance com ela); também na escolha entre cartas.

@@ -1,0 +1,4419 @@
+{
+"nota": "Elenco alternativo. Itens com \"repetido\": true usam a carta igual do elenco padrão (dados/pokemon.json).",
+"cartas": [
+{
+"id": "froakie",
+"nome": "Froakie",
+"cor": "inicial",
+"forca": 4,
+"tipos": [
+"agua"
+],
+"vantagens": [
+"terra",
+"pedra",
+"fogo"
+],
+"captura": [],
+"familia": "froakie",
+"estagio": 0,
+"img": "0 - inicial_alt/froakie.png"
+},
+{
+"id": "piplup",
+"nome": "Piplup",
+"cor": "inicial",
+"forca": 4,
+"tipos": [
+"agua"
+],
+"vantagens": [
+"terra",
+"pedra",
+"fogo"
+],
+"captura": [],
+"familia": "piplup",
+"estagio": 0,
+"img": "0 - inicial_alt/piplup.png"
+},
+{
+"id": "scorbunny",
+"nome": "Scorbunny",
+"cor": "inicial",
+"forca": 4,
+"tipos": [
+"fogo"
+],
+"vantagens": [
+"metal",
+"inseto",
+"gelo",
+"grama"
+],
+"captura": [],
+"familia": "scorbunny",
+"estagio": 0,
+"img": "0 - inicial_alt/scorbunny.png"
+},
+{
+"id": "snivy",
+"nome": "Snivy",
+"cor": "inicial",
+"forca": 4,
+"tipos": [
+"grama"
+],
+"vantagens": [
+"eletrico",
+"terra",
+"pedra",
+"agua"
+],
+"captura": [],
+"familia": "snivy",
+"estagio": 0,
+"img": "0 - inicial_alt/snivy.png"
+},
+{
+"id": "tepig",
+"nome": "Tepig",
+"cor": "inicial",
+"forca": 4,
+"tipos": [
+"fogo"
+],
+"vantagens": [
+"metal",
+"inseto",
+"gelo",
+"grama"
+],
+"captura": [],
+"familia": "tepig",
+"estagio": 0,
+"img": "0 - inicial_alt/tepig.png"
+},
+{
+"id": "treecko",
+"nome": "Treecko",
+"cor": "inicial",
+"forca": 4,
+"tipos": [
+"grama"
+],
+"vantagens": [
+"eletrico",
+"terra",
+"pedra",
+"agua"
+],
+"captura": [],
+"familia": "treecko",
+"estagio": 0,
+"img": "0 - inicial_alt/treecko.png"
+},
+{
+"id": "aipom",
+"nome": "Aipom",
+"cor": "rosa",
+"forca": 3,
+"tipos": [
+"normal"
+],
+"vantagens": [],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "aipom",
+"estagio": 0,
+"img": "1 - rosa_alt/aipom.png"
+},
+{
+"id": "amaura",
+"nome": "Amaura",
+"cor": "rosa",
+"forca": 3,
+"tipos": [
+"gelo",
+"pedra"
+],
+"vantagens": [
+"dragao",
+"fogo",
+"voador",
+"grama"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "amaura",
+"estagio": 0,
+"img": "1 - rosa_alt/amaura.png"
+},
+{
+"id": "axew",
+"nome": "Axew",
+"cor": "rosa",
+"forca": 2,
+"tipos": [
+"dragao"
+],
+"vantagens": [
+"agua",
+"fogo",
+"eletrico",
+"grama"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "axew",
+"estagio": 0,
+"img": "1 - rosa_alt/axew.png"
+},
+{
+"id": "baltoy",
+"nome": "Baltoy",
+"cor": "rosa",
+"forca": 3,
+"tipos": [
+"psiquico",
+"terra"
+],
+"vantagens": [
+"veneno",
+"fogo",
+"eletrico",
+"lutador"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "baltoy",
+"estagio": 0,
+"img": "1 - rosa_alt/baltoy.png"
+},
+{
+"id": "bellsprout",
+"nome": "Bellsprout",
+"cor": "rosa",
+"forca": 2,
+"tipos": [
+"grama",
+"veneno"
+],
+"vantagens": [
+"terra",
+"fada",
+"pedra",
+"agua"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "bellsprout",
+"estagio": 0,
+"img": "1 - rosa_alt/bellsprout.png"
+},
+{
+"id": "chinchou",
+"nome": "Chinchou",
+"cor": "rosa",
+"forca": 3,
+"tipos": [
+"eletrico",
+"agua"
+],
+"vantagens": [
+"terra",
+"fogo",
+"voador",
+"agua"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "chinchou",
+"estagio": 0,
+"img": "1 - rosa_alt/chinchou.png"
+},
+{
+"id": "croagunk",
+"nome": "Croagunk",
+"cor": "rosa",
+"forca": 3,
+"tipos": [
+"lutador",
+"veneno"
+],
+"vantagens": [
+"normal",
+"pedra",
+"gelo",
+"grama"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "croagunk",
+"estagio": 0,
+"img": "1 - rosa_alt/croagunk.png"
+},
+{
+"id": "deino",
+"nome": "Deino",
+"cor": "rosa",
+"forca": 2,
+"tipos": [
+"dragao",
+"sombrio"
+],
+"vantagens": [
+"psiquico",
+"grama",
+"agua",
+"fantasma"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "deino",
+"estagio": 0,
+"img": "1 - rosa_alt/deino.png"
+},
+{
+"id": "electrike",
+"nome": "Electrike",
+"cor": "rosa",
+"forca": 3,
+"tipos": [
+"eletrico"
+],
+"vantagens": [
+"voador",
+"agua"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "electrike",
+"estagio": 0,
+"img": "1 - rosa_alt/electrike.png"
+},
+{
+"id": "elekid",
+"repetido": true
+},
+{
+"id": "exeggcute",
+"repetido": true
+},
+{
+"id": "flabebe",
+"nome": "Flabébé",
+"cor": "rosa",
+"forca": 2,
+"tipos": [
+"fada"
+],
+"vantagens": [
+"sombrio",
+"dragao",
+"lutador"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "flabebe",
+"estagio": 0,
+"img": "1 - rosa_alt/flabebe.png"
+},
+{
+"id": "fletchling",
+"nome": "Fletchling",
+"cor": "rosa",
+"forca": 2,
+"tipos": [
+"fogo",
+"voador"
+],
+"vantagens": [
+"lutador",
+"inseto",
+"gelo",
+"grama"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "fletchling",
+"estagio": 0,
+"img": "1 - rosa_alt/fletchling.png"
+},
+{
+"id": "geodude2",
+"nome": "Geodude",
+"cor": "rosa",
+"forca": 3,
+"tipos": [
+"pedra",
+"terra"
+],
+"vantagens": [
+"gelo",
+"inseto",
+"eletrico",
+"fogo"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "geodude2",
+"estagio": 0,
+"img": "1 - rosa_alt/geodude2.png"
+},
+{
+"id": "golett",
+"nome": "Golett",
+"cor": "rosa",
+"forca": 3,
+"tipos": [
+"fantasma",
+"terra"
+],
+"vantagens": [
+"psiquico",
+"fogo",
+"eletrico",
+"veneno"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "golett",
+"estagio": 0,
+"img": "1 - rosa_alt/golett.png"
+},
+{
+"id": "grimer",
+"nome": "Grimer",
+"cor": "rosa",
+"forca": 3,
+"tipos": [
+"veneno"
+],
+"vantagens": [
+"lutador",
+"inseto",
+"veneno",
+"grama"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "grimer",
+"estagio": 0,
+"img": "1 - rosa_alt/grimer.png"
+},
+{
+"id": "hatenna",
+"nome": "Hatenna",
+"cor": "rosa",
+"forca": 1,
+"tipos": [
+"psiquico"
+],
+"vantagens": [
+"lutador",
+"veneno"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "hatenna",
+"estagio": 0,
+"img": "1 - rosa_alt/hatenna.png"
+},
+{
+"id": "helioptile2",
+"nome": "Helioptile",
+"cor": "rosa",
+"forca": 2,
+"tipos": [
+"eletrico",
+"normal"
+],
+"vantagens": [
+"voador",
+"agua"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "helioptile2",
+"estagio": 0,
+"img": "1 - rosa_alt/helioptile2.png"
+},
+{
+"id": "honedge2",
+"nome": "Honedge",
+"cor": "rosa",
+"forca": 2,
+"tipos": [
+"fantasma",
+"metal"
+],
+"vantagens": [
+"psiquico",
+"fada",
+"gelo",
+"lutador"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "honedge2",
+"estagio": 0,
+"img": "1 - rosa_alt/honedge2.png"
+},
+{
+"id": "hoppip",
+"nome": "Hoppip",
+"cor": "rosa",
+"forca": 2,
+"tipos": [
+"grama",
+"voador"
+],
+"vantagens": [
+"lutador",
+"inseto",
+"pedra",
+"agua"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "hoppip",
+"estagio": 0,
+"img": "1 - rosa_alt/hoppip.png"
+},
+{
+"id": "impidimp",
+"nome": "Impidimp",
+"cor": "rosa",
+"forca": 3,
+"tipos": [
+"sombrio",
+"fada"
+],
+"vantagens": [
+"dragao",
+"sombrio",
+"psiquico",
+"fantasma"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "impidimp",
+"estagio": 0,
+"img": "1 - rosa_alt/impidimp.png"
+},
+{
+"id": "jangmoo",
+"nome": "Jangmo-o",
+"cor": "rosa",
+"forca": 3,
+"tipos": [
+"dragao",
+"lutador"
+],
+"vantagens": [
+"agua",
+"pedra",
+"gelo",
+"grama"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "jangmoo",
+"estagio": 0,
+"img": "1 - rosa_alt/jangmoo.png"
+},
+{
+"id": "joltik",
+"nome": "Joltik",
+"cor": "rosa",
+"forca": 1,
+"tipos": [
+"inseto",
+"eletrico"
+],
+"vantagens": [
+"agua",
+"voador",
+"psiquico",
+"grama"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "joltik",
+"estagio": 0,
+"img": "1 - rosa_alt/joltik.png"
+},
+{
+"id": "lotad",
+"nome": "Lotad",
+"cor": "rosa",
+"forca": 2,
+"tipos": [
+"grama",
+"agua"
+],
+"vantagens": [
+"eletrico",
+"terra",
+"pedra",
+"fogo"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "lotad",
+"estagio": 0,
+"img": "1 - rosa_alt/lotad.png"
+},
+{
+"id": "magikarp",
+"nome": "Magikarp",
+"cor": "rosa",
+"forca": 1,
+"tipos": [
+"agua"
+],
+"vantagens": [
+"terra",
+"fogo",
+"pedra"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "magikarp",
+"estagio": 0,
+"img": "1 - rosa_alt/magikarp.png"
+},
+{
+"id": "makuhita",
+"nome": "Makuhita",
+"cor": "rosa",
+"forca": 3,
+"tipos": [
+"lutador"
+],
+"vantagens": [
+"normal",
+"sombrio",
+"pedra",
+"gelo"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "makuhita",
+"estagio": 0,
+"img": "1 - rosa_alt/makuhita.png"
+},
+{
+"id": "mareep",
+"repetido": true
+},
+{
+"id": "mimejr",
+"nome": "Mime Jr.",
+"cor": "rosa",
+"forca": 1,
+"tipos": [
+"psiquico",
+"fada"
+],
+"vantagens": [
+"inseto",
+"lutador",
+"grama"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "mimejr",
+"estagio": 0,
+"img": "1 - rosa_alt/mimejr.png"
+},
+{
+"id": "nidoranm",
+"nome": "Nidoran♂",
+"cor": "rosa",
+"forca": 2,
+"tipos": [
+"veneno"
+],
+"vantagens": [
+"fada",
+"inseto",
+"lutador",
+"grama"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "nidoranm",
+"estagio": 0,
+"img": "1 - rosa_alt/nidoranm.png"
+},
+{
+"id": "noibat",
+"nome": "Noibat",
+"cor": "rosa",
+"forca": 2,
+"tipos": [
+"dragao",
+"voador"
+],
+"vantagens": [
+"lutador",
+"fogo",
+"eletrico",
+"grama"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "noibat",
+"estagio": 0,
+"img": "1 - rosa_alt/noibat.png"
+},
+{
+"id": "pichu",
+"repetido": true
+},
+{
+"id": "pikipek",
+"nome": "Pikipek",
+"cor": "rosa",
+"forca": 2,
+"tipos": [
+"voador"
+],
+"vantagens": [
+"inseto",
+"lutador",
+"grama"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "pikipek",
+"estagio": 0,
+"img": "1 - rosa_alt/pikipek.png"
+},
+{
+"id": "poliwag",
+"repetido": true
+},
+{
+"id": "ralts",
+"repetido": true
+},
+{
+"id": "roggenrola",
+"repetido": true
+},
+{
+"id": "rolycoly",
+"nome": "Rolycoly",
+"cor": "rosa",
+"forca": 2,
+"tipos": [
+"pedra"
+],
+"vantagens": [
+"voador",
+"inseto",
+"gelo",
+"fogo"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "rolycoly",
+"estagio": 0,
+"img": "1 - rosa_alt/rolycoly.png"
+},
+{
+"id": "sandile2",
+"repetido": true
+},
+{
+"id": "seel",
+"nome": "Seel",
+"cor": "rosa",
+"forca": 3,
+"tipos": [
+"agua"
+],
+"vantagens": [
+"fogo",
+"pedra",
+"terra"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "seel",
+"estagio": 0,
+"img": "1 - rosa_alt/seel.png"
+},
+{
+"id": "slugma",
+"nome": "Slugma",
+"cor": "verde",
+"forca": 3,
+"tipos": [
+"fogo"
+],
+"vantagens": [
+"metal",
+"inseto",
+"gelo",
+"grama"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "slugma",
+"estagio": 0,
+"img": "1 - rosa_alt/slugma.png"
+},
+{
+"id": "snubbull",
+"nome": "Snubbull",
+"cor": "rosa",
+"forca": 3,
+"tipos": [
+"fada"
+],
+"vantagens": [
+"sombrio",
+"inseto",
+"dragao",
+"lutador"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "snubbull",
+"estagio": 0,
+"img": "1 - rosa_alt/snubbull.png"
+},
+{
+"id": "solosis",
+"nome": "Solosis",
+"cor": "rosa",
+"forca": 1,
+"tipos": [
+"psiquico"
+],
+"vantagens": [
+"veneno",
+"lutador"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "solosis",
+"estagio": 0,
+"img": "1 - rosa_alt/solosis.png"
+},
+{
+"id": "spheal",
+"nome": "Spheal",
+"cor": "rosa",
+"forca": 2,
+"tipos": [
+"gelo"
+],
+"vantagens": [
+"dragao",
+"terra",
+"voador",
+"grama"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "spheal",
+"estagio": 0,
+"img": "1 - rosa_alt/spheal.png"
+},
+{
+"id": "spinarak",
+"nome": "Spinarak",
+"cor": "rosa",
+"forca": 2,
+"tipos": [
+"inseto",
+"veneno"
+],
+"vantagens": [
+"lutador",
+"sombrio",
+"psiquico",
+"grama"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "spinarak",
+"estagio": 0,
+"img": "1 - rosa_alt/spinarak.png"
+},
+{
+"id": "spoink",
+"nome": "Spoink",
+"cor": "rosa",
+"forca": 3,
+"tipos": [
+"psiquico"
+],
+"vantagens": [
+"veneno",
+"lutador"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "spoink",
+"estagio": 0,
+"img": "1 - rosa_alt/spoink.png"
+},
+{
+"id": "starly",
+"nome": "Starly",
+"cor": "rosa",
+"forca": 2,
+"tipos": [
+"voador"
+],
+"vantagens": [
+"inseto",
+"lutador",
+"grama"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "starly",
+"estagio": 0,
+"img": "1 - rosa_alt/starly.png"
+},
+{
+"id": "timburr",
+"repetido": true
+},
+{
+"id": "toxel",
+"repetido": true
+},
+{
+"id": "trapinch",
+"nome": "Trapinch",
+"cor": "rosa",
+"forca": 2,
+"tipos": [
+"terra"
+],
+"vantagens": [
+"metal",
+"eletrico",
+"veneno",
+"fogo"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "trapinch",
+"estagio": 0,
+"img": "1 - rosa_alt/trapinch.png"
+},
+{
+"id": "tympole",
+"nome": "Tympole",
+"cor": "rosa",
+"forca": 1,
+"tipos": [
+"agua"
+],
+"vantagens": [
+"terra",
+"pedra",
+"fogo"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "tympole",
+"estagio": 0,
+"img": "1 - rosa_alt/tympole.png"
+},
+{
+"id": "tynamo",
+"nome": "Tynamo",
+"cor": "rosa",
+"forca": 2,
+"tipos": [
+"eletrico"
+],
+"vantagens": [
+"voador",
+"agua"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "tynamo",
+"estagio": 0,
+"img": "1 - rosa_alt/tynamo.png"
+},
+{
+"id": "vanillite",
+"nome": "Vanillite",
+"cor": "rosa",
+"forca": 1,
+"tipos": [
+"gelo"
+],
+"vantagens": [
+"terra",
+"voador",
+"dragao",
+"grama"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "vanillite",
+"estagio": 0,
+"img": "1 - rosa_alt/vanillite.png"
+},
+{
+"id": "weedle",
+"nome": "Weedle",
+"cor": "rosa",
+"forca": 1,
+"tipos": [
+"inseto",
+"veneno"
+],
+"vantagens": [
+"fada",
+"sombrio",
+"psiquico",
+"grama"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "weedle",
+"estagio": 0,
+"img": "1 - rosa_alt/weedle.png"
+},
+{
+"id": "whismur",
+"nome": "Whismur",
+"cor": "rosa",
+"forca": 2,
+"tipos": [
+"normal"
+],
+"vantagens": [],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "whismur",
+"estagio": 0,
+"img": "1 - rosa_alt/whismur.png"
+},
+{
+"id": "wynaut",
+"nome": "Wynaut",
+"cor": "rosa",
+"forca": 1,
+"tipos": [
+"psiquico"
+],
+"vantagens": [
+"lutador",
+"veneno"
+],
+"captura": [
+2,
+3,
+4,
+5
+],
+"familia": "wynaut",
+"estagio": 0,
+"img": "1 - rosa_alt/wynaut.png"
+},
+{
+"id": "zubat",
+"repetido": true
+},
+{
+"id": "anorith",
+"nome": "Anorith",
+"cor": "verde",
+"forca": 5,
+"tipos": [
+"inseto",
+"pedra"
+],
+"vantagens": [
+"fogo",
+"sombrio",
+"psiquico",
+"grama"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "anorith",
+"estagio": 0,
+"img": "2 - verde_alt/anorith.png"
+},
+{
+"id": "archen",
+"nome": "Archen",
+"cor": "verde",
+"forca": 4,
+"tipos": [
+"pedra",
+"voador"
+],
+"vantagens": [
+"lutador",
+"fogo",
+"gelo",
+"grama"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "archen",
+"estagio": 0,
+"img": "2 - verde_alt/archen.png"
+},
+{
+"id": "ariados",
+"nome": "Ariados",
+"cor": "verde",
+"forca": 5,
+"tipos": [
+"inseto",
+"veneno"
+],
+"vantagens": [
+"lutador",
+"sombrio",
+"psiquico",
+"grama"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "spinarak",
+"estagio": 1,
+"img": "2 - verde_alt/ariados.png"
+},
+{
+"id": "bagon",
+"nome": "Bagon",
+"cor": "verde",
+"forca": 3,
+"tipos": [
+"dragao"
+],
+"vantagens": [
+"agua",
+"fogo",
+"eletrico",
+"grama"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "bagon",
+"estagio": 0,
+"img": "2 - verde_alt/bagon.png"
+},
+{
+"id": "blitzle",
+"nome": "Blitzle",
+"cor": "verde",
+"forca": 4,
+"tipos": [
+"eletrico"
+],
+"vantagens": [
+"voador",
+"agua"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "blitzle",
+"estagio": 0,
+"img": "2 - verde_alt/blitzle.png"
+},
+{
+"id": "boldore",
+"repetido": true
+},
+{
+"id": "carkol",
+"nome": "Carkol",
+"cor": "verde",
+"forca": 4,
+"tipos": [
+"fogo",
+"pedra"
+],
+"vantagens": [
+"voador",
+"inseto",
+"gelo",
+"grama"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "rolycoly",
+"estagio": 1,
+"img": "2 - verde_alt/carkol.png"
+},
+{
+"id": "carvanha",
+"nome": "Carvanha",
+"cor": "verde",
+"forca": 3,
+"tipos": [
+"sombrio",
+"agua"
+],
+"vantagens": [
+"psiquico",
+"fantasma",
+"terra",
+"fogo"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "carvanha",
+"estagio": 0,
+"img": "2 - verde_alt/carvanha.png"
+},
+{
+"id": "doublade",
+"nome": "Doublade",
+"cor": "verde",
+"forca": 4,
+"tipos": [
+"fantasma",
+"metal"
+],
+"vantagens": [
+"psiquico",
+"lutador",
+"gelo",
+"fada"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "honedge2",
+"estagio": 1,
+"img": "2 - verde_alt/doublade.png"
+},
+{
+"id": "duosion",
+"nome": "Duosion",
+"cor": "verde",
+"forca": 4,
+"tipos": [
+"psiquico"
+],
+"vantagens": [
+"veneno",
+"lutador"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "solosis",
+"estagio": 1,
+"img": "2 - verde_alt/duosion.png"
+},
+{
+"id": "eelektrik",
+"nome": "Eelektrik",
+"cor": "verde",
+"forca": 4,
+"tipos": [
+"eletrico"
+],
+"vantagens": [
+"voador",
+"agua"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "tynamo",
+"estagio": 1,
+"img": "2 - verde_alt/eelektrik.png"
+},
+{
+"id": "flaaffy",
+"repetido": true
+},
+{
+"id": "fletchinder",
+"nome": "Fletchinder",
+"cor": "verde",
+"forca": 4,
+"tipos": [
+"fogo",
+"voador"
+],
+"vantagens": [
+"lutador",
+"inseto",
+"gelo",
+"grama"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "fletchling",
+"estagio": 1,
+"img": "2 - verde_alt/fletchinder.png"
+},
+{
+"id": "floette",
+"nome": "Floette",
+"cor": "azul",
+"forca": 5,
+"tipos": [
+"fada"
+],
+"vantagens": [
+"sombrio",
+"dragao",
+"lutador"
+],
+"captura": [
+4,
+5
+],
+"familia": "flabebe",
+"estagio": 1,
+"img": "2 - verde_alt/floette.png"
+},
+{
+"id": "fraxure",
+"nome": "Fraxure",
+"cor": "verde",
+"forca": 4,
+"tipos": [
+"dragao"
+],
+"vantagens": [
+"agua",
+"fogo",
+"eletrico",
+"grama"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "axew",
+"estagio": 1,
+"img": "2 - verde_alt/fraxure.png"
+},
+{
+"id": "golbat",
+"repetido": true
+},
+{
+"id": "graveler",
+"nome": "Graveler",
+"cor": "verde",
+"forca": 5,
+"tipos": [
+"pedra",
+"terra"
+],
+"vantagens": [
+"eletrico",
+"voador",
+"gelo",
+"fogo"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "geodude2",
+"estagio": 1,
+"img": "2 - verde_alt/graveler.png"
+},
+{
+"id": "gurdurr",
+"repetido": true
+},
+{
+"id": "hakamo-o",
+"nome": "Hakamo-o",
+"cor": "verde",
+"forca": 5,
+"tipos": [
+"dragao",
+"lutador"
+],
+"vantagens": [
+"agua",
+"pedra",
+"gelo",
+"grama"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "jangmoo",
+"estagio": 1,
+"img": "2 - verde_alt/hakamo-o.png"
+},
+{
+"id": "hattrem",
+"nome": "Hattrem",
+"cor": "verde",
+"forca": 4,
+"tipos": [
+"psiquico"
+],
+"vantagens": [
+"lutador",
+"veneno"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "hatenna",
+"estagio": 1,
+"img": "2 - verde_alt/hattrem.png"
+},
+{
+"id": "hippopotas",
+"nome": "Hippopotas",
+"cor": "verde",
+"forca": 3,
+"tipos": [
+"terra"
+],
+"vantagens": [
+"eletrico",
+"pedra",
+"veneno",
+"fogo"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "hippopotas",
+"estagio": 0,
+"img": "2 - verde_alt/hippopotas.png"
+},
+{
+"id": "kakuna",
+"nome": "Kakuna",
+"cor": "verde",
+"forca": 3,
+"tipos": [
+"inseto",
+"veneno"
+],
+"vantagens": [
+"fada",
+"sombrio",
+"psiquico",
+"grama"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "weedle",
+"estagio": 1,
+"img": "2 - verde_alt/kakuna.png"
+},
+{
+"id": "kirlia",
+"repetido": true
+},
+{
+"id": "krokorok2",
+"repetido": true
+},
+{
+"id": "larvitar",
+"repetido": true
+},
+{
+"id": "lickitung",
+"nome": "Lickitung",
+"cor": "verde",
+"forca": 5,
+"tipos": [
+"normal"
+],
+"vantagens": [],
+"captura": [
+3,
+4,
+5
+],
+"familia": "lickitung",
+"estagio": 0,
+"img": "2 - verde_alt/lickitung.png"
+},
+{
+"id": "litleo",
+"nome": "Litleo",
+"cor": "verde",
+"forca": 3,
+"tipos": [
+"fogo",
+"normal"
+],
+"vantagens": [
+"metal",
+"inseto",
+"gelo",
+"grama"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "litleo",
+"estagio": 0,
+"img": "2 - verde_alt/litleo.png"
+},
+{
+"id": "lombre",
+"nome": "Lombre",
+"cor": "verde",
+"forca": 4,
+"tipos": [
+"grama",
+"agua"
+],
+"vantagens": [
+"eletrico",
+"terra",
+"pedra",
+"fogo"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "lotad",
+"estagio": 1,
+"img": "2 - verde_alt/lombre.png"
+},
+{
+"id": "loudred",
+"nome": "Loudred",
+"cor": "verde",
+"forca": 5,
+"tipos": [
+"normal"
+],
+"vantagens": [],
+"captura": [
+3,
+4,
+5
+],
+"familia": "whismur",
+"estagio": 1,
+"img": "2 - verde_alt/loudred.png"
+},
+{
+"id": "manectric",
+"nome": "Manectric",
+"cor": "verde",
+"forca": 5,
+"tipos": [
+"eletrico"
+],
+"vantagens": [
+"voador",
+"agua"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "electrike",
+"estagio": 1,
+"img": "2 - verde_alt/manectric.png"
+},
+{
+"id": "mienfoo",
+"nome": "Mienfoo",
+"cor": "verde",
+"forca": 4,
+"tipos": [
+"lutador"
+],
+"vantagens": [
+"normal",
+"sombrio",
+"gelo",
+"pedra"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "mienfoo",
+"estagio": 0,
+"img": "2 - verde_alt/mienfoo.png"
+},
+{
+"id": "misdreavus",
+"nome": "Misdreavus",
+"cor": "verde",
+"forca": 4,
+"tipos": [
+"fantasma"
+],
+"vantagens": [
+"lutador",
+"inseto",
+"psiquico",
+"veneno"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "misdreavus",
+"estagio": 0,
+"img": "2 - verde_alt/misdreavus.png"
+},
+{
+"id": "nidorino",
+"nome": "Nidorino",
+"cor": "verde",
+"forca": 5,
+"tipos": [
+"veneno"
+],
+"vantagens": [
+"fada",
+"inseto",
+"lutador",
+"grama"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "nidoranm",
+"estagio": 1,
+"img": "2 - verde_alt/nidorino.png"
+},
+{
+"id": "palpitoad",
+"nome": "Palpitoad",
+"cor": "verde",
+"forca": 4,
+"tipos": [
+"agua",
+"terra"
+],
+"vantagens": [
+"eletrico",
+"metal",
+"pedra",
+"fogo"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "tympole",
+"estagio": 1,
+"img": "2 - verde_alt/palpitoad.png"
+},
+{
+"id": "pansear",
+"nome": "Pansear",
+"cor": "verde",
+"forca": 4,
+"tipos": [
+"fogo"
+],
+"vantagens": [
+"metal",
+"inseto",
+"gelo",
+"grama"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "pansear",
+"estagio": 0,
+"img": "2 - verde_alt/pansear.png"
+},
+{
+"id": "pikachu",
+"repetido": true
+},
+{
+"id": "poliwhirl",
+"repetido": true
+},
+{
+"id": "ponyta",
+"nome": "Ponyta",
+"cor": "verde",
+"forca": 5,
+"tipos": [
+"fogo"
+],
+"vantagens": [
+"metal",
+"inseto",
+"gelo",
+"grama"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "ponyta",
+"estagio": 0,
+"img": "2 - verde_alt/ponyta.png"
+},
+{
+"id": "porygon",
+"nome": "Porygon",
+"cor": "verde",
+"forca": 4,
+"tipos": [
+"normal"
+],
+"vantagens": [],
+"captura": [
+3,
+4,
+5
+],
+"familia": "porygon",
+"estagio": 0,
+"img": "2 - verde_alt/porygon.png"
+},
+{
+"id": "riolu",
+"nome": "Riolu",
+"cor": "verde",
+"forca": 4,
+"tipos": [
+"lutador"
+],
+"vantagens": [
+"gelo",
+"sombrio",
+"pedra",
+"normal"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "riolu",
+"estagio": 0,
+"img": "2 - verde_alt/riolu.png"
+},
+{
+"id": "salandit",
+"nome": "Salandit",
+"cor": "verde",
+"forca": 3,
+"tipos": [
+"fogo",
+"veneno"
+],
+"vantagens": [
+"fada",
+"metal",
+"gelo",
+"grama"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "salandit",
+"estagio": 0,
+"img": "2 - verde_alt/salandit.png"
+},
+{
+"id": "sandshrew",
+"nome": "Sandshrew",
+"cor": "verde",
+"forca": 4,
+"tipos": [
+"terra"
+],
+"vantagens": [
+"eletrico",
+"metal",
+"pedra",
+"fogo"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "sandshrew",
+"estagio": 0,
+"img": "2 - verde_alt/sandshrew.png"
+},
+{
+"id": "shieldon",
+"nome": "Shieldon",
+"cor": "verde",
+"forca": 4,
+"tipos": [
+"pedra",
+"metal"
+],
+"vantagens": [
+"fada",
+"pedra",
+"gelo",
+"fogo"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "shieldon",
+"estagio": 0,
+"img": "2 - verde_alt/shieldon.png"
+},
+{
+"id": "skiploom",
+"nome": "Skiploom",
+"cor": "verde",
+"forca": 4,
+"tipos": [
+"grama",
+"voador"
+],
+"vantagens": [
+"lutador",
+"inseto",
+"pedra",
+"agua"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "hoppip",
+"estagio": 1,
+"img": "2 - verde_alt/skiploom.png"
+},
+{
+"id": "skrelp",
+"nome": "Skrelp",
+"cor": "verde",
+"forca": 3,
+"tipos": [
+"veneno",
+"agua"
+],
+"vantagens": [
+"fada",
+"terra",
+"grama",
+"fogo"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "skrelp",
+"estagio": 0,
+"img": "2 - verde_alt/skrelp.png"
+},
+{
+"id": "staravia",
+"nome": "Staravia",
+"cor": "verde",
+"forca": 4,
+"tipos": [
+"voador"
+],
+"vantagens": [
+"inseto",
+"lutador",
+"grama"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "starly",
+"estagio": 1,
+"img": "2 - verde_alt/staravia.png"
+},
+{
+"id": "staryu",
+"nome": "Staryu",
+"cor": "verde",
+"forca": 4,
+"tipos": [
+"agua"
+],
+"vantagens": [
+"terra",
+"fogo",
+"pedra"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "staryu",
+"estagio": 0,
+"img": "2 - verde_alt/staryu.png"
+},
+{
+"id": "throh",
+"nome": "Throh",
+"cor": "verde",
+"forca": 6,
+"tipos": [
+"lutador"
+],
+"vantagens": [
+"normal",
+"sombrio",
+"pedra",
+"metal"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "throh",
+"estagio": 0,
+"img": "2 - verde_alt/throh.png"
+},
+{
+"id": "trumbeak",
+"nome": "Trumbeak",
+"cor": "verde",
+"forca": 4,
+"tipos": [
+"voador"
+],
+"vantagens": [
+"inseto",
+"lutador",
+"grama"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "pikipek",
+"estagio": 1,
+"img": "2 - verde_alt/trumbeak.png"
+},
+{
+"id": "vanillish",
+"nome": "Vanillish",
+"cor": "verde",
+"forca": 3,
+"tipos": [
+"gelo"
+],
+"vantagens": [
+"terra",
+"voador",
+"dragao",
+"grama"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "vanillite",
+"estagio": 1,
+"img": "2 - verde_alt/vanillish.png"
+},
+{
+"id": "vibrava",
+"nome": "Vibrava",
+"cor": "verde",
+"forca": 4,
+"tipos": [
+"terra",
+"dragao"
+],
+"vantagens": [
+"agua",
+"eletrico",
+"grama",
+"fogo"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "trapinch",
+"estagio": 1,
+"img": "2 - verde_alt/vibrava.png"
+},
+{
+"id": "wailmer",
+"nome": "Wailmer",
+"cor": "verde",
+"forca": 4,
+"tipos": [
+"agua"
+],
+"vantagens": [
+"pedra",
+"terra",
+"fogo"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "wailmer",
+"estagio": 0,
+"img": "2 - verde_alt/wailmer.png"
+},
+{
+"id": "weepinbell",
+"nome": "Weepinbell",
+"cor": "verde",
+"forca": 4,
+"tipos": [
+"grama",
+"veneno"
+],
+"vantagens": [
+"terra",
+"fada",
+"pedra",
+"agua"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "bellsprout",
+"estagio": 1,
+"img": "2 - verde_alt/weepinbell.png"
+},
+{
+"id": "yamask",
+"nome": "Yamask",
+"cor": "verde",
+"forca": 3,
+"tipos": [
+"fantasma"
+],
+"vantagens": [
+"normal",
+"fantasma",
+"psiquico",
+"lutador"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "yamask",
+"estagio": 0,
+"img": "2 - verde_alt/yamask.png"
+},
+{
+"id": "zweilous",
+"nome": "Zweilous",
+"cor": "verde",
+"forca": 4,
+"tipos": [
+"dragao",
+"sombrio"
+],
+"vantagens": [
+"psiquico",
+"grama",
+"agua",
+"fantasma"
+],
+"captura": [
+3,
+4,
+5
+],
+"familia": "deino",
+"estagio": 1,
+"img": "2 - verde_alt/zweilous.png"
+},
+{
+"id": "alolan raichu",
+"nome": "Raichu de Alola",
+"cor": "azul",
+"forca": 6,
+"tipos": [
+"eletrico",
+"psiquico"
+],
+"vantagens": [
+"lutador",
+"veneno",
+"voador",
+"agua"
+],
+"captura": [
+4,
+5
+],
+"familia": "pichu",
+"estagio": 2,
+"img": "3 - azul_alt/alolan raichu.png"
+},
+{
+"id": "ambipom",
+"nome": "Ambipom",
+"cor": "azul",
+"forca": 7,
+"tipos": [
+"normal"
+],
+"vantagens": [],
+"captura": [
+4,
+5
+],
+"familia": "aipom",
+"estagio": 1,
+"img": "3 - azul_alt/ambipom.png"
+},
+{
+"id": "armaldo",
+"nome": "Armaldo",
+"cor": "azul",
+"forca": 7,
+"tipos": [
+"inseto",
+"pedra"
+],
+"vantagens": [
+"fogo",
+"sombrio",
+"psiquico",
+"grama"
+],
+"captura": [
+4,
+5
+],
+"familia": "anorith",
+"estagio": 1,
+"img": "3 - azul_alt/armaldo.png"
+},
+{
+"id": "beedrill",
+"nome": "Beedrill",
+"cor": "azul",
+"forca": 6,
+"tipos": [
+"inseto",
+"veneno"
+],
+"vantagens": [
+"fada",
+"sombrio",
+"psiquico",
+"grama"
+],
+"captura": [
+4,
+5
+],
+"familia": "weedle",
+"estagio": 2,
+"img": "3 - azul_alt/beedrill.png"
+},
+{
+"id": "claydol",
+"nome": "Claydol",
+"cor": "azul",
+"forca": 7,
+"tipos": [
+"psiquico",
+"terra"
+],
+"vantagens": [
+"veneno",
+"fogo",
+"eletrico",
+"lutador"
+],
+"captura": [
+4,
+5
+],
+"familia": "baltoy",
+"estagio": 1,
+"img": "3 - azul_alt/claydol.png"
+},
+{
+"id": "cofagrigus",
+"nome": "Cofagrigus",
+"cor": "azul",
+"forca": 7,
+"tipos": [
+"fantasma"
+],
+"vantagens": [
+"normal",
+"fantasma",
+"psiquico",
+"lutador"
+],
+"captura": [
+4,
+5
+],
+"familia": "yamask",
+"estagio": 1,
+"img": "3 - azul_alt/cofagrigus.png"
+},
+{
+"id": "dewgong",
+"nome": "Dewgong",
+"cor": "azul",
+"forca": 7,
+"tipos": [
+"gelo",
+"agua"
+],
+"vantagens": [
+"terra",
+"fogo",
+"dragao",
+"grama"
+],
+"captura": [
+4,
+5
+],
+"familia": "seel",
+"estagio": 1,
+"img": "3 - azul_alt/dewgong.png"
+},
+{
+"id": "electabuzz",
+"repetido": true
+},
+{
+"id": "exploud",
+"nome": "Exploud",
+"cor": "azul",
+"forca": 6,
+"tipos": [
+"normal"
+],
+"vantagens": [],
+"captura": [
+4,
+5
+],
+"familia": "whismur",
+"estagio": 2,
+"img": "3 - azul_alt/exploud.png"
+},
+{
+"id": "frogadier",
+"nome": "Frogadier",
+"cor": "azul",
+"forca": 6,
+"tipos": [
+"agua"
+],
+"vantagens": [
+"terra",
+"pedra",
+"fogo"
+],
+"captura": [
+4,
+5
+],
+"familia": "froakie",
+"estagio": 1,
+"img": "3 - azul_alt/frogadier.png"
+},
+{
+"id": "galvantula",
+"nome": "Galvantula",
+"cor": "azul",
+"forca": 7,
+"tipos": [
+"inseto",
+"eletrico"
+],
+"vantagens": [
+"agua",
+"voador",
+"psiquico",
+"grama"
+],
+"captura": [
+4,
+5
+],
+"familia": "joltik",
+"estagio": 1,
+"img": "3 - azul_alt/galvantula.png"
+},
+{
+"id": "gigalith",
+"repetido": true
+},
+{
+"id": "girafarig",
+"nome": "Girafarig",
+"cor": "azul",
+"forca": 8,
+"tipos": [
+"psiquico",
+"normal"
+],
+"vantagens": [
+"lutador",
+"veneno"
+],
+"captura": [
+4,
+5
+],
+"familia": "girafarig",
+"estagio": 0,
+"img": "3 - azul_alt/girafarig.png"
+},
+{
+"id": "granbull",
+"nome": "Granbull",
+"cor": "azul",
+"forca": 7,
+"tipos": [
+"fada"
+],
+"vantagens": [
+"dragao",
+"inseto",
+"lutador",
+"sombrio"
+],
+"captura": [
+4,
+5
+],
+"familia": "snubbull",
+"estagio": 1,
+"img": "3 - azul_alt/granbull.png"
+},
+{
+"id": "grovyle",
+"nome": "Grovyle",
+"cor": "azul",
+"forca": 6,
+"tipos": [
+"grama"
+],
+"vantagens": [
+"eletrico",
+"terra",
+"pedra",
+"agua"
+],
+"captura": [
+4,
+5
+],
+"familia": "treecko",
+"estagio": 1,
+"img": "3 - azul_alt/grovyle.png"
+},
+{
+"id": "grumpig",
+"nome": "Grumpig",
+"cor": "azul",
+"forca": 6,
+"tipos": [
+"psiquico"
+],
+"vantagens": [
+"veneno",
+"lutador"
+],
+"captura": [
+4,
+5
+],
+"familia": "spoink",
+"estagio": 1,
+"img": "3 - azul_alt/grumpig.png"
+},
+{
+"id": "hariyama",
+"nome": "Hariyama",
+"cor": "azul",
+"forca": 7,
+"tipos": [
+"lutador"
+],
+"vantagens": [
+"normal",
+"sombrio",
+"pedra",
+"gelo"
+],
+"captura": [
+4,
+5
+],
+"familia": "makuhita",
+"estagio": 1,
+"img": "3 - azul_alt/hariyama.png"
+},
+{
+"id": "haxorus",
+"nome": "Haxorus",
+"cor": "azul",
+"forca": 6,
+"tipos": [
+"dragao"
+],
+"vantagens": [
+"agua",
+"fogo",
+"eletrico",
+"grama"
+],
+"captura": [
+4,
+5
+],
+"familia": "axew",
+"estagio": 2,
+"img": "3 - azul_alt/haxorus.png"
+},
+{
+"id": "heatmor",
+"nome": "Heatmor",
+"cor": "azul",
+"forca": 8,
+"tipos": [
+"fogo"
+],
+"vantagens": [
+"metal",
+"inseto",
+"gelo",
+"grama"
+],
+"captura": [
+4,
+5
+],
+"familia": "heatmor",
+"estagio": 0,
+"img": "3 - azul_alt/heatmor.png"
+},
+{
+"id": "heliolisk2",
+"nome": "Heliolisk",
+"cor": "azul",
+"forca": 7,
+"tipos": [
+"eletrico",
+"normal"
+],
+"vantagens": [
+"voador",
+"agua"
+],
+"captura": [
+4,
+5
+],
+"familia": "helioptile2",
+"estagio": 1,
+"img": "3 - azul_alt/heliolisk2.png"
+},
+{
+"id": "hippowdon",
+"nome": "Hippowdon",
+"cor": "azul",
+"forca": 7,
+"tipos": [
+"terra"
+],
+"vantagens": [
+"eletrico",
+"pedra",
+"veneno",
+"fogo"
+],
+"captura": [
+4,
+5
+],
+"familia": "hippopotas",
+"estagio": 1,
+"img": "3 - azul_alt/hippowdon.png"
+},
+{
+"id": "hydreigon",
+"nome": "Hydreigon",
+"cor": "azul",
+"forca": 6,
+"tipos": [
+"dragao",
+"sombrio"
+],
+"vantagens": [
+"psiquico",
+"grama",
+"agua",
+"fantasma"
+],
+"captura": [
+4,
+5
+],
+"familia": "deino",
+"estagio": 2,
+"img": "3 - azul_alt/hydreigon.png"
+},
+{
+"id": "jumpluff",
+"nome": "Jumpluff",
+"cor": "azul",
+"forca": 6,
+"tipos": [
+"grama",
+"voador"
+],
+"vantagens": [
+"lutador",
+"inseto",
+"pedra",
+"agua"
+],
+"captura": [
+4,
+5
+],
+"familia": "hoppip",
+"estagio": 2,
+"img": "3 - azul_alt/jumpluff.png"
+},
+{
+"id": "krookodile",
+"repetido": true
+},
+{
+"id": "lanturn",
+"nome": "Lanturn",
+"cor": "azul",
+"forca": 6,
+"tipos": [
+"eletrico",
+"agua"
+],
+"vantagens": [
+"terra",
+"fogo",
+"voador",
+"agua"
+],
+"captura": [
+4,
+5
+],
+"familia": "chinchou",
+"estagio": 1,
+"img": "3 - azul_alt/lanturn.png"
+},
+{
+"id": "ludicolo",
+"nome": "Ludicolo",
+"cor": "azul",
+"forca": 7,
+"tipos": [
+"grama",
+"agua"
+],
+"vantagens": [
+"eletrico",
+"terra",
+"pedra",
+"fogo"
+],
+"captura": [
+4,
+5
+],
+"familia": "lotad",
+"estagio": 2,
+"img": "3 - azul_alt/ludicolo.png"
+},
+{
+"id": "magcargo",
+"nome": "Magcargo",
+"cor": "azul",
+"forca": 6,
+"tipos": [
+"fogo",
+"pedra"
+],
+"vantagens": [
+"metal",
+"voador",
+"gelo",
+"grama"
+],
+"captura": [
+4,
+5
+],
+"familia": "slugma",
+"estagio": 1,
+"img": "3 - azul_alt/magcargo.png"
+},
+{
+"id": "mismagius",
+"nome": "Mismagius",
+"cor": "azul",
+"forca": 6,
+"tipos": [
+"fantasma"
+],
+"vantagens": [
+"lutador",
+"inseto",
+"psiquico",
+"veneno"
+],
+"captura": [
+4,
+5
+],
+"familia": "misdreavus",
+"estagio": 1,
+"img": "3 - azul_alt/mismagius.png"
+},
+{
+"id": "morgrem",
+"nome": "Morgrem",
+"cor": "azul",
+"forca": 5,
+"tipos": [
+"sombrio",
+"fada"
+],
+"vantagens": [
+"dragao",
+"sombrio",
+"psiquico",
+"fantasma"
+],
+"captura": [
+4,
+5
+],
+"familia": "impidimp",
+"estagio": 1,
+"img": "3 - azul_alt/morgrem.png"
+},
+{
+"id": "mr mime",
+"nome": "Mr. Mime",
+"cor": "azul",
+"forca": 6,
+"tipos": [
+"psiquico",
+"fada"
+],
+"vantagens": [
+"dragao",
+"sombrio",
+"lutador",
+"veneno"
+],
+"captura": [
+4,
+5
+],
+"familia": "mimejr",
+"estagio": 1,
+"img": "3 - azul_alt/mr mime.png"
+},
+{
+"id": "muk",
+"nome": "Muk",
+"cor": "azul",
+"forca": 7,
+"tipos": [
+"veneno"
+],
+"vantagens": [
+"fada",
+"inseto",
+"lutador",
+"grama"
+],
+"captura": [
+4,
+5
+],
+"familia": "grimer",
+"estagio": 1,
+"img": "3 - azul_alt/muk.png"
+},
+{
+"id": "noivern",
+"nome": "Noivern",
+"cor": "azul",
+"forca": 7,
+"tipos": [
+"dragao",
+"voador"
+],
+"vantagens": [
+"lutador",
+"fogo",
+"eletrico",
+"grama"
+],
+"captura": [
+4,
+5
+],
+"familia": "noibat",
+"estagio": 1,
+"img": "3 - azul_alt/noivern.png"
+},
+{
+"id": "pignite",
+"nome": "Pignite",
+"cor": "azul",
+"forca": 6,
+"tipos": [
+"fogo",
+"lutador"
+],
+"vantagens": [
+"metal",
+"pedra",
+"gelo",
+"grama"
+],
+"captura": [
+4,
+5
+],
+"familia": "tepig",
+"estagio": 1,
+"img": "3 - azul_alt/pignite.png"
+},
+{
+"id": "pinsir",
+"nome": "Pinsir",
+"cor": "azul",
+"forca": 8,
+"tipos": [
+"inseto"
+],
+"vantagens": [
+"psiquico",
+"sombrio",
+"terra",
+"grama"
+],
+"captura": [
+4,
+5
+],
+"familia": "pinsir",
+"estagio": 0,
+"img": "3 - azul_alt/pinsir.png"
+},
+{
+"id": "politoed",
+"nome": "Politoed",
+"cor": "azul",
+"forca": 6,
+"tipos": [
+"agua"
+],
+"vantagens": [
+"terra",
+"pedra",
+"fogo"
+],
+"captura": [
+4,
+5
+],
+"familia": "poliwag",
+"estagio": 2,
+"img": "3 - azul_alt/politoed.png"
+},
+{
+"id": "porygon2",
+"nome": "Porygon2",
+"cor": "azul",
+"forca": 6,
+"tipos": [
+"normal"
+],
+"vantagens": [],
+"captura": [
+4,
+5
+],
+"familia": "porygon",
+"estagio": 1,
+"img": "3 - azul_alt/porygon2.png"
+},
+{
+"id": "prinplup",
+"nome": "Prinplup",
+"cor": "azul",
+"forca": 6,
+"tipos": [
+"agua"
+],
+"vantagens": [
+"terra",
+"pedra",
+"fogo"
+],
+"captura": [
+4,
+5
+],
+"familia": "piplup",
+"estagio": 1,
+"img": "3 - azul_alt/prinplup.png"
+},
+{
+"id": "pupitar",
+"repetido": true
+},
+{
+"id": "raboot",
+"nome": "Raboot",
+"cor": "azul",
+"forca": 6,
+"tipos": [
+"fogo"
+],
+"vantagens": [
+"metal",
+"inseto",
+"gelo",
+"grama"
+],
+"captura": [
+4,
+5
+],
+"familia": "scorbunny",
+"estagio": 1,
+"img": "3 - azul_alt/raboot.png"
+},
+{
+"id": "salazzle",
+"nome": "Salazzle",
+"cor": "azul",
+"forca": 7,
+"tipos": [
+"fogo",
+"veneno"
+],
+"vantagens": [
+"fada",
+"metal",
+"gelo",
+"grama"
+],
+"captura": [
+4,
+5
+],
+"familia": "salandit",
+"estagio": 1,
+"img": "3 - azul_alt/salazzle.png"
+},
+{
+"id": "sandslash",
+"nome": "Sandslash",
+"cor": "azul",
+"forca": 6,
+"tipos": [
+"terra"
+],
+"vantagens": [
+"eletrico",
+"metal",
+"pedra",
+"fogo"
+],
+"captura": [
+4,
+5
+],
+"familia": "sandshrew",
+"estagio": 1,
+"img": "3 - azul_alt/sandslash.png"
+},
+{
+"id": "sealeo",
+"nome": "Sealeo",
+"cor": "azul",
+"forca": 5,
+"tipos": [
+"gelo"
+],
+"vantagens": [
+"dragao",
+"terra",
+"voador",
+"grama"
+],
+"captura": [
+4,
+5
+],
+"familia": "spheal",
+"estagio": 1,
+"img": "3 - azul_alt/sealeo.png"
+},
+{
+"id": "seismitoad",
+"nome": "Seismitoad",
+"cor": "azul",
+"forca": 7,
+"tipos": [
+"agua",
+"terra"
+],
+"vantagens": [
+"eletrico",
+"metal",
+"pedra",
+"fogo"
+],
+"captura": [
+4,
+5
+],
+"familia": "tympole",
+"estagio": 2,
+"img": "3 - azul_alt/seismitoad.png"
+},
+{
+"id": "servine",
+"nome": "Servine",
+"cor": "azul",
+"forca": 6,
+"tipos": [
+"grama"
+],
+"vantagens": [
+"terra",
+"pedra",
+"eletrico",
+"agua"
+],
+"captura": [
+4,
+5
+],
+"familia": "snivy",
+"estagio": 1,
+"img": "3 - azul_alt/servine.png"
+},
+{
+"id": "shelgon",
+"nome": "Shelgon",
+"cor": "azul",
+"forca": 5,
+"tipos": [
+"dragao"
+],
+"vantagens": [
+"agua",
+"fogo",
+"eletrico",
+"grama"
+],
+"captura": [
+4,
+5
+],
+"familia": "bagon",
+"estagio": 1,
+"img": "3 - azul_alt/shelgon.png"
+},
+{
+"id": "simisear",
+"nome": "Simisear",
+"cor": "azul",
+"forca": 7,
+"tipos": [
+"fogo"
+],
+"vantagens": [
+"metal",
+"inseto",
+"gelo",
+"grama"
+],
+"captura": [
+4,
+5
+],
+"familia": "pansear",
+"estagio": 1,
+"img": "3 - azul_alt/simisear.png"
+},
+{
+"id": "skarmory",
+"nome": "Skarmory",
+"cor": "azul",
+"forca": 8,
+"tipos": [
+"metal",
+"voador"
+],
+"vantagens": [
+"fada",
+"pedra",
+"gelo",
+"grama"
+],
+"captura": [
+4,
+5
+],
+"familia": "skarmory",
+"estagio": 0,
+"img": "3 - azul_alt/skarmory.png"
+},
+{
+"id": "staraptor",
+"nome": "Staraptor",
+"cor": "azul",
+"forca": 6,
+"tipos": [
+"voador"
+],
+"vantagens": [
+"inseto",
+"lutador",
+"grama"
+],
+"captura": [
+4,
+5
+],
+"familia": "starly",
+"estagio": 2,
+"img": "3 - azul_alt/staraptor.png"
+},
+{
+"id": "starmie",
+"nome": "Starmie",
+"cor": "azul",
+"forca": 7,
+"tipos": [
+"psiquico",
+"agua"
+],
+"vantagens": [
+"veneno",
+"lutador",
+"fogo",
+"terra"
+],
+"captura": [
+4,
+5
+],
+"familia": "staryu",
+"estagio": 1,
+"img": "3 - azul_alt/starmie.png"
+},
+{
+"id": "talonflame",
+"nome": "Talonflame",
+"cor": "azul",
+"forca": 7,
+"tipos": [
+"fogo",
+"voador"
+],
+"vantagens": [
+"lutador",
+"inseto",
+"gelo",
+"grama"
+],
+"captura": [
+4,
+5
+],
+"familia": "fletchling",
+"estagio": 2,
+"img": "3 - azul_alt/talonflame.png"
+},
+{
+"id": "toxicroak",
+"nome": "Toxicroak",
+"cor": "azul",
+"forca": 7,
+"tipos": [
+"lutador",
+"veneno"
+],
+"vantagens": [
+"normal",
+"pedra",
+"gelo",
+"grama"
+],
+"captura": [
+4,
+5
+],
+"familia": "croagunk",
+"estagio": 1,
+"img": "3 - azul_alt/toxicroak.png"
+},
+{
+"id": "vanilluxe",
+"nome": "Vanilluxe",
+"cor": "azul",
+"forca": 6,
+"tipos": [
+"gelo"
+],
+"vantagens": [
+"terra",
+"voador",
+"dragao",
+"grama"
+],
+"captura": [
+4,
+5
+],
+"familia": "vanillite",
+"estagio": 2,
+"img": "3 - azul_alt/vanilluxe.png"
+},
+{
+"id": "victrebel",
+"nome": "Victreebel",
+"cor": "azul",
+"forca": 7,
+"tipos": [
+"grama",
+"veneno"
+],
+"vantagens": [
+"fada",
+"terra",
+"pedra",
+"agua"
+],
+"captura": [
+4,
+5
+],
+"familia": "bellsprout",
+"estagio": 2,
+"img": "3 - azul_alt/victrebel.png"
+},
+{
+"id": "aegislash",
+"nome": "Aegislash",
+"cor": "vermelho",
+"forca": 7,
+"tipos": [
+"fantasma",
+"metal"
+],
+"vantagens": [
+"psiquico",
+"lutador",
+"gelo",
+"fada"
+],
+"captura": [
+5
+],
+"familia": "honedge2",
+"estagio": 2,
+"img": "4 - vermelho_alt/aegislash.png"
+},
+{
+"id": "alolan exeggutor",
+"nome": "Exeggutor de Alola",
+"cor": "vermelho",
+"forca": 8,
+"tipos": [
+"dragao",
+"grama"
+],
+"vantagens": [
+"eletrico",
+"fogo",
+"pedra",
+"agua"
+],
+"captura": [
+5
+],
+"familia": "exeggcute",
+"estagio": 1,
+"img": "4 - vermelho_alt/alolan exeggutor.png"
+},
+{
+"id": "ampharos",
+"repetido": true
+},
+{
+"id": "archeops",
+"nome": "Archeops",
+"cor": "vermelho",
+"forca": 8,
+"tipos": [
+"pedra",
+"voador"
+],
+"vantagens": [
+"lutador",
+"fogo",
+"gelo",
+"grama"
+],
+"captura": [
+5
+],
+"familia": "archen",
+"estagio": 1,
+"img": "4 - vermelho_alt/archeops.png"
+},
+{
+"id": "aurorus",
+"nome": "Aurorus",
+"cor": "vermelho",
+"forca": 8,
+"tipos": [
+"gelo",
+"pedra"
+],
+"vantagens": [
+"dragao",
+"fogo",
+"voador",
+"grama"
+],
+"captura": [
+5
+],
+"familia": "amaura",
+"estagio": 1,
+"img": "4 - vermelho_alt/aurorus.png"
+},
+{
+"id": "bastiodon",
+"nome": "Bastiodon",
+"cor": "vermelho",
+"forca": 7,
+"tipos": [
+"pedra",
+"metal"
+],
+"vantagens": [
+"fada",
+"pedra",
+"gelo",
+"fogo"
+],
+"captura": [
+5
+],
+"familia": "shieldon",
+"estagio": 1,
+"img": "4 - vermelho_alt/bastiodon.png"
+},
+{
+"id": "cinderace",
+"nome": "Cinderace",
+"cor": "vermelho",
+"forca": 8,
+"tipos": [
+"fogo"
+],
+"vantagens": [
+"metal",
+"inseto",
+"gelo",
+"grama"
+],
+"captura": [
+5
+],
+"familia": "scorbunny",
+"estagio": 2,
+"img": "4 - vermelho_alt/cinderace.png"
+},
+{
+"id": "coalossal",
+"nome": "Coalossal",
+"cor": "vermelho",
+"forca": 7,
+"tipos": [
+"fogo",
+"pedra"
+],
+"vantagens": [
+"voador",
+"inseto",
+"gelo",
+"grama"
+],
+"captura": [
+5
+],
+"familia": "rolycoly",
+"estagio": 2,
+"img": "4 - vermelho_alt/coalossal.png"
+},
+{
+"id": "conkeldurr",
+"repetido": true
+},
+{
+"id": "crobat",
+"repetido": true
+},
+{
+"id": "dragalge",
+"nome": "Dragalge",
+"cor": "vermelho",
+"forca": 8,
+"tipos": [
+"veneno",
+"dragao"
+],
+"vantagens": [
+"fada",
+"fogo",
+"dragao",
+"grama"
+],
+"captura": [
+5
+],
+"familia": "skrelp",
+"estagio": 1,
+"img": "4 - vermelho_alt/dragalge.png"
+},
+{
+"id": "eelektross",
+"nome": "Eelektross",
+"cor": "vermelho",
+"forca": 7,
+"tipos": [
+"eletrico"
+],
+"vantagens": [
+"voador",
+"agua"
+],
+"captura": [
+5
+],
+"familia": "tynamo",
+"estagio": 2,
+"img": "4 - vermelho_alt/eelektross.png"
+},
+{
+"id": "electivire",
+"repetido": true
+},
+{
+"id": "emboar",
+"nome": "Emboar",
+"cor": "vermelho",
+"forca": 8,
+"tipos": [
+"fogo",
+"lutador"
+],
+"vantagens": [
+"metal",
+"pedra",
+"gelo",
+"grama"
+],
+"captura": [
+5
+],
+"familia": "tepig",
+"estagio": 2,
+"img": "4 - vermelho_alt/emboar.png"
+},
+{
+"id": "empoleon",
+"nome": "Empoleon",
+"cor": "vermelho",
+"forca": 8,
+"tipos": [
+"agua",
+"metal"
+],
+"vantagens": [
+"fada",
+"terra",
+"pedra",
+"fogo"
+],
+"captura": [
+5
+],
+"familia": "piplup",
+"estagio": 2,
+"img": "4 - vermelho_alt/empoleon.png"
+},
+{
+"id": "florges",
+"nome": "Florges",
+"cor": "vermelho",
+"forca": 8,
+"tipos": [
+"fada"
+],
+"vantagens": [
+"sombrio",
+"dragao",
+"lutador"
+],
+"captura": [
+5
+],
+"familia": "flabebe",
+"estagio": 2,
+"img": "4 - vermelho_alt/florges.png"
+},
+{
+"id": "flygon",
+"nome": "Flygon",
+"cor": "vermelho",
+"forca": 7,
+"tipos": [
+"terra",
+"dragao"
+],
+"vantagens": [
+"agua",
+"fogo",
+"eletrico",
+"grama"
+],
+"captura": [
+5
+],
+"familia": "trapinch",
+"estagio": 2,
+"img": "4 - vermelho_alt/flygon.png"
+},
+{
+"id": "gallade",
+"nome": "Gallade",
+"cor": "vermelho",
+"forca": 8,
+"tipos": [
+"lutador",
+"psiquico"
+],
+"vantagens": [
+"normal",
+"pedra",
+"lutador",
+"veneno"
+],
+"captura": [
+5
+],
+"familia": "ralts",
+"estagio": 2,
+"img": "4 - vermelho_alt/gallade.png"
+},
+{
+"id": "golem8",
+"nome": "Golem",
+"cor": "vermelho",
+"forca": 8,
+"tipos": [
+"pedra",
+"terra"
+],
+"vantagens": [
+"eletrico",
+"voador",
+"gelo",
+"fogo"
+],
+"captura": [
+5
+],
+"familia": "geodude2",
+"estagio": 2,
+"img": "4 - vermelho_alt/golem8.png"
+},
+{
+"id": "golurk",
+"nome": "Golurk",
+"cor": "vermelho",
+"forca": 8,
+"tipos": [
+"fantasma",
+"terra"
+],
+"vantagens": [
+"psiquico",
+"fogo",
+"eletrico",
+"veneno"
+],
+"captura": [
+5
+],
+"familia": "golett",
+"estagio": 1,
+"img": "4 - vermelho_alt/golurk.png"
+},
+{
+"id": "greninja",
+"nome": "Greninja",
+"cor": "vermelho",
+"forca": 8,
+"tipos": [
+"agua",
+"sombrio"
+],
+"vantagens": [
+"terra",
+"fantasma",
+"psiquico",
+"fogo"
+],
+"captura": [
+5
+],
+"familia": "froakie",
+"estagio": 2,
+"img": "4 - vermelho_alt/greninja.png"
+},
+{
+"id": "grimmsnarl",
+"nome": "Grimmsnarl",
+"cor": "vermelho",
+"forca": 7,
+"tipos": [
+"sombrio",
+"fada"
+],
+"vantagens": [
+"dragao",
+"sombrio",
+"psiquico",
+"fantasma"
+],
+"captura": [
+5
+],
+"familia": "impidimp",
+"estagio": 2,
+"img": "4 - vermelho_alt/grimmsnarl.png"
+},
+{
+"id": "gyarados",
+"nome": "Gyarados",
+"cor": "vermelho",
+"forca": 8,
+"tipos": [
+"agua",
+"voador"
+],
+"vantagens": [
+"lutador",
+"grama",
+"terra",
+"fogo"
+],
+"captura": [
+5
+],
+"familia": "magikarp",
+"estagio": 1,
+"img": "4 - vermelho_alt/gyarados.png"
+},
+{
+"id": "hatterene",
+"nome": "Hatterene",
+"cor": "vermelho",
+"forca": 7,
+"tipos": [
+"fada",
+"psiquico"
+],
+"vantagens": [
+"dragao",
+"sombrio",
+"lutador",
+"veneno"
+],
+"captura": [
+5
+],
+"familia": "hatenna",
+"estagio": 2,
+"img": "4 - vermelho_alt/hatterene.png"
+},
+{
+"id": "kommo-o",
+"nome": "Kommo-o",
+"cor": "vermelho",
+"forca": 7,
+"tipos": [
+"dragao",
+"lutador"
+],
+"vantagens": [
+"agua",
+"pedra",
+"gelo",
+"grama"
+],
+"captura": [
+5
+],
+"familia": "jangmoo",
+"estagio": 2,
+"img": "4 - vermelho_alt/kommo-o.png"
+},
+{
+"id": "lickilicky",
+"nome": "Lickilicky",
+"cor": "vermelho",
+"forca": 8,
+"tipos": [
+"normal"
+],
+"vantagens": [],
+"captura": [
+5
+],
+"familia": "lickitung",
+"estagio": 1,
+"img": "4 - vermelho_alt/lickilicky.png"
+},
+{
+"id": "lucario",
+"nome": "Lucario",
+"cor": "vermelho",
+"forca": 8,
+"tipos": [
+"lutador",
+"metal"
+],
+"vantagens": [
+"gelo",
+"sombrio",
+"pedra",
+"fada"
+],
+"captura": [
+5
+],
+"familia": "riolu",
+"estagio": 1,
+"img": "4 - vermelho_alt/lucario.png"
+},
+{
+"id": "mienshao",
+"nome": "Mienshao",
+"cor": "vermelho",
+"forca": 8,
+"tipos": [
+"lutador"
+],
+"vantagens": [
+"normal",
+"sombrio",
+"gelo",
+"pedra"
+],
+"captura": [
+5
+],
+"familia": "mienfoo",
+"estagio": 1,
+"img": "4 - vermelho_alt/mienshao.png"
+},
+{
+"id": "mr rime",
+"nome": "Mr. Rime",
+"cor": "vermelho",
+"forca": 8,
+"tipos": [
+"gelo",
+"psiquico"
+],
+"vantagens": [
+"dragao",
+"voador",
+"lutador",
+"veneno"
+],
+"captura": [
+5
+],
+"familia": "mimejr",
+"estagio": 2,
+"img": "4 - vermelho_alt/mr rime.png"
+},
+{
+"id": "nidoking",
+"nome": "Nidoking",
+"cor": "vermelho",
+"forca": 8,
+"tipos": [
+"veneno",
+"terra"
+],
+"vantagens": [
+"fada",
+"fogo",
+"eletrico",
+"grama"
+],
+"captura": [
+5
+],
+"familia": "nidoranm",
+"estagio": 2,
+"img": "4 - vermelho_alt/nidoking.png"
+},
+{
+"id": "porygon-z",
+"nome": "Porygon-Z",
+"cor": "vermelho",
+"forca": 8,
+"tipos": [
+"normal"
+],
+"vantagens": [],
+"captura": [
+5
+],
+"familia": "porygon",
+"estagio": 2,
+"img": "4 - vermelho_alt/porygon-z.png"
+},
+{
+"id": "pyroar2",
+"nome": "Pyroar",
+"cor": "vermelho",
+"forca": 8,
+"tipos": [
+"fogo",
+"normal"
+],
+"vantagens": [
+"metal",
+"inseto",
+"gelo",
+"grama"
+],
+"captura": [
+5
+],
+"familia": "litleo",
+"estagio": 1,
+"img": "4 - vermelho_alt/pyroar2.png"
+},
+{
+"id": "rapidash",
+"nome": "Rapidash",
+"cor": "vermelho",
+"forca": 8,
+"tipos": [
+"fogo"
+],
+"vantagens": [
+"metal",
+"inseto",
+"gelo",
+"grama"
+],
+"captura": [
+5
+],
+"familia": "ponyta",
+"estagio": 1,
+"img": "4 - vermelho_alt/rapidash.png"
+},
+{
+"id": "reuniclus",
+"nome": "Reuniclus",
+"cor": "vermelho",
+"forca": 7,
+"tipos": [
+"psiquico"
+],
+"vantagens": [
+"veneno",
+"lutador"
+],
+"captura": [
+5
+],
+"familia": "solosis",
+"estagio": 2,
+"img": "4 - vermelho_alt/reuniclus.png"
+},
+{
+"id": "salamence",
+"nome": "Salamence",
+"cor": "vermelho",
+"forca": 8,
+"tipos": [
+"dragao",
+"voador"
+],
+"vantagens": [
+"agua",
+"fogo",
+"eletrico",
+"grama"
+],
+"captura": [
+5
+],
+"familia": "bagon",
+"estagio": 2,
+"img": "4 - vermelho_alt/salamence.png"
+},
+{
+"id": "sceptile",
+"nome": "Sceptile",
+"cor": "vermelho",
+"forca": 8,
+"tipos": [
+"grama",
+"dragao"
+],
+"vantagens": [
+"eletrico",
+"fogo",
+"pedra",
+"agua"
+],
+"captura": [
+5
+],
+"familia": "treecko",
+"estagio": 2,
+"img": "4 - vermelho_alt/sceptile.png"
+},
+{
+"id": "serperior",
+"nome": "Serperior",
+"cor": "vermelho",
+"forca": 8,
+"tipos": [
+"grama"
+],
+"vantagens": [
+"terra",
+"pedra",
+"eletrico",
+"agua"
+],
+"captura": [
+5
+],
+"familia": "snivy",
+"estagio": 2,
+"img": "4 - vermelho_alt/serperior.png"
+},
+{
+"id": "sharpedo",
+"nome": "Sharpedo",
+"cor": "vermelho",
+"forca": 8,
+"tipos": [
+"sombrio",
+"agua"
+],
+"vantagens": [
+"psiquico",
+"fantasma",
+"terra",
+"fogo"
+],
+"captura": [
+5
+],
+"familia": "carvanha",
+"estagio": 1,
+"img": "4 - vermelho_alt/sharpedo.png"
+},
+{
+"id": "toucannon2",
+"nome": "Toucannon",
+"cor": "vermelho",
+"forca": 8,
+"tipos": [
+"voador"
+],
+"vantagens": [
+"inseto",
+"lutador",
+"grama"
+],
+"captura": [
+5
+],
+"familia": "pikipek",
+"estagio": 2,
+"img": "4 - vermelho_alt/toucannon2.png"
+},
+{
+"id": "toxtricity",
+"repetido": true
+},
+{
+"id": "tyranitar2",
+"repetido": true
+},
+{
+"id": "wailord",
+"nome": "Wailord",
+"cor": "vermelho",
+"forca": 8,
+"tipos": [
+"agua"
+],
+"vantagens": [
+"pedra",
+"terra",
+"fogo"
+],
+"captura": [
+5
+],
+"familia": "wailmer",
+"estagio": 1,
+"img": "4 - vermelho_alt/wailord.png"
+},
+{
+"id": "walrein2",
+"nome": "Walrein",
+"cor": "vermelho",
+"forca": 7,
+"tipos": [
+"gelo"
+],
+"vantagens": [
+"dragao",
+"terra",
+"voador",
+"grama"
+],
+"captura": [
+5
+],
+"familia": "spheal",
+"estagio": 2,
+"img": "4 - vermelho_alt/walrein2.png"
+},
+{
+"id": "wobbuffet",
+"nome": "Wobbuffet",
+"cor": "vermelho",
+"forca": 8,
+"tipos": [
+"psiquico"
+],
+"vantagens": [
+"lutador",
+"veneno"
+],
+"captura": [
+5
+],
+"familia": "wynaut",
+"estagio": 1,
+"img": "4 - vermelho_alt/wobbuffet.png"
+},
+{
+"id": "zebstrika",
+"nome": "Zebstrika",
+"cor": "vermelho",
+"forca": 8,
+"tipos": [
+"eletrico"
+],
+"vantagens": [
+"voador",
+"agua"
+],
+"captura": [
+5
+],
+"familia": "blitzle",
+"estagio": 1,
+"img": "4 - vermelho_alt/zebstrika.png"
+},
+{
+"id": "celebi",
+"repetido": true
+},
+{
+"id": "darkrai",
+"nome": "Darkrai",
+"cor": "amarelo",
+"forca": 11,
+"tipos": [
+"sombrio"
+],
+"vantagens": [
+"psiquico",
+"fantasma"
+],
+"captura": [
+6
+],
+"familia": "darkrai",
+"estagio": 0,
+"img": "5 - amarelo_alt/darkrai.png"
+},
+{
+"id": "entei",
+"nome": "Entei",
+"cor": "amarelo",
+"forca": 11,
+"tipos": [
+"fogo"
+],
+"vantagens": [
+"metal",
+"inseto",
+"gelo",
+"grama"
+],
+"captura": [
+6
+],
+"familia": "entei",
+"estagio": 0,
+"img": "5 - amarelo_alt/entei.png"
+},
+{
+"id": "ho-oh",
+"nome": "Ho-Oh",
+"cor": "amarelo",
+"forca": 11,
+"tipos": [
+"fogo",
+"voador"
+],
+"vantagens": [
+"lutador",
+"inseto",
+"gelo",
+"grama"
+],
+"captura": [
+6
+],
+"familia": "ho-oh",
+"estagio": 0,
+"img": "5 - amarelo_alt/ho-oh.png"
+},
+{
+"id": "latias",
+"nome": "Latias",
+"cor": "amarelo",
+"forca": 11,
+"tipos": [
+"dragao",
+"psiquico"
+],
+"vantagens": [
+"agua",
+"grama",
+"veneno",
+"lutador"
+],
+"captura": [
+6
+],
+"familia": "latias",
+"estagio": 0,
+"img": "5 - amarelo_alt/latias.png"
+},
+{
+"id": "lugia",
+"nome": "Lugia",
+"cor": "amarelo",
+"forca": 11,
+"tipos": [
+"psiquico",
+"voador"
+],
+"vantagens": [
+"veneno",
+"inseto",
+"lutador",
+"grama"
+],
+"captura": [
+6
+],
+"familia": "lugia",
+"estagio": 0,
+"img": "5 - amarelo_alt/lugia.png"
+},
+{
+"id": "raikou",
+"nome": "Raikou",
+"cor": "amarelo",
+"forca": 11,
+"tipos": [
+"eletrico"
+],
+"vantagens": [
+"metal",
+"voador",
+"agua"
+],
+"captura": [
+6
+],
+"familia": "raikou",
+"estagio": 0,
+"img": "5 - amarelo_alt/raikou.png"
+},
+{
+"id": "regice",
+"nome": "Regice",
+"cor": "amarelo",
+"forca": 11,
+"tipos": [
+"gelo"
+],
+"vantagens": [
+"terra",
+"voador",
+"dragao",
+"grama"
+],
+"captura": [
+6
+],
+"familia": "regice",
+"estagio": 0,
+"img": "5 - amarelo_alt/regice.png"
+},
+{
+"id": "regigigas",
+"nome": "Regigigas",
+"cor": "amarelo",
+"forca": 11,
+"tipos": [
+"normal"
+],
+"vantagens": [],
+"captura": [
+6
+],
+"familia": "regigigas",
+"estagio": 0,
+"img": "5 - amarelo_alt/regigigas.png"
+},
+{
+"id": "regirock",
+"repetido": true
+},
+{
+"id": "suicune",
+"nome": "Suicune",
+"cor": "amarelo",
+"forca": 11,
+"tipos": [
+"agua"
+],
+"vantagens": [
+"fogo",
+"pedra",
+"terra"
+],
+"captura": [
+6
+],
+"familia": "suicune",
+"estagio": 0,
+"img": "5 - amarelo_alt/suicune.png"
+}
+]
+}

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Conferência de Elenco</title>
+<style>
+:root{--bg:#0f141b;--bg2:#1b222c;--line:#2c3542;--txt:#e7ecf2;--mut:#93a0b0;--acc:#ffd23f;--warn:#f59e0b}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bg:#f4f6f9;--bg2:#fff;--line:#d9dee6;--txt:#17202b;--mut:#5b6777}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.4 Inter,system-ui,sans-serif;padding:16px}
+h1{font-size:20px;margin:0 0 6px}.mut{color:var(--mut)}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 16px}
+select,input{background:var(--bg2);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font:inherit}
+h2{font-size:16px;margin:22px 0 8px;text-transform:capitalize}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.c{display:flex;gap:10px;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:8px}
+.c.flag{border-color:var(--warn);box-shadow:0 0 0 1px var(--warn) inset}
+.c img{width:96px;border-radius:6px;cursor:zoom-in;flex:none}
+.c b{font-size:15px}.c div{min-width:0}.c p{margin:2px 0;font-size:12.5px;overflow-wrap:anywhere}
+.nota{color:var(--warn);font-size:12px}
+#z{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center}#z img{max-height:92vh;max-width:92vw}
+</style></head><body>
+<h1>Conferência de elenco</h1>
+<div class="mut">Dados lidos das cartas. Cartas com borda laranja têm uma observação.</div>
+<div class="bar"><select id="el"></select><input id="q" placeholder="filtrar por nome…"><span class="mut" id="n"></span></div>
+<div id="out"></div><div id="z"><img></div>
+<script src="js/data.js"></script>
+<script>
+const D = window.DATA, CORES = ['inicial', 'rosa', 'verde', 'azul', 'vermelho', 'amarelo'];
+const NOTAS = { slugma: 'Estava na pasta rosa, mas a barra da carta é verde: considerado Verde.', floette: 'Estava na pasta verde, mas a barra da carta é azul: considerado Azul.',
+  mimejr: 'As bolinhas de família desta carta não mostram o Mr. Rime; tratado como linha Mime Jr. → Mr. Mime → Mr. Rime.', 'mr mime': 'Idem: tratado como linha de 3 com o Mr. Rime.', 'mr rime': 'Linha Mime Jr. → Mr. Mime → Mr. Rime.' };
+const T = { agua: 'Água', dragao: 'Dragão', eletrico: 'Elétrico', psiquico: 'Psíquico' };
+const nt = t => T[t] || t.charAt(0).toUpperCase() + t.slice(1);
+const el = document.getElementById('el');
+el.innerHTML = Object.entries(D.elencos).map(([k, v]) => `<option value="${k}" ${k === 'alt' ? 'selected' : ''}>${v}</option>`).join('');
+const nomeDe = id => (D.pokemon.find(p => p.id === id) || { nome: id }).nome;
+function draw() {
+  const e = el.value, q = document.getElementById('q').value.trim().toLowerCase();
+  const L = D.pokemon.filter(p => (p.elencos || ['padrao']).includes(e) && (!q || p.nome.toLowerCase().includes(q)));
+  document.getElementById('n').textContent = L.length + ' cartas';
+  document.getElementById('out').innerHTML = CORES.map(cor => { const l = L.filter(p => p.cor === cor); if (!l.length) return '';
+    return `<h2>${cor} (${l.length})</h2><div class="grid">${l.map(p => { const fam = D.pokemon.filter(x => x.familia === p.familia && (x.elencos || ['padrao']).includes(e)).sort((a, b) => a.estagio - b.estagio);
+      return `<div class="c ${NOTAS[p.id] && e === 'alt' ? 'flag' : ''}"><img src="${p.img}" loading="lazy"><div><b>${p.nome}</b> <span class="mut">força ${p.forca}</span>
+      <p>Tipo: ${p.tipos.map(nt).join(', ')}</p><p>Vantagem: ${p.vantagens.map(nt).join(', ') || '—'}</p><p>Captura: ${p.captura.length ? p.captura.join(', ') : '—'}</p>
+      <p class="mut">${fam.length > 1 ? 'Linha: ' + fam.map(x => x.id === p.id ? '<b>' + x.nome + '</b>' : x.nome).join(' → ') : 'Sem evolução'}${(p.elencos || []).length > 1 ? ' · também no outro elenco' : ''}</p>
+      ${NOTAS[p.id] && e === 'alt' ? `<p class="nota">${NOTAS[p.id]}</p>` : ''}</div></div>`; }).join('')}</div>`; }).join('');
+  document.querySelectorAll('.c img').forEach(i => i.onclick = () => { const z = document.getElementById('z'); z.querySelector('img').src = i.src; z.style.display = 'flex'; });
+}
+document.getElementById('z').onclick = e => e.currentTarget.style.display = 'none';
+el.onchange = draw; document.getElementById('q').oninput = draw; draw();
+</script></body></html>

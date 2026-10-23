@@ -8,6 +8,12 @@ for c in poke:
     if c['id'] == 'electrode': c['cor'] = 'verde'
     c['img'] = 'img/pokemon/' + base(c['img']) + '.webp'
     if c['familia'] in ('eevee2', 'slowpoke2'): c['familiaRamificada'] = True
+for c in poke: c['elencos'] = ['padrao']
+# elenco alternativo: cartas novas + as repetidas (iguais às do padrão)
+porId = {c['id']: c for c in poke}
+for c in J(D + '/pokemon_alt.json')['cartas']:
+    if c.get('repetido'): porId[c['id']]['elencos'].append('alt'); continue
+    c = dict(c); c['img'] = 'img/pokemon/' + c['id'] + '.webp'; c['elencos'] = ['alt']; poke.append(c)
 ids = [c['id'] for c in poke]; assert len(ids) == len(set(ids))
 # Efeitos automáticos (o resto fica com a caixa de ferramentas manual)
 # passos: itens n | treinador n | ganhar cor n | capturar cor | pular n | tabela [[faces],[passos]] | seTipo tipo [passos] | seCor cor [passos]
@@ -155,7 +161,7 @@ for k, h in hexmap['hexes'].items():
                     spaces=[{kk: v for kk, v in s.items() if kk in ('id', 'x', 'y', 'kind', 'color', 'tipo', 'cidade', 'especial', 'lado')} for s in h['spaces']],
                     slots=[{kk: v for kk, v in s.items() if kk in ('id', 'x', 'y', 'color', 'space')} for s in h['slots']],
                     edges=[{kk: v for kk, v in e.items() if kk in ('a', 'b', 'dir', 'itemCost')} for e in h['edges']])
-DATA = dict(hexes=hexes, pokemon=poke, eventos=ev, supereventos=sev, treinadores=tr, lideres=ld, itens=it,
+DATA = dict(hexes=hexes, pokemon=poke, elencos={'padrao': 'Balanceado (padrão)', 'alt': 'Alternativo'}, eventos=ev, supereventos=sev, treinadores=tr, lideres=ld, itens=it,
             versos=dict(evento=ev_back, superevento=sev_back, treinador=tr_back, lider=ld_back, item=it_back,
                         **{c: f'img/pokemon/verso_{c}.webp' for c in ['inicial', 'rosa', 'verde', 'azul', 'vermelho', 'amarelo']}),
             pads={c: f'img/pads/{c}.webp' for c in ['branco', 'preto', 'vermelho', 'azul', 'verde', 'amarelo']})

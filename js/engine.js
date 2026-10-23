@@ -86,7 +86,8 @@
     montarTabuleiro(st);
     const g = grafo(st), d = D();
     // baralhos de Pokémon por cor
-    CORES.forEach(c => st.decks[c] = embaralhar(st, d.pokemon.filter(p => p.cor === c).map(p => p.id)));
+    st.elenco = cfg.elenco && d.elencos && d.elencos[cfg.elenco] ? cfg.elenco : 'padrao';
+    CORES.forEach(c => st.decks[c] = embaralhar(st, d.pokemon.filter(p => p.cor === c && (p.elencos || ['padrao']).includes(st.elenco)).map(p => p.id)));
     st.decks.item = embaralhar(st, d.itens.flatMap(c => Array.from({ length: c.copias || 1 }, (_, i) => c.id + '#' + i)));
     st.decks.evento = embaralhar(st, d.eventos.map(c => c.id));
     st.decks.superevento = embaralhar(st, d.supereventos.map(c => c.id));
