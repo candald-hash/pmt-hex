@@ -355,7 +355,7 @@ button.celebi:hover:not(:disabled){background:rgba(244,114,182,.15);border-color
 .ligaPick .team2{margin-bottom:4px}
 .cpStats{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:12px 0 4px}
 .cpStat{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:8px 14px;min-width:96px;display:flex;flex-direction:column;align-items:center}
-.cpStat b{font:400 24px "Russo One";color:var(--acc)}
+.cpStat b{font:800 24px Inter,sans-serif;color:var(--acc)}
 .cpStat span{font-size:12px;color:var(--mut)}
 .cpTime .team2{justify-content:center}
 .propAlvos{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
@@ -389,3 +389,7 @@ button.celebi:hover:not(:disabled){background:rgba(244,114,182,.15);border-color
 @media (max-width:420px){.acoesFixas.tres button{font-size:12.5px}}
 @media (min-width:761px) and (max-width:980px){.acoesFixas.tres button{font-size:12px;padding-left:2px;padding-right:2px}}
 .salaBts{display:flex;gap:4px;margin-left:6px}.salaBts .sm{padding:4px 8px}
+.chanceCap{display:flex;align-items:baseline;gap:8px;margin:12px 0 2px;padding:8px 12px;border-radius:10px;background:var(--bg2);border:1px solid var(--line)}
+.chanceCap b{font:800 22px Inter,sans-serif;color:var(--acc)}
+.bolaCh{position:relative}
+.bolaCh .bch{position:absolute;left:50%;bottom:4px;transform:translateX(-50%);background:rgba(0,0,0,.78);color:#fff;font-size:11px;font-weight:700;padding:1px 6px;border-radius:999px}

@@ -111,6 +111,15 @@
   }
   function tirar(st, cor) { const dk = st.decks[cor]; return dk && dk.length ? dk.shift() : null; }
   function devolver(st, cor, id) { if (id) st.decks[cor].push(id); }
+  // eliminado da Liga: Pokémons voltam às pilhas da sua cor (fora do jogo); Itens e Treinadores vão para o descarte
+  function devolverEliminado(st, q) {
+    const np = q.pokemon.length, ni = q.itens.length;
+    q.pokemon.forEach(id => { const cor = P(id).cor; if (st.decks[cor]) devolver(st, cor, id); }); q.pokemon = []; q.mais1 = {}; q.travadas = [];
+    q.itens.forEach(i => st.descartes.item.push(i)); q.itens = [];
+    [q.treinador, ...q.treinadoresExtra].filter(Boolean).forEach(t => st.descartes.treinador.push(t)); q.treinador = null; q.treinadoresExtra = [];
+    st.propostas = (st.propostas || []).filter(pr => pr.de !== q.id && pr.para !== q.id);
+    log(st, `${q.nome} devolve ${np} Pokémon${np === 1 ? '' : 's'} às pilhas e descarta ${ni} Ite${ni === 1 ? 'm' : 'ns'} e seu Treinador.`);
+  }
   function log(st, msg, tipo, refs) { const e = { t: st.rodada, msg, tipo: tipo || '' }; if (refs && refs.length) e.refs = refs; st.log.push(e); if (st.log.length > 400) st.log.shift(); }
   const atv = st => (st.ator != null ? st.ator : st.vez); // quem executa o efeito agora (ator ≠ vez quando um efeito é copiado)
   const J = (st, i) => st.jogadores[i == null ? atv(st) : i];
@@ -281,8 +290,8 @@
     const g = grafo(st), s = g.nodes[k], p = J(st), c = s.cidade || {};
     const passos = [];
     if (!o.trem) {
-      if (!st.pioneiros[k] && c.pioneiro) { st.pioneiros[k] = p.id; log(st, `${p.nome} é o Pioneiro de ${c.nome}! ${c.pioneiro}`, 'destaque'); passos.push(...(c.pioneiroAuto || autoTexto(c.pioneiro))); }
-      else if (!st.pioneiros[k]) st.pioneiros[k] = p.id;
+      if (st.pioneiros[k] == null && c.pioneiro) { st.pioneiros[k] = p.id; log(st, `${p.nome} é o Pioneiro de ${c.nome}! ${c.pioneiro}`, 'destaque'); passos.push(...(c.pioneiroAuto || autoTexto(c.pioneiro))); }
+      else if (st.pioneiros[k] == null) st.pioneiros[k] = p.id;
       if (!p.visitou.includes(k)) { p.visitou.push(k); if (c.primeiraVisita) { log(st, `Primeira visita a ${c.nome}: ${c.primeiraVisita}`); passos.push(...(c.primeiraAuto || autoTexto(c.primeiraVisita))); } }
     }
     addU(p.passou, k);
@@ -536,11 +545,11 @@
       else if (op === 'voltarCarta') { st.pend = a; }
       else if (op === 'alvo') pedirAlvo(st, a, b);
       else if (op === 'todos') iniciarTodos(st, a);
-      else if (op === 'festival') { const N = st.jogadores.length, ordem = st.jogadores.map((_, k) => (atv(st) + k) % N); st.pend = { tipo: 'festival', ordem, i: 0, restam: 2, trocados: [], titulo: 'Festival Pokémon' }; ajustarFestival(st); }
+      else if (op === 'festival') { const N = st.jogadores.length, ordem = st.jogadores.map((_, k) => (atv(st) + k) % N).filter(j => !J(st, j).eliminado); st.pend = { tipo: 'festival', ordem, i: 0, restam: 2, trocados: [], titulo: 'Festival Pokémon' }; ajustarFestival(st); }
       else if (op === 'juniperFim') { [p, J(st, a)].forEach(x => ganharCor(st, x, 'rosa', 1)); }
       else if (op === 'cartaPronta') { const bar = b || 'evento'; st.pend = { tipo: 'carta', baralho: bar, carta: a, ativado: false, titulo: (bar === 'evento' ? idx().ev : idx().sev)[a].nome }; }
       else if (op === 'azalea') { const cs = []; for (let k = 0; k < 2; k++) { reporBaralho(st, 'evento'); const c = st.decks.evento.shift(); if (c) cs.push(c); } if (cs.length) st.pend = { tipo: 'azalea', cartas: cs, titulo: 'Azalea: escolha o Evento que você ativa (o outro vai para um oponente)' }; }
-      else if (op === 'distribuir') { const bar = a && a.baralho || 'evento', cs = []; const n = Math.min(a && a.n || st.jogadores.length, st.jogadores.length); for (let k = 0; k < n; k++) (() => { reporBaralho(st, bar); const c = st.decks[bar].shift(); if (c) cs.push(c); })(); if (cs.length) st.pend = { tipo: 'distribuir', baralho: bar, cartas: cs, jogadores: st.jogadores.map(q => q.id), atribuido: {}, titulo: a && a.titulo || 'Distribua um Evento para cada jogador' }; }
+      else if (op === 'distribuir') { const bar = a && a.baralho || 'evento', cs = []; const vv = st.jogadores.filter(q => !q.eliminado), n = Math.min(a && a.n || vv.length, vv.length); for (let k = 0; k < n; k++) (() => { reporBaralho(st, bar); const c = st.decks[bar].shift(); if (c) cs.push(c); })(); if (cs.length) st.pend = { tipo: 'distribuir', baralho: bar, cartas: cs, jogadores: vv.map(q => q.id), atribuido: {}, titulo: a && a.titulo || 'Distribua um Evento para cada jogador' }; }
       else if (op === 'descAqua') { if (p.itens.length === 1) descartarAqua(st, p, p.itens[0]); else if (p.itens.length) st.pend = { tipo: 'descartarDe', aqua: true, itens: p.itens.slice(), titulo: `Operação Aqua: ${p.nome}, descarte um Item` }; }
       else if (op === 'criadores') st.pend = { tipo: 'criadores', titulo: 'Criadores Pokémon: escolha uma das opções' };
       else if (op === 'aquaCompra') { const pool = (st.opAqua || []).filter(i => st.descartes.item.includes(i)); st.opAqua = null; st.pend = { tipo: 'aquaCompra', pool, resta: 3, titulo: 'Operação Aqua: compre 3 Itens (dos descartados ou da pilha)' }; }
@@ -960,7 +969,7 @@
     contaBatalha(st, 'liga', [pd.a, pd.b], w);
     log(st, `🏆 ${W.nome} vence ${J(st, l).nome} na Liga (${FASE_LIGA[pd.fase]}).`, 'destaque');
     st.pend = null;
-    const elim = id => { J(st, id).eliminado = true; L.ativos = L.ativos.filter(x => x !== id); L.elim.push(id); log(st, `${J(st, id).nome} foi eliminado da Liga.`); };
+    const elim = id => { J(st, id).eliminado = true; L.ativos = L.ativos.filter(x => x !== id); L.elim.push(id); log(st, `${J(st, id).nome} foi eliminado da Liga.`); devolverEliminado(st, J(st, id)); };
     let campeao = null;
     if (pd.fase === 'duas') { L.vit[w] = (L.vit[w] || 0) + 1; if (L.vit[w] >= 2) campeao = w; else { irPlanalto(st, [w, l]); log(st, `Placar: ${L.ativos.map(id => J(st, id).nome + ' ' + (L.vit[id] || 0)).join(' × ')}. Os dois voltam ao Planalto Índigo.`); } }
     else if (pd.fase === 'tres') { const v = L.venceu[w] = L.venceu[w] || []; if (!v.includes(l)) v.push(l); if (v.length >= 2) campeao = w; else { irPlanalto(st, [w, l]); log(st, 'Os dois voltam ao Planalto Índigo.'); } }
@@ -1095,7 +1104,7 @@
   }
   function alvosValidos(st, acao, o) {
     const eu = J(st), usados = (st.turno && st.turno.alvosUsados) || [];
-    return st.jogadores.filter(q => (q.id !== eu.id || (o && o.incluirEu)) && !(o && o.distinto && usados.includes(q.id))).filter(q => {
+    return st.jogadores.filter(q => !q.eliminado && (q.id !== eu.id || (o && o.incluirEu)) && !(o && o.distinto && usados.includes(q.id))).filter(q => {
       if (acao === 'troca' || acao === 'ssanne') return paresTroca(eu, q, o && o.cores).length > 0;
       if (acao === 'roubar1' || acao === 'roubar2') return q.itens.length > 0;
       if (acao === 'duelo') return q.pokemon.some(id => obedece(q, P(id).cor)) && eu.pokemon.some(id => obedece(eu, P(id).cor));
@@ -1260,8 +1269,8 @@
   // ---------- Grupo 2: efeitos para todos / por regra ----------
   const TODOS_NOME = { aqua: 'Invasão Aqua', magma: 'Invasão Magma', rocket: 'Invasão Rocket', opaqua: 'Operação Aqua', opmagma: 'Operação Magma' };
   function iniciarTodos(st, acao) {
-    if (acao === 'rocket') { st.jogadores.forEach(q => comprarItem(st, q, 1, true)); log(st, 'Todos compraram um Item.'); }
-    const ordem = st.jogadores.map((_, k) => (atv(st) + 1 + k) % st.jogadores.length).filter(i => i !== atv(st));
+    if (acao === 'rocket') { st.jogadores.filter(q => !q.eliminado).forEach(q => comprarItem(st, q, 1, true)); log(st, 'Todos compraram um Item.'); }
+    const ordem = st.jogadores.map((_, k) => (atv(st) + 1 + k) % st.jogadores.length).filter(i => i !== atv(st) && !J(st, i).eliminado);
     proximoTodos(st, { acao, fila: ordem, protegidos: [] });
   }
   function proximoTodos(st, ctx) {
@@ -1276,12 +1285,12 @@
     aplicarTodos(st, ctx.acao, ctx.protegidos);
   }
   function aplicarTodos(st, acao, prot) {
-    const afetados = st.jogadores.filter(q => !prot.includes(q.id));
+    const afetados = st.jogadores.filter(q => !prot.includes(q.id) && !q.eliminado);
     if (acao === 'aqua') { afetados.forEach(q => { const n = q.itens.length; q.itens.slice().forEach(i => descartarItem(st, q, i)); comprarItem(st, q, n, true); }); log(st, `Invasão Aqua: ${afetados.map(q => q.nome).join(', ')} ${afetados.length > 1 ? 'trocaram' : 'trocou'} todos os Itens.`); }
     if (acao === 'magma') { afetados.forEach(q => { if (q.treinador) st.descartes.treinador.push(q.treinador); reporBaralho(st, 'treinador'); q.treinador = st.decks.treinador.shift() || null; }); log(st, `Invasão Magma: ${afetados.map(q => q.nome).join(', ')} ${afetados.length > 1 ? 'trocaram' : 'trocou'} de Treinador.`); }
     if (acao === 'rocket') {
       const N = st.jogadores.length, roubos = [];
-      st.jogadores.forEach(q => { const v = J(st, (q.id - 1 + N) % N); if (prot.includes(v.id) || !v.itens.length || v.id === q.id) return; roubos.push([q, v, v.itens[Math.floor(rnd(st) * v.itens.length)]]); });
+      st.jogadores.forEach(q => { let d = 1; while (d < N && J(st, (q.id - d + N) % N).eliminado) d++; const v = J(st, (q.id - d + N) % N); if (prot.includes(v.id) || q.eliminado || v.eliminado || !v.itens.length || v.id === q.id) return; roubos.push([q, v, v.itens[Math.floor(rnd(st) * v.itens.length)]]); });
       roubos.forEach(([q, v, inst]) => { const i = v.itens.indexOf(inst); if (i >= 0) { v.itens.splice(i, 1); q.itens.push(inst); } });
       log(st, 'Invasão Rocket: ' + (roubos.map(([q, v]) => `${q.nome} pegou um Item de ${v.nome}`).join('; ') || 'ninguém tinha Itens para pegar') + '.');
     }
@@ -1306,7 +1315,7 @@
     return 0;
   }
   function iniciarRanking(st, o) {
-    const cands = st.jogadores.filter(q => !(o.excluirAtivo && q.id === atv(st))).map(q => ({ id: q.id, v: metrica(st, q, o.metrica) }));
+    const cands = st.jogadores.filter(q => !q.eliminado && !(o.excluirAtivo && q.id === atv(st))).map(q => ({ id: q.id, v: metrica(st, q, o.metrica) }));
     passoRanking(st, { o, restantes: cands, ganhadores: [] });
   }
   function passoRanking(st, R) {
@@ -1364,7 +1373,7 @@
   }
   // Jogadores não podem ficar sem Treinador: quem estiver sem compra um imediatamente
   function reporTreinadores(st) {
-    st.jogadores.forEach(q => { if (q.treinador) return; reporBaralho(st, 'treinador'); const t = st.decks.treinador.shift(); if (!t) return; q.treinador = t; log(st, `${q.nome} estava sem Treinador e comprou ${idx().tr[t].nome}.`, '', [['tr', t]]); });
+    st.jogadores.forEach(q => { if (q.treinador || q.eliminado) return; reporBaralho(st, 'treinador'); const t = st.decks.treinador.shift(); if (!t) return; q.treinador = t; log(st, `${q.nome} estava sem Treinador e comprou ${idx().tr[t].nome}.`, '', [['tr', t]]); });
   }
   // ---------- Criadores Pokémon ----------
   const CRIA_CORES = { 1: ['rosa', 'verde', 'azul'], 2: ['inicial', 'rosa', 'verde', 'azul', 'vermelho', 'amarelo'] };

@@ -10,6 +10,10 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- Correção: o efeito de Pioneiro (ex.: Mahogany) se repetia a cada visita quando o pioneiro era o 1º jogador.
+- Liga: o jogador eliminado devolve seus Pokémons às pilhas e descarta Itens e Treinador; eliminados não são mais afetados nem escolhidos por efeitos.
+- Captura: chance de captura (%) sempre visível, atualizada com a Bola escolhida (cada Bola mostra a chance com ela); também na escolha entre cartas.
+- On-line: as Bolas e Itens de batalha de outro jogador não aparecem mais para quem está só assistindo (inclusive o anfitrião).
 - Sala on-line: com a sala já criada, o anfitrião pode adicionar lugares (pessoa ou IA), remover lugares e alternar cada lugar entre pessoa e IA. Quem perde o lugar passa a assistir e entra sozinho no próximo lugar aberto.
 - Botões Rolar dado · Propor troca · Encerrar turno sempre lado a lado, no mesmo lugar (ações extras ficam numa linha abaixo).
 - Poké-Fans e Esconderijo Rocket: a tela de resultado mostra os Treinadores trocados e os novos donos.

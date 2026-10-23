@@ -29,6 +29,7 @@
   const souAnfitriao = () => NET.modo !== 'cliente';
   const online = () => NET.modo !== 'local';
   const souEu = id => !online() || id === NET.eu; // este assento é jogado nesta tela?
+  const pct = x => Math.round(x * 100) + '%';
   function agir(nome, ...a) {
     if (NET.modo === 'cliente') { if (NET.enviar) NET.enviar(nome, a); return; }
     const j = NET.modo === 'local' ? 'host' : NET.eu;
@@ -436,7 +437,7 @@
     }, 0);
     if (pd.tipo === 'captura') return mCaptura(pd, p);
     if (pd.tipo === 'carta') return mCarta(pd, p);
-    if (pd.tipo === 'escolherCaptura') return mEscolher(pd, pd.cartas.map(id => ({ id, img: E.P(id).img })), id => agir('escolherCaptura', id), 'Escolha qual tentar capturar');
+    if (pd.tipo === 'escolherCaptura') return mEscolher(pd, pd.cartas.map(id => ({ id, img: E.P(id).img, tag: window.AI ? 'chance ' + pct(window.AI.pCaptura(st, p, id, null, null)) : '' })), id => agir('escolherCaptura', id), 'Escolha qual tentar capturar (chance sem Bola)');
     if (pd.tipo === 'escolherEvento') return mEscolher(pd, pd.cartas.map(id => ({ id, img: E.idx().ev[id].img })), id => agir('escolherEvento', id), 'Escolha o Evento a ativar');
     if (pd.tipo === 'treinador' && E.J(st, pd.jogador).ia && !p.ia) { const q = E.J(st, pd.jogador); if (!treinTimer) treinTimer = setTimeout(() => { treinTimer = null; if (st.pend && st.pend.tipo === 'treinador') agirIA('escolherTreinador', window.AI.decidirTreinador(st)); }, 700); return abrirModal(`<h2>${esc(pd.titulo)}</h2><p class="mut">🤖 ${esc(q.nome)} está escolhendo o Treinador…</p>`); }
     if (pd.tipo === 'treinador') { const q = E.J(st, pd.jogador); if (q.id !== p.id) pd.titulo = `${q.nome}: escolha seu Treinador`; const op = [q.treinador, ...q.treinadoresExtra].filter(Boolean); return mEscolher(pd, op.map(id => ({ id, img: E.idx().tr[id].img })), id => agir('escolherTreinador', id), 'Você só pode manter um Treinador ativo'); }
@@ -851,7 +852,7 @@
     });
   }
   function mEscolher(pd, cartas, cb, sub) {
-    abrirModal(`<h2>${esc(pd.titulo)}</h2><p class="mut">${esc(sub)}</p><div class="pick">${cartas.map(c => `<div class="pc" data-id="${c.id}"><img src="${c.img}"></div>`).join('')}</div>`);
+    abrirModal(`<h2>${esc(pd.titulo)}</h2><p class="mut">${esc(sub)}</p><div class="pick">${cartas.map(c => `<div class="pc ${c.tag ? 'bolaCh' : ''}" data-id="${c.id}"><img src="${c.img}">${c.tag ? `<span class="bch">${c.tag}</span>` : ''}</div>`).join('')}</div>`);
     $('#modalCard').querySelectorAll('.pc').forEach(c => c.onclick = () => cb(c.dataset.id));
   }
   // animação: o resultado já foi sorteado pelo motor; a tela só "segura" a revelação por ~0,9 s
@@ -868,18 +869,22 @@
       setTimeout(() => { clearInterval(animCap.timer); animCap.timer = null; animCap.feito = k; render(); }, 800);
     }
     const r = animando ? null : r0;
-    const bolas = p.itens.filter(i => E.ITEM(i).bola);
+    const minha = souEu(p.id); // no on-line, só o dono vê as Bolas que tem
+    const bolas = minha ? p.itens.filter(i => E.ITEM(i).bola) : [];
     const escolhida = sel.bola && bolas.includes(sel.bola) ? sel.bola : null;
     const faixa = E.faixaCaptura(st, p, pd.carta, escolhida, pd.slot);
+    const chance = b => window.AI ? window.AI.pCaptura(st, p, pd.carta, b, pd.slot) : null;
+    const chBase = chance(null), chSel = chance(escolhida);
     const tr = p.treinador && E.idx().tr[p.treinador];
     abrirModal(`<div class="mgrid"><img src="${c.img}"><div>
       <h2>${esc(pd.titulo)}</h2><div class="mut">Pokémon ${esc(c.cor)} · força ${c.forca}${pd.slot && st.slots[pd.slot] && st.slots[pd.slot].fraco ? ' · <b style="color:#fbbf24">enfraquecido (±1)</b>' : ''}</div>
       <p style="margin:10px 0 2px">Dados que capturam:</p>${c.captura.length ? faces(c.captura) : '<p class="mut">Este Pokémon não pode ser capturado.</p>'}
       ${animando ? rolagemAnimada(r0) : ''}
-      ${!r && !animando ? `<p style="margin:12px 0 4px">Usar Poké-Bola? <span class="mut">(anuncie antes de rolar)</span></p>
-        <div class="hand">${bolas.map(i => `<div class="ic ${i === escolhida ? 'sel' : ''}" data-b="${i}" title="${esc(E.ITEM(i).nome)}"><img src="${E.ITEM(i).img}"></div>`).join('') || '<span class="mut">Você não tem Bolas.</span>'}</div>
-        <p class="mut">Ajuste permitido no dado: <b>±${faixa}</b>${tr && tr.efeito === 'red' ? ' · Red: rola 2 dados' : ''}</p>` : ''}
-      ${r ? `<div class="rolling final">${r.dados.map(d => `<div class="die3d parou ${r.ok ? 'ok' : 'no'}"><span>${d}</span></div>`).join('')}</div><div class="result surge ${r.ok ? 'ok' : 'no'}"><b class="big">${r.ok ? 'Capturado!' : 'Escapou…'}</b>Dado${r.dados.length > 1 ? 's' : ''}: ${r.dados.join(' e ')}${r.faixa ? ` · ajuste ±${r.faixa}` : ''}${!r.ok && pd.slot && c.cor !== 'amarelo' ? '<br>O Pokémon fica revelado e enfraquecido.' : ''}</div>` : ''}
+      ${!r && !animando && c.captura.length && chSel != null ? `<div class="chanceCap"><span>Chance de captura</span><b>${pct(chSel)}</b>${escolhida && chSel !== chBase ? `<span class="mut">(sem Bola: ${pct(chBase)})</span>` : ''}</div>` : ''}
+      ${!r && !animando ? (minha ? `<p style="margin:12px 0 4px">Usar Poké-Bola? <span class="mut">(anuncie antes de rolar)</span></p>
+        <div class="hand">${bolas.map(i => `<div class="ic bolaCh ${i === escolhida ? 'sel' : ''}" data-b="${i}" title="${esc(E.ITEM(i).nome)}${chance(i) != null ? ' — chance ' + pct(chance(i)) : ''}"><img src="${E.ITEM(i).img}">${chance(i) != null ? `<span class="bch">${pct(chance(i))}</span>` : ''}</div>`).join('') || '<span class="mut">Você não tem Bolas.</span>'}</div>` : `<p class="mut" style="margin:12px 0 4px">${esc(p.nome)} decide se usa uma Bola antes de rolar.</p>`)
+        + `<p class="mut">Ajuste permitido no dado: <b>±${faixa}</b>${tr && tr.efeito === 'red' ? ' · Red: rola 2 dados' : ''}</p>` : ''}
+      ${r ? `<div class="rolling final">${r.dados.map(d => `<div class="die3d parou ${r.ok ? 'ok' : 'no'}"><span>${d}</span></div>`).join('')}</div><div class="result surge ${r.ok ? 'ok' : 'no'}"><b class="big">${r.ok ? 'Capturado!' : 'Escapou…'}</b>${r.bola ? `${esc(E.ITEM(r.bola).nome)} · ` : ''}Dado${r.dados.length > 1 ? 's' : ''}: ${r.dados.join(' e ')}${r.faixa ? ` · ajuste ±${r.faixa}` : ''}${!r.ok && pd.slot && c.cor !== 'amarelo' ? '<br>O Pokémon fica revelado e enfraquecido.' : ''}</div>` : ''}
       <div class="mfoot">${animando ? '' : !r ? `<button data-desist>Não tentar</button><button class="pri" id="rol" ${c.captura.length ? '' : 'disabled'}>🎲 Rolar captura</button>` : `${!r.ok && E.celebiDe(p) && !p.ia ? '<button class="celebi" id="celC">🌸 Pedido a Celebi: refazer</button>' : ''}<button class="pri" id="ok">Continuar</button>`}</div>
     </div></div>`);
     const cc = $('#celC'); if (cc) cc.onclick = () => agir('celebiCaptura');
@@ -988,7 +993,7 @@
   function nomeHex(k) { const hx = E.grafo(st).slots[k].pos; return D.hexes[st.layout[hx]].id.replace(/BR.*$/i, ''); }
   function mSlot(pd, p) {
     abrirModal(`<h2>${esc(pd.titulo)}</h2><p class="mut">${pd.opcoes.length} opção(ões). Cartas viradas mostram só a cor; o rótulo indica o hexágono.</p>
-      <div class="pick" style="grid-template-columns:repeat(auto-fill,minmax(96px,1fr))">${pd.opcoes.map(k => { const c = st.slots[k], pk = E.P(c.carta); return `<div class="pc" data-k="${k}" title="Hexágono ${nomeHex(k)}"><img src="${c.aberta ? pk.img : D.versos[E.grafo(st).slots[k].cor]}"><span class="f">${nomeHex(k)}${c.fraco ? ' · enfraq.' : ''}</span></div>`; }).join('')}</div>`);
+      <div class="pick" style="grid-template-columns:repeat(auto-fill,minmax(96px,1fr))">${pd.opcoes.map(k => { const c = st.slots[k], pk = E.P(c.carta); return `<div class="pc" data-k="${k}" title="Hexágono ${nomeHex(k)}"><img src="${c.aberta ? pk.img : D.versos[E.grafo(st).slots[k].cor]}"><span class="f">${nomeHex(k)}${c.fraco ? ' · enfraq.' : ''}${pd.f && pd.f.acao === 'capturar' && c.aberta && window.AI ? ' · ' + pct(window.AI.pCaptura(st, p, c.carta, null, k)) : ''}</span></div>`; }).join('')}</div>`);
     $('#modalCard').querySelectorAll('.pc').forEach(c => c.onclick = () => agir('escolherSlot', c.dataset.k));
   }
   function mTipoCor(pd) {
@@ -1122,9 +1127,10 @@
     const S = sel.lider;
     const aptos = p.pokemon.filter(id => E.obedece(p, E.P(id).cor));
     const prev = id => E.forcaBase(p, id) + E.bonusTreinador(p, id) + (E.P(id).vantagens.includes(L.tipo) ? 2 : 0) + (S.it[id] ? (E.ITEM(S.it[id]).bonus && (!E.ITEM(S.it[id]).tipos || E.P(id).tipos.some(t => E.ITEM(S.it[id]).tipos.includes(t))) ? E.ITEM(S.it[id]).bonus : 0) : 0);
-    const itensBat = p.itens.filter(i => E.ITEM(i).uso === 'batalha' && E.ITEM(i).bonus);
+    const maoP = souEu(p.id) ? p.itens : [];
+    const itensBat = maoP.filter(i => E.ITEM(i).uso === 'batalha' && E.ITEM(i).bonus);
     const usados = Object.values(S.it);
-    const remedios = p.itens.filter(i => i.startsWith('potion#'));
+    const remedios = maoP.filter(i => i.startsWith('potion#'));
     const liderVs = S.pk.reduce((s, id) => s + E.P(id).tipos.filter(t => L.vantagens.includes(t)).length * 2, 0);
     const chave = r ? r.seq : null, animando = !!(r && r.det && r.det[0] && r.det[0].forca != null && animLd.feito !== chave);
     if (animando && !animLd.timer) {
