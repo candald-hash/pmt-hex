@@ -1391,6 +1391,7 @@
     st.pend = null;
     descartar.forEach(id => { p.pokemon.splice(p.pokemon.indexOf(id), 1); delete p.mais1[id]; if (st.decks[P(id).cor]) devolver(st, P(id).cor, id); });
     log(st, `Criadores Pokémon: ${p.nome} descartou ${descartar.map(id => P(id).nome).join(', ')}.`, '', descartar.map(id => ['pk', id]));
+    if (st.trocasCarta) st.trocasCarta.push({ j: p.id, devolvidos: descartar.slice() });
     st.decks[cor].splice(st.decks[cor].indexOf(pegar), 1); ganharPokemon(st, p, pegar, 'Criadores Pokémon');
     continuar(st); return true;
   }
@@ -1530,7 +1531,7 @@
     const pd = st.pend; if (!pd || pd.tipo !== 'negociador') return; const p = J(st);
     if (ids && ids.length === 2 && P(ids[0]).cor === P(ids[1]).cor && ids.every(i => p.pokemon.includes(i))) {
       const cor = P(ids[0]).cor; ids.forEach(i => { p.pokemon.splice(p.pokemon.indexOf(i), 1); delete p.mais1[i]; devolver(st, cor, i); });
-      log(st, `${p.nome} devolveu ${ids.map(i => P(i).nome).join(' e ')}.`); ganharCor(st, p, cor, 1);
+      log(st, `${p.nome} devolveu ${ids.map(i => P(i).nome).join(' e ')}.`); if (st.trocasCarta) st.trocasCarta.push({ j: p.id, devolvidos: ids.slice() }); ganharCor(st, p, cor, 1);
     }
     st.pend = null; continuar(st);
   }

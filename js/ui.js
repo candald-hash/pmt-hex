@@ -741,12 +741,14 @@
   }
   // trocas feitas pelo efeito da carta (Troca Pokémon, S.S. Anne, Festival Pokémon…): cartas com os novos donos
   function blocoTrocasCarta() {
-    const l = st.trocasCarta || []; if (!l.length) return '';
+    const todas = st.trocasCarta || []; if (!todas.length) return '';
     const dono = j => { const q = E.J(st, j); return `<span class="dot" style="background:${COR_HEX[q.cor]}"></span>${esc(q.nome)}`; };
     const pk = (id, sub, cls, tr) => { if (!id) return `<div class="tcPk ${cls || ''}"><div class="tcVazio">sem Treinador</div><span class="mut">${sub}</span></div>`; const c = tr ? E.idx().tr[id] : E.P(id); return `<div class="tcPk ${tr ? 'tr' : ''} ${cls || ''}"><img src="${c.img}" data-z="${c.img}"><b>${esc(c.nome)}</b><span class="mut">${sub}</span></div>`; };
-    return `<div class="ganhos surge"><div class="mut">Troca${l.length > 1 ? 's' : ''} realizada${l.length > 1 ? 's' : ''}${l.every(t => t.tr) ? ' (Treinadores)' : ''}:</div><div class="tcWrap">${l.map(t => t.a != null
+    const l = todas.filter(t => !t.devolvidos), dv = todas.filter(t => t.devolvidos);
+    return (l.length ? `<div class="ganhos surge"><div class="mut">Troca${l.length > 1 ? 's' : ''} realizada${l.length > 1 ? 's' : ''}${l.every(t => t.tr) ? ' (Treinadores)' : ''}:</div><div class="tcWrap">${l.map(t => t.a != null
       ? `<div class="tcLin">${pk(t.pa, 'agora de ' + dono(t.b), '', t.tr)}<div class="tcSeta">⇄</div>${pk(t.pb, 'agora de ' + dono(t.a), '', t.tr)}</div>`
-      : `<div class="tcLin">${pk(t.saiu, t.tr ? 'descartado' : 'devolvido à pilha', 'saiu', t.tr)}<div class="tcSeta">→</div>${pk(t.entrou, 'agora de ' + dono(t.j), '', t.tr)}</div>`).join('')}</div></div>`;
+      : `<div class="tcLin">${pk(t.saiu, t.tr ? 'descartado' : 'devolvido à pilha', 'saiu', t.tr)}<div class="tcSeta">→</div>${pk(t.entrou, 'agora de ' + dono(t.j), '', t.tr)}</div>`).join('')}</div></div>` : '')
+      + (dv.length ? `<div class="ganhos surge"><div class="mut">Devolvidos para fora do jogo:</div><div class="tcWrap">${dv.map(t => `<div class="tcLin">${t.devolvidos.map(id => pk(id, 'de ' + dono(t.j), 'saiu')).join('')}</div>`).join('')}</div></div>` : '');
   }
   // ---------- Propostas de troca entre humanos ----------
   let selProp = null, trocaVista = null;
@@ -1025,10 +1027,22 @@
     $('#ngn').onclick = () => { sel.neg = null; agir('resolverNegociador', null); };
     $('#ngs').onclick = () => { const e = S.slice(); sel.neg = null; agir('resolverNegociador', e); };
   }
+  // até 3 Pokémons do oponente que dá para receber numa troca (mesma cor de um meu, família não travada)
+  function sugestoesTroca(p, q, cores) {
+    const pares = E.paresTroca(p, q, cores), deles = [...new Set(pares.map(x => x[1]))];
+    const minhas = new Set(p.pokemon.map(id => E.P(id).familia || id));
+    const forca = id => E.forcaBase(q, id);
+    const mesma = deles.filter(id => minhas.has(E.P(id).familia || id)).sort((a, b) => forca(b) - forca(a));
+    const lista = (mesma.length ? mesma : deles.slice().sort((a, b) => forca(b) - forca(a))).slice(0, 3);
+    if (!lista.length) return '<span class="mut">sem trocas possíveis</span>';
+    return `<span class="sugT" title="${mesma.length ? 'Da mesma linha evolutiva de um Pokémon seu' : 'Os mais fortes que você pode receber'}"><span class="mut">${mesma.length ? '🔗 mesma linha' : '💪 mais fortes'}</span>${lista.map(id => `<img src="${E.P(id).img}" data-z="${E.P(id).img}" title="${esc(E.P(id).nome)} — força ${E.forcaBase(q, id)}">`).join('')}</span>`;
+  }
   function mAlvo(pd, p) {
     abrirModal(`<h2>${esc(pd.titulo)}</h2>${pd.bloqueavel ? '<p class="mut">Este efeito pode ser bloqueado por Poké-Boneca.</p>' : ''}
-      <div style="display:grid;gap:8px">${pd.opcoes.map(i => { const q = E.J(st, i); const t = q.treinador && E.idx().tr[q.treinador]; return linhaJogador(q, `${q.id === p.id ? '<span class="tag">você</span>' : ''}<span class="mut">${t ? esc(t.nome) : ''}</span>${insignias(q, true)}`); }).join('')}</div>`);
+      ${['troca', 'ssanne'].includes(pd.acao) ? '<p class="mut">Ao lado de cada oponente, até 3 Pokémons dele que você pode receber: primeiro os da mesma linha evolutiva de algum seu; senão, os mais fortes.</p>' : ''}
+      <div style="display:grid;gap:8px">${pd.opcoes.map(i => { const q = E.J(st, i); const t = q.treinador && E.idx().tr[q.treinador]; return linhaJogador(q, `${q.id === p.id ? '<span class="tag">você</span>' : ''}${['troca', 'ssanne'].includes(pd.acao) ? sugestoesTroca(p, q, pd.cores) : `<span class="mut">${t ? esc(t.nome) : ''}</span>${insignias(q, true)}`}`); }).join('')}</div>`);
     $('#modalCard').querySelectorAll('.pj').forEach(c => c.onclick = () => agir('escolherAlvo', +c.dataset.p));
+    $('#modalCard').querySelectorAll('.sugT img').forEach(i => i.onclick = ev => { ev.stopPropagation(); zoom(i.dataset.z); });
   }
   let brineyTimer = null, treinTimer = null, junTimer = null, festTimer = null;
   function mBriney(pd, p) {

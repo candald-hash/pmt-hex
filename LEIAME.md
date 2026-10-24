@@ -10,6 +10,8 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- Negociador e Criadores Pokémon: a tela de resultado mostra os Pokémons devolvidos para fora do jogo.
+- Eventos de troca (Troca Pokémon, S.S. Anne): na escolha do oponente, cada um mostra até 3 Pokémons que você pode receber — da mesma linha evolutiva de algum seu ou, se não houver, os mais fortes.
 - Elenco alternativo de Pokémons (225 cartas): escolha "Elenco de Pokémons" ao criar a partida (local) ou na sala on-line (o anfitrião escolhe). Página de conferência das cartas: elenco.html.
 - Correção: o efeito de Pioneiro (ex.: Mahogany) se repetia a cada visita quando o pioneiro era o 1º jogador.
 - Liga: o jogador eliminado devolve seus Pokémons às pilhas e descarta Itens e Treinador; eliminados não são mais afetados nem escolhidos por efeitos.
