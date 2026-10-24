@@ -841,7 +841,7 @@
     <circle cx="56" cy="8" r="9" fill="#f1c27d" stroke="#111" stroke-width="1.5"/><path d="M46 6 a10 9 0 0 1 20 -2 l-24 2 z" fill="${cor}" stroke="#111" stroke-width="1.5"/></svg>`;
   function fxBike(q) {
     const c = camadaFx(), cor = COR_HEX[q.cor] || '#ffd23f';
-    const el = h(`<div class="fxBand bike" style="--cor:${cor}"><div class="fxTxt">🚲 TURNO EXTRA <span>·</span> <b>${esc(q.nome)}</b> usou a Bicicleta</div><div class="fxBici">${ciclistaSVG(cor)}</div></div>`);
+    const el = h(`<div class="fxBand bike" style="--cor:${cor}"><div class="fxTxt">🚲 TURNO EXTRA <span>·</span> <b>${esc(q.nome)}</b> usou a Bicicleta</div><div class="fxBici"><div class="bikeSpr" style="background-image:url(img/fx/bike_${q.cor}.webp)"></div></div></div>`);
     c.appendChild(el); setTimeout(() => el.remove(), 3000);
   }
   function centroPeao(j) {

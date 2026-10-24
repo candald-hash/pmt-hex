@@ -10,6 +10,7 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- Bicicleta: o ciclista da animação agora usa os sprites em pixel art (6 quadros de pedalada), na cor do jogador.
 - Efeitos na tela: faixa animada de "Turno extra" com um ciclista atravessando a tela (Bicicleta) e faixa de "Truque Rocket" com a carta voando da vítima para o ladrão (vale também para Eventos que roubam Itens; só os dois envolvidos veem qual Item foi).
 - Pokédex: a tela de conclusão mostra as cartas reveladas e seus hexágonos.
 - Jogador preso (sem Pokémon para atravessar as passagens de tipo em volta, ex.: depois de Voar/Túnel): no início da vez dele, volta para a cidade do hexágono, descarta 1 Item aleatório e perde o turno, com aviso.

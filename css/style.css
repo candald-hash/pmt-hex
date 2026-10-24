@@ -418,3 +418,8 @@ button.celebi:hover:not(:disabled){background:rgba(244,114,182,.15);border-color
 @keyframes fxRastro{50%{transform:translateX(6px)}}
 @keyframes fxVira{0%,50%{opacity:0}65%,100%{opacity:1}}
 @media (max-width:760px){.fxBand{height:110px}.fxTxt{font-size:16px}.fxBici svg{width:126px;height:94px}}
+
+.bikeSpr{width:144px;height:144px;background-size:864px 144px;background-repeat:no-repeat;image-rendering:pixelated;animation:bikePedal .55s steps(6) infinite}
+@keyframes bikePedal{to{background-position:-864px 0}}
+@media (max-width:760px){.bikeSpr{width:104px;height:104px;background-size:624px 104px;animation-name:bikePedalM}}
+@keyframes bikePedalM{to{background-position:-624px 0}}
