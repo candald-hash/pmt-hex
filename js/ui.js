@@ -280,6 +280,7 @@
   function render() {
     if (!st) return;
     iniciarAnim();
+    setTimeout(tocarFx, 0);
     renderBoard();
     const p = E.J(st), t = st.turno || {};
     // --- turno ---
@@ -822,6 +823,47 @@
     if (online() && NET.eu !== av.de) return;
     toast(av.aceita ? `🤝 ${esc(E.J(st, av.para).nome)} aceitou sua troca!` : `✖ ${esc(E.J(st, av.para).nome)} recusou sua proposta de troca.`);
   }
+  // ---------- efeitos visuais na tela (Bicicleta, roubo de Item) ----------
+  let fxVisto = null;
+  function tocarFx() {
+    const f = st && st.fx;
+    if (fxVisto === null) { fxVisto = f ? f.seq : 0; return; } // ao abrir/recarregar não repete o último efeito
+    if (!f || f.seq === fxVisto) return; fxVisto = f.seq;
+    if (f.tipo === 'bike') fxBike(E.J(st, f.j)); else if (f.tipo === 'roubo') fxRoubo(f);
+  }
+  function camadaFx() { let c = $('#fxLayer'); if (!c) { c = h('<div id="fxLayer"></div>'); $('#boardWrap').appendChild(c); } return c; }
+  const ciclistaSVG = cor => `<svg viewBox="0 -4 140 104" width="172" height="128"><g class="rastro" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".7"><line x1="128" y1="40" x2="139" y2="40"/><line x1="122" y1="56" x2="139" y2="56"/><line x1="126" y1="72" x2="139" y2="72"/></g>
+    <g class="roda"><circle cx="30" cy="74" r="20" fill="none" stroke="#111" stroke-width="5"/><g stroke="#666" stroke-width="2"><line x1="30" y1="54" x2="30" y2="94"/><line x1="10" y1="74" x2="50" y2="74"/><line x1="16" y1="60" x2="44" y2="88"/><line x1="44" y1="60" x2="16" y2="88"/></g></g>
+    <g class="roda r2"><circle cx="104" cy="74" r="20" fill="none" stroke="#111" stroke-width="5"/><g stroke="#666" stroke-width="2"><line x1="104" y1="54" x2="104" y2="94"/><line x1="84" y1="74" x2="124" y2="74"/><line x1="90" y1="60" x2="118" y2="88"/><line x1="118" y1="60" x2="90" y2="88"/></g></g>
+    <g stroke="#e11d48" stroke-width="5" stroke-linecap="round" fill="none"><path d="M30 74 L52 46 L88 46 L104 74 M52 46 L68 74 L88 46 M86 40 L90 34 M48 36 L52 46"/></g>
+    <path d="M40 34 h14" stroke="#111" stroke-width="5" stroke-linecap="round"/><path d="M82 33 h14" stroke="#111" stroke-width="6" stroke-linecap="round"/>
+    <g stroke-linecap="round" fill="none"><path class="perna" d="M86 34 L74 54 L68 74" stroke="#1e3a8a" stroke-width="8"/><path d="M86 34 L62 14" stroke="#111" stroke-width="16"/><path d="M86 34 L62 14" stroke="${cor}" stroke-width="12"/><path d="M64 18 L50 34" stroke="#f1c27d" stroke-width="6"/></g>
+    <circle cx="56" cy="8" r="9" fill="#f1c27d" stroke="#111" stroke-width="1.5"/><path d="M46 6 a10 9 0 0 1 20 -2 l-24 2 z" fill="${cor}" stroke="#111" stroke-width="1.5"/></svg>`;
+  function fxBike(q) {
+    const c = camadaFx(), cor = COR_HEX[q.cor] || '#ffd23f';
+    const el = h(`<div class="fxBand bike" style="--cor:${cor}"><div class="fxTxt">🚲 TURNO EXTRA <span>·</span> <b>${esc(q.nome)}</b> usou a Bicicleta</div><div class="fxBici">${ciclistaSVG(cor)}</div></div>`);
+    c.appendChild(el); setTimeout(() => el.remove(), 3000);
+  }
+  function centroPeao(j) {
+    const g = document.querySelector(`#lPawns .pawn[data-j="${j}"]`), W = $('#boardWrap').getBoundingClientRect();
+    if (!g) return { x: W.left + W.width / 2, y: W.top + W.height / 2 };
+    const r = g.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  }
+  function fxRoubo(f) {
+    const c = camadaFx(), ladrao = E.J(st, f.de), vit = E.J(st, f.para);
+    const meu = online() && (NET.eu === f.de || NET.eu === f.para), it = f.itens[0], face = meu && it && it !== 'oculto' ? E.ITEM(it) : null;
+    const txt = f.nome === 'Truque Rocket' ? `🎭 TRUQUE ROCKET <span>·</span> <b>${esc(ladrao.nome)}</b> pegou ${f.itens.length > 1 ? f.itens.length + ' Itens' : 'um Item'} de <b>${esc(vit.nome)}</b>` : `🎭 ${esc(f.nome)} <span>·</span> <b>${esc(ladrao.nome)}</b> pegou ${f.itens.length > 1 ? f.itens.length + ' Itens' : 'um Item'} de <b>${esc(vit.nome)}</b>`;
+    const band = h(`<div class="fxBand roubo"><div class="fxTxt">${txt}</div></div>`); c.appendChild(band); setTimeout(() => band.remove(), 3200);
+    const a = centroPeao(f.para), b = centroPeao(f.de), W = c.getBoundingClientRect();
+    f.itens.forEach((inst, k) => {
+      const carta = h(`<div class="fxCarta"><img src="${D.versos.item}">${face && k === 0 ? `<img class="face" src="${face.img}">` : ''}</div>`); c.appendChild(carta);
+      const x0 = a.x - W.left - 36, y0 = a.y - W.top - 50, x1 = b.x - W.left - 36, y1 = b.y - W.top - 50, my = Math.min(y0, y1) - 120;
+      carta.animate([{ transform: `translate(${x0}px,${y0}px) scale(.4) rotate(0deg)`, opacity: 0 }, { transform: `translate(${x0}px,${y0 - 30}px) scale(1) rotate(-8deg)`, opacity: 1, offset: .2 },
+        { transform: `translate(${(x0 + x1) / 2}px,${my}px) scale(1.15) rotate(10deg)`, offset: .55 }, { transform: `translate(${x1}px,${y1}px) scale(.8) rotate(0deg)`, opacity: 1, offset: .9 }, { transform: `translate(${x1}px,${y1}px) scale(.3)`, opacity: 0 }],
+        { duration: 2200, delay: 250 + k * 250, easing: 'ease-in-out', fill: 'both' }).onfinish = () => carta.remove();
+    });
+    if (meu && face) setTimeout(() => toast(NET.eu === f.de ? `🎭 Você pegou: ${esc(face.nome)}` : `🎭 ${esc(ladrao.nome)} pegou seu ${esc(face.nome)}`), 1800);
+  }
   function mCampeao(pd) {
     const q = E.J(st, pd.jogador), es = q.stats || { eventos: 0, superEventos: 0, bat: {} }, B = es.bat || {};
     const NOMES_BAT = { lider: 'Ginásios', duelo: 'Duelos', praca: 'Festival de Praça', liga: 'Liga' };
@@ -991,7 +1033,7 @@
       <h2>${esc(card.nome)}</h2><span class="tag">${pd.baralho === 'evento' ? 'Evento' : 'Super Evento'}</span>${card.bloqueavel ? ' <span class="tag" style="color:#fca5a5">bloqueável por Poké-Boneca</span>' : ''}${card.continuado ? ` <span class="tag">continuado: ${card.continuado} turnos</span>` : ''}
       <p style="font-size:16px;margin:14px 0">${esc(card.texto)}</p>
       ${card.duelo ? `<p class="mut">Duelo — +1: ${card.duelo.mais1.map(t => E.TIPOS_NOME[t]).join(', ')} · −1: ${card.duelo.menos1.map(t => E.TIPOS_NOME[t]).join(', ')}</p>` : ''}
-      ${pd.ativado ? blocoTrocasCarta() : ''}${pd.ativado && (st.ganhosCarta || []).length ? `<div class="ganhos surge"><div class="mut">Pokémon${st.ganhosCarta.length > 1 ? 's' : ''} recebido${st.ganhosCarta.length > 1 ? 's' : ''}:</div><div class="row" style="gap:12px;flex-wrap:wrap">${st.ganhosCarta.map(([j, id]) => `<div class="gpk"><img src="${E.P(id).img}" data-z="${E.P(id).img}"><div><b>${esc(E.P(id).nome)}</b>${j !== p.id || st.ganhosCarta.some(x => x[0] !== p.id) ? `<br><span class="mut">${esc(E.J(st, j).nome)}</span>` : ''}</div></div>`).join('')}</div></div>` : ''}
+      ${pd.ativado && (st.reveladosCarta || []).length ? `<div class="ganhos surge"><div class="mut">Revelado${st.reveladosCarta.length > 1 ? 's' : ''} no tabuleiro:</div><div class="row" style="gap:12px;flex-wrap:wrap">${st.reveladosCarta.filter(k => st.slots[k] && st.slots[k].carta).map(k => { const id = st.slots[k].carta; return `<div class="gpk"><img src="${E.P(id).img}" data-z="${E.P(id).img}"><div><b>${esc(E.P(id).nome)}</b><br><span class="mut">hexágono ${esc(nomeHex(k))}</span></div></div>`; }).join('')}</div></div>` : ''}${pd.ativado ? blocoTrocasCarta() : ''}${pd.ativado && (st.ganhosCarta || []).length ? `<div class="ganhos surge"><div class="mut">Pokémon${st.ganhosCarta.length > 1 ? 's' : ''} recebido${st.ganhosCarta.length > 1 ? 's' : ''}:</div><div class="row" style="gap:12px;flex-wrap:wrap">${st.ganhosCarta.map(([j, id]) => `<div class="gpk"><img src="${E.P(id).img}" data-z="${E.P(id).img}"><div><b>${esc(E.P(id).nome)}</b>${j !== p.id || st.ganhosCarta.some(x => x[0] !== p.id) ? `<br><span class="mut">${esc(E.J(st, j).nome)}</span>` : ''}</div></div>`).join('')}</div></div>` : ''}
       ${pd.ativado ? `<div class="result">${card.autoCompleto ? 'Efeito aplicado.' : auto ? 'Efeitos automáticos aplicados. O anfitrião pode completar o que faltar pela caixa de ferramentas.' : 'Este efeito é aplicado à mão pela caixa de ferramentas.'}</div>` : ''}
       <div class="mfoot">
         ${!card.autoCompleto && souAnfitriao() ? '<button id="tools">Caixa de ferramentas</button>' : ''}

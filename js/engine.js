@@ -500,7 +500,7 @@
     if (reacaoAberta(st)) return;
     pd.ativado = true;
     const card = (pd.baralho === 'evento' ? idx().ev : idx().sev)[pd.carta];
-    st.cartaAtiva = card.nome; st.ganhosCarta = []; st.trocasCarta = [];
+    st.cartaAtiva = card.nome; st.ganhosCarta = []; st.trocasCarta = []; st.reveladosCarta = [];
     const passos = passosCarta(card);
     if (!passos.length) { log(st, 'Efeito manual: use a caixa de ferramentas para aplicar.'); return; }
     const resto = { pend: st.pend }; st.pend = null; executar(st, passos.concat([['voltarCarta', resto.pend]]));
@@ -512,7 +512,7 @@
     if (st.pend !== pd) return; // a Flauta trocou o Evento
     pd = st.pend;
     if (pd.carta !== 'gsball') st.descartes[pd.baralho].push(pd.carta);
-    st.pend = null; st.ganhosCarta = null; st.trocasCarta = null;
+    st.pend = null; st.ganhosCarta = null; st.trocasCarta = null; st.reveladosCarta = null;
     const card = (pd.baralho === 'evento' ? idx().ev : idx().sev)[pd.carta];
     (st.efeitos || []).filter(e => e.tipo === 'suborno' && e.dono !== atv(st)).forEach(e => {
       const d = J(st, e.dono); e.copiou = true;
@@ -1014,7 +1014,7 @@
     const p = J(st); if (!podeEncerrar(st)) return;
     if (p.itens.length > limiteItens(p)) { st.pend = { tipo: 'descartar', n: p.itens.length - limiteItens(p), titulo: `Descarte ${p.itens.length - limiteItens(p)} Item(ns) (limite ${limiteItens(p)})` }; return; }
     if (st.turno.turnoExtra) { st.turno.turnoExtra = false; log(st, `${p.nome} joga um turno extra.`); st.turno = null; inicioTurno(st, true); return; }
-    if (st.turno.bicicletaAtiva) { st.turno.bicicletaAtiva = false; log(st, `${p.nome} joga o turno extra (Bicicleta).`); st.turno = null; inicioTurno(st, true); st.turno.bicicletaUsada = true; return; }
+    if (st.turno.bicicletaAtiva) { st.turno.bicicletaAtiva = false; log(st, `${p.nome} joga o turno extra (Bicicleta).`); st.turno = null; inicioTurno(st, true); st.turno.bicicletaUsada = true; fx(st, { tipo: 'bike', j: p.id }); return; }
     proximo(st);
   }
   function descartarExcesso(st, insts) {
@@ -1039,7 +1039,7 @@
     }
     if (it.id === 'truquerocket') {
       if (st.pend || !alvosValidos(st, 'roubar1', {}).length) { log(st, 'Truque Rocket: nenhum oponente tem Itens.'); return; }
-      descartarItem(st, p, inst); log(st, `${p.nome} usou Truque Rocket.`, '', [['it', it.id]]); pedirAlvo(st, 'roubar1', { bloqueavel: true }); return;
+      descartarItem(st, p, inst); log(st, `${p.nome} usou Truque Rocket.`, '', [['it', it.id]]); st.truqueRocket = true; pedirAlvo(st, 'roubar1', { bloqueavel: true }); return;
     }
     if (it.id === 'vara') {
       if (!turnoLivre) { log(st, 'A Vara de Pesca só pode ser usada antes de se deslocar.'); return; }
@@ -1163,8 +1163,11 @@
     else aplicarAcao(st, pd.acao, pd.alvo, pd);
     continuar(st);
   }
+  // efeito visual para todas as telas (st.fx muda de seq a cada novo efeito)
+  function fx(st, o) { st.fx = Object.assign({ seq: ((st.fx && st.fx.seq) || 0) + 1 }, o); }
   function roubar(st, p, q, n) {
-    let k = 0; for (; k < n && q.itens.length; k++) { const i = Math.floor(rnd(st) * q.itens.length); p.itens.push(q.itens.splice(i, 1)[0]); }
+    let k = 0; const lev = []; for (; k < n && q.itens.length; k++) { const i = Math.floor(rnd(st) * q.itens.length); const it = q.itens.splice(i, 1)[0]; p.itens.push(it); lev.push(it); }
+    if (lev.length) fx(st, { tipo: 'roubo', de: p.id, para: q.id, itens: lev, nome: st.truqueRocket ? 'Truque Rocket' : (st.cartaAtiva || 'Roubo') }); st.truqueRocket = false;
     log(st, `${p.nome} pegou ${k} Item(ns) aleatório(s) de ${q.nome}.`);
   }
   function aplicarAcao(st, acao, alvo, pd) {
@@ -1452,7 +1455,7 @@
     if (f.coresDistintas) (M[f.coresDistintas + ':cores'] = M[f.coresDistintas + ':cores'] || []).push(P(c.carta).cor);
     if (f.hexDistintos) (M[f.hexDistintos + ':hex'] = M[f.hexDistintos + ':hex'] || []).push(grafo(st).slots[k].pos);
     st.pend = null;
-    if (f.acao === 'revelar') { if (revelar(st, k)) janelaRepel(st, [k]); }
+    if (f.acao === 'revelar') { const nova = revelar(st, k); if (st.reveladosCarta && nova) st.reveladosCarta.push(k); if (nova) janelaRepel(st, [k]); }
     else if (f.acao === 'pegar') { const id = c.carta; st.slots[k] = { carta: tirar(st, grafo(st).slots[k].cor), aberta: false, fraco: false }; ganharPokemon(st, J(st), id, 'de graça'); }
     else if (f.acao === 'capturar') { const nova = revelar(st, k); iniciarCaptura(st, { slot: k }); if (nova) janelaRepel(st, [k]); }
     continuar(st);
@@ -1803,6 +1806,7 @@
       if (pd.tipo === 'proposta' && pd.de !== j && pd.para !== j) { pd.meus = []; pd.deles = []; pd.privado = true; }
     }
     if (v.propostas) v.propostas = v.propostas.filter(pr => pr.de === j || pr.para === j);
+    if (v.fx && v.fx.tipo === 'roubo' && v.fx.de !== j && v.fx.para !== j) v.fx.itens = v.fx.itens.map(() => 'oculto');
     v.fila = []; v.vista = j;
     return v;
   }

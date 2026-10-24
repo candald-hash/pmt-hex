@@ -10,6 +10,8 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- Efeitos na tela: faixa animada de "Turno extra" com um ciclista atravessando a tela (Bicicleta) e faixa de "Truque Rocket" com a carta voando da vítima para o ladrão (vale também para Eventos que roubam Itens; só os dois envolvidos veem qual Item foi).
+- Pokédex: a tela de conclusão mostra as cartas reveladas e seus hexágonos.
 - Jogador preso (sem Pokémon para atravessar as passagens de tipo em volta, ex.: depois de Voar/Túnel): no início da vez dele, volta para a cidade do hexágono, descarta 1 Item aleatório e perde o turno, com aviso.
 - Copycat: não troca os jogadores de lugar se algum deles estiver no hexágono do Planalto Índigo (os Itens são comprados normalmente).
 - Pokédex (e outras revelações): a escolha é feita direto no tabuleiro.
