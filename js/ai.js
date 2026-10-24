@@ -279,6 +279,7 @@
       if (pd.tipo === 'escolherCaptura') { const best = pd.cartas.slice().sort((a, b) => pCaptura(st, p, b) * valorPokemon(p, b) - pCaptura(st, p, a) * valorPokemon(p, a))[0]; E.escolherCaptura(st, best); return true; }
       if (pd.tipo === 'escolherEvento') { const best = pd.cartas.slice().sort((a, b) => (E.idx().ev[b].autoCompleto ? 1 : 0) - (E.idx().ev[a].autoCompleto ? 1 : 0))[0]; E.escolherEvento(st, best); return true; }
       if (pd.tipo === 'treinador') { if (!E.J(st, pd.jogador).ia) return 'esperar'; const q = E.J(st, pd.jogador); const op = [q.treinador, ...q.treinadoresExtra].filter(Boolean); E.escolherTreinador(st, op.sort((a, b) => valorTreinador(q, b) - valorTreinador(q, a))[0]); return true; }
+      if (pd.tipo === 'preso') { E.confirmarPreso(st); return true; }
       if (pd.tipo === 'proposta') { if (!E.J(st, pd.para).ia) return 'esperar'; E.responderProposta(st, false); return true; }
       if (pd.tipo === 'travar') {
         const q = E.J(st, pd.jogador != null ? pd.jogador : st.vez);

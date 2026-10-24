@@ -10,6 +10,9 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- Jogador preso (sem Pokémon para atravessar as passagens de tipo em volta, ex.: depois de Voar/Túnel): no início da vez dele, volta para a cidade do hexágono, descarta 1 Item aleatório e perde o turno, com aviso.
+- Copycat: não troca os jogadores de lugar se algum deles estiver no hexágono do Planalto Índigo (os Itens são comprados normalmente).
+- Pokédex (e outras revelações): a escolha é feita direto no tabuleiro.
 - "Propor troca" saiu da barra de botões e foi para o perfil do jogador (clique no adversário na lista de Jogadores). Sugestões de troca: sempre até 3 (mesma linha 🔗, depois mais fortes 💪), com o ícone sob cada carta.
 - Negociador e Criadores Pokémon: a tela de resultado mostra os Pokémons devolvidos para fora do jogo.
 - Eventos de troca (Troca Pokémon, S.S. Anne): na escolha do oponente, cada um mostra até 3 Pokémons que você pode receber — da mesma linha evolutiva de algum seu ou, se não houver, os mais fortes.

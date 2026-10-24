@@ -10,7 +10,7 @@
   const COR_HEX = { branco: '#f3f4f6', preto: '#1f2937', vermelho: '#e3202b', azul: '#2563eb', verde: '#16a34a', amarelo: '#facc15' };
   const COR_NOME = { branco: 'Branco', preto: 'Preto', vermelho: 'Vermelho', azul: 'Azul', verde: 'Verde', amarelo: 'Amarelo' };
   const CARD_W = E.HW * 0.148, CARD_H = CARD_W / 0.86;
-  let st = null, view = null, boardMode = null, sel = {}, luraEnq = false;
+  let st = null, view = null, boardMode = null, sel = {}, luraEnq = false, slotEnq = false;
   const PREF = 'pmthex-prefs';
   let prefs = (() => { try { return Object.assign({ tema: 'escuro', velIA: 'normal' }, JSON.parse(localStorage.getItem(PREF)) || {}); } catch (e) { return { tema: 'escuro', velIA: 'normal' }; } })();
   function salvarPrefs() { try { localStorage.setItem(PREF, JSON.stringify(prefs)); } catch (e) {} }
@@ -421,6 +421,8 @@
   function renderPend() {
     const pd = st.pend;
     if (!pd || pd.tipo !== 'lura') { luraEnq = false; if (boardMode && boardMode.lura) { boardMode = null; renderBoard(); } }
+    if (!pd) slotEnq = false;
+    if (!pd || pd.tipo !== 'slot') { if (boardMode && boardMode.pendSlot) { boardMode = null; renderBoard(); } }
     if (!pd) { if ($('#modalCard').dataset.pend) { delete $('#modalCard').dataset.pend; fecharModal(); } return; }
     $('#modalCard').dataset.pend = pd.tipo;
     const p = E.J(st);
@@ -509,6 +511,20 @@
       if (p.ia) { abrirModal(`<h2>${esc(pd.titulo)}</h2><p class="mut">🤖 ${esc(p.nome)} está escolhendo…</p>`); return; }
       if (!boardMode) { fecharModal(); $('#modalCard').dataset.pend = 'espaco'; boardMode = { tipo: 'espaco', pend: true, filtro: pd.opcoes, msg: pd.titulo, cb: k => agir('escolherEspaco', k) }; renderBoard(); }
       return;
+    }
+    if (pd.tipo === 'preso') {
+      const q = E.J(st, pd.jogador), meu = souEu(q.id);
+      abrirModal(`<h2>⛓ ${meu ? 'Você ficou preso!' : esc(q.nome) + ' ficou preso'}</h2><p>${esc(pd.texto)}</p>${pd.item ? `<div class="hand"><div class="ic" style="width:80px;opacity:.6"><img src="${E.ITEM(pd.item).img}"></div></div>` : ''}
+        <div class="mfoot">${meu && !q.ia ? '<button class="pri" id="okPreso">Entendi</button>' : `<span class="mut">⏳ Aguardando ${esc(q.nome)}…</span>`}</div>`);
+      const b = $('#okPreso'); if (b) b.onclick = () => agir('confirmarPreso'); return;
+    }
+    if (pd.tipo === 'slot' && pd.f && pd.f.acao === 'revelar') {
+      // revelações (ex.: Pokédex) direto no tabuleiro
+      if (p.ia || !souEu(p.id)) { if (boardMode && boardMode.pendSlot) boardMode = null; abrirModal(`<h2>${esc(pd.titulo)}</h2><p class="mut">${p.ia ? '🤖 ' : '⏳ '}${esc(p.nome)} está escolhendo no tabuleiro…</p>`); return; }
+      fecharModal(); $('#modalCard').dataset.pend = 'slot';
+      boardMode = { tipo: 'slot', pendSlot: true, pend: true, filtro: pd.opcoes, msg: pd.titulo + ' — clique numa carta virada no tabuleiro', cb: k => agir('escolherSlot', k) };
+      if (!slotEnq) { slotEnq = true; enquadrar(); }
+      renderBoard(); return;
     }
     if (pd.tipo === 'slot') return mSlot(pd, p);
     if (pd.tipo === 'lura') {

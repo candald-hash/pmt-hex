@@ -202,6 +202,7 @@
     st.fase = 'inicio'; st.turno = { rolagem: null, dados: null, destinos: null, batalhouLider: false, moveu: false, bicicleta: st.turno && st.turno.bicicletaUsada ? true : false };
     if (p.pular > 0) { p.pular--; log(st, `${p.nome} perde a vez.`); proximo(st); return; }
     log(st, `Vez de ${p.nome}.`, 'vez');
+    if (!extra && preso(st, p.id)) return punirPreso(st, p);
     const L = st.liga;
     if (!extra && L && L.etapa === 'final' && L.finalTurnos && !L.finalMarcada && Object.values(L.finalTurnos).every(n => n <= 0)) {
       L.finalMarcada = true; const [f1, f2] = L.ativos; log(st, `Os finalistas jogaram seus 3 turnos: começa a FINAL da Liga, ${J(st, f1).nome} × ${J(st, f2).nome}!`, 'destaque');
@@ -209,6 +210,24 @@
     }
     abrirProposta(st);
   }
+  // ---------- jogador preso (ex.: Voar/Túnel para um espaço cercado por passagens de tipo) ----------
+  function noHexFinal(st, q) { const g = grafo(st), pl = Object.values(g.nodes).find(n => n.especial === 'planalto'); return !!pl && g.nodes[q.pos] && g.nodes[q.pos].pos === pl.pos; }
+  function preso(st, pi) {
+    const g = grafo(st), q = J(st, pi), s = g.nodes[q.pos]; if (!s || s.kind === 'cidade' || s.especial === 'planalto' || st.liga) return false;
+    if (q.itens.some(i => i.split('#')[0] === 'voar')) return false; // ainda pode Voar
+    const max = q.itens.some(i => ['corda', 'escaperope'].includes(i.split('#')[0])) ? 8 : 6;
+    for (let n = 1; n <= max; n++) if (Object.keys(destinos(st, pi, n)).length) return false;
+    return true;
+  }
+  function punirPreso(st, p) {
+    const g = grafo(st), hex = g.nodes[p.pos].pos, c = Object.values(g.nodes).find(n => n.pos === hex && n.kind === 'cidade'), onde = nomeEspaco(st, p.pos);
+    if (c) { p.pos = c.key; addU(p.passou, c.key); }
+    let it = null; if (p.itens.length) { it = p.itens[Math.floor(rnd(st) * p.itens.length)]; descartarItem(st, p, it); }
+    const txt = `${p.nome} ficou preso em ${onde} (sem Pokémon para atravessar as passagens): volta para ${c ? nomeEspaco(st, c.key) : 'a cidade'}${it ? ', descarta ' + ITEM(it).nome : ''} e perde este turno.`;
+    log(st, txt, 'destaque');
+    st.pend = { tipo: 'preso', jogador: p.id, item: it, titulo: 'Você ficou preso!', texto: txt };
+  }
+  function confirmarPreso(st) { const pd = st.pend; if (!pd || pd.tipo !== 'preso') return; st.pend = null; proximo(st); }
   function proximo(st) {
     const L = st.liga;
     if (L && L.etapa === 'final' && L.finalTurnos && L.finalTurnos[st.vez] > 0) { L.finalTurnos[st.vez]--; log(st, `Final da Liga: ${J(st, st.vez).nome} tem mais ${L.finalTurnos[st.vez]} turno(s) antes da final.`); }
@@ -1179,7 +1198,9 @@
       case 'pular2': q.pular += 2; log(st, `${q.nome} perde os próximos 2 turnos.`); break;
       case 'pular1': q.pular += 1; log(st, `${q.nome} perde o próximo turno.`); break;
       case 'copycat2': {
-        comprarItem(st, p, 1); comprarItem(st, q, 1); [p.pos, q.pos] = [q.pos, p.pos];
+        comprarItem(st, p, 1); comprarItem(st, q, 1);
+        if (noHexFinal(st, p) || noHexFinal(st, q)) { log(st, `${p.nome} e ${q.nome} compraram 1 Item; não trocam de lugar porque ${noHexFinal(st, p) ? p.nome : q.nome} está no hexágono do Planalto Índigo.`); break; }
+        [p.pos, q.pos] = [q.pos, p.pos];
         log(st, `${p.nome} e ${q.nome} compraram 1 Item e trocaram de lugar.`); break;
       }
       case 'praca': iniciarPraca(st, p.id, alvo); break;
@@ -1791,6 +1812,6 @@
     novoJogo, grafo, destinos, rolarMovimento, escolherDado, hiker, ajustarRolagem, mover, trem, encerrarTurno, podeEncerrar, descartarExcesso,
     ativarCarta, concluirCarta, fecharPend, rolarCaptura, escolherCaptura, escolherEvento, escolherTreinador, travar, abrirLider, lutarLider, remedio,
     podeEnfrentar, usarItem, lyra, ferramenta, duelo, forcaBase, forcaEmBatalha, bonusEvolucao, bonusTreinador, obedece, nInsignias, limiteItens, faixaCaptura,
-    nomeEspaco, familiaTravada, posXY, autoTexto, escolherAlvo, responderBoneca, iniciarReacoes, reacaoAberta, reagir, encerrarReacoes, celebiMovimento, celebiCaptura, celebiLider, celebiDuelo, aceitarTabela, celebiTabela, celebiDe, escolherLura, resolverFestival, resolverJuniper, resolverAzalea, distribuirEvento, comprarAqua, resolverMagma, est, desistirCaptura, vistaDe, PEND_PRIVADO, escolherDuelo, proporTroca, cancelarProposta, responderProposta, podeProporTroca, alvosProposta, trocavel, MAX_PROPOSTA, quemDecide, podeAgir, acao, posAcao, celebiPraca, reagirRepel, encerrarRepel, temRepel, ligaCelebi, ligaRemedio, responderCynthia, temCynthia, escolherDuplaPraca, fecharPraca, resolverPracaPremio, pracaAptosDe, pracaForca, PREMIOS_PRACA, iniciarLiga, ligaGatilho, resolverLigaOponente, ligaEscolher, ligaSeguir, ligaAptos, porCapturas, FASE_LIGA, resolverWally, wallyOk, resolverCriadores, opcoesCriadores, linhasCriadores, foraDeJogoCriadores, resolverFuchsia, resolverBriney, encrencado, escolherSlot, resolverTipoCor, pegarDeLista, escolherEspaco, escolherLiderFora, pagarItens, resolverNegociador, pegarItem, filtrarSlots, escolherDesempate, descartarDe, resolverTroca, resolverDividir, escolherOpcao, lutarDuelo, fecharDuelo, aptosDuelo, paresTroca, temBoneca, slotInsignia, vantagem, bonusItemBatalha, idx, P, ITEM, J, HW, HH, CORES_PEAO, TIPOS_NOME, ORDEM_FORCA
+    nomeEspaco, familiaTravada, posXY, autoTexto, escolherAlvo, responderBoneca, iniciarReacoes, reacaoAberta, reagir, encerrarReacoes, celebiMovimento, celebiCaptura, celebiLider, celebiDuelo, aceitarTabela, celebiTabela, celebiDe, escolherLura, resolverFestival, resolverJuniper, resolverAzalea, distribuirEvento, comprarAqua, resolverMagma, est, desistirCaptura, vistaDe, PEND_PRIVADO, escolherDuelo, confirmarPreso, preso, noHexFinal, proporTroca, cancelarProposta, responderProposta, podeProporTroca, alvosProposta, trocavel, MAX_PROPOSTA, quemDecide, podeAgir, acao, posAcao, celebiPraca, reagirRepel, encerrarRepel, temRepel, ligaCelebi, ligaRemedio, responderCynthia, temCynthia, escolherDuplaPraca, fecharPraca, resolverPracaPremio, pracaAptosDe, pracaForca, PREMIOS_PRACA, iniciarLiga, ligaGatilho, resolverLigaOponente, ligaEscolher, ligaSeguir, ligaAptos, porCapturas, FASE_LIGA, resolverWally, wallyOk, resolverCriadores, opcoesCriadores, linhasCriadores, foraDeJogoCriadores, resolverFuchsia, resolverBriney, encrencado, escolherSlot, resolverTipoCor, pegarDeLista, escolherEspaco, escolherLiderFora, pagarItens, resolverNegociador, pegarItem, filtrarSlots, escolherDesempate, descartarDe, resolverTroca, resolverDividir, escolherOpcao, lutarDuelo, fecharDuelo, aptosDuelo, paresTroca, temBoneca, slotInsignia, vantagem, bonusItemBatalha, idx, P, ITEM, J, HW, HH, CORES_PEAO, TIPOS_NOME, ORDEM_FORCA
   };
 })(window);
