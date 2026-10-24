@@ -396,3 +396,6 @@ button.celebi:hover:not(:disabled){background:rgba(244,114,182,.15);border-color
 .sugT{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
 .sugT .mut{font-size:11.5px;margin-right:2px}
 .sugT img{width:50px;border-radius:4px;cursor:zoom-in}
+.sugC{display:flex;flex-direction:column;align-items:center;gap:1px;font-size:13px;line-height:1}
+.sugC>span{cursor:help}
+.ajudaT{cursor:help}

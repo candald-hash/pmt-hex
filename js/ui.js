@@ -289,9 +289,8 @@
     const noCidade = E.grafo(st).nodes[p.pos].kind === 'cidade' || E.grafo(st).nodes[p.pos].especial === 'planalto';
     const cordas = p.itens.filter(i => ['corda', 'escaperope'].includes(i.split('#')[0]));
     let acoes = '';
-    // botões fixos, sempre no mesmo lugar: Rolar dado · Propor troca · Encerrar turno
-    const comTroca = E.alvosProposta(st).length > 0 && !p.ia;
-    const fixos = `<div class="acoesFixas ${comTroca ? 'tres' : ''}"><button class="${st.fase === 'inicio' ? 'pri' : ''}" data-a="rolar" ${st.fase === 'inicio' ? '' : 'disabled'}>🎲 Rolar dado</button>${comTroca ? `<button data-a="propor" ${E.podeProporTroca(st) ? '' : 'disabled'} title="Proponha uma troca de até ${E.MAX_PROPOSTA} Pokémon com outro jogador humano">🤝 Propor troca</button>` : ''}<button data-a="fim" ${st.fase !== 'mover' && E.podeEncerrar(st) ? '' : 'disabled'}>Encerrar turno ▸</button></div>`;
+    // botões fixos, sempre no mesmo lugar: Rolar dado · Encerrar turno (Propor troca fica no perfil de cada jogador)
+    const fixos = `<div class="acoesFixas"><button class="${st.fase === 'inicio' ? 'pri' : ''}" data-a="rolar" ${st.fase === 'inicio' ? '' : 'disabled'}>🎲 Rolar dado</button><button data-a="fim" ${st.fase !== 'mover' && E.podeEncerrar(st) ? '' : 'disabled'}>Encerrar turno ▸</button></div>`;
     if (st.fase === 'inicio') {
       if (tr && tr.efeito === 'hiker') acoes += `<button data-a="hiker">Hiker: andar até 2</button>`;
       if (noCidade && p.passou.length > 1) acoes += `<button data-a="trem">🚆 Trem</button>`;
@@ -321,7 +320,6 @@
       if (a === 'rolar') agir('rolarMovimento'); else if (a === 'hiker') agir('hiker'); else if (a === 'lyra') agir('lyra');
       else if (a === 'trem') { boardMode = { tipo: 'trem', msg: 'Escolha uma cidade já visitada para ir de Trem' }; enquadrar(); render(); }
       else if (a === 'lider') agir('abrirLider');
-      else if (a === 'propor') { selProp = null; mProporTroca(); }
       else if (a === 'fim') { agir('encerrarTurno'); if (!st.pend) setTimeout(() => focar(E.J(st).pos, 0.55), 20); }
     });
     tb.querySelectorAll('[data-celebi]').forEach(b => b.onclick = () => agir('celebiMovimento', +b.dataset.celebi));
@@ -773,6 +771,8 @@
       <p class="mut">${esc(b.nome)} responde no início da própria vez. Pokémon que mudarem de dono até lá anulam a proposta.</p><div class="mfoot"><button class="pri" data-x>Fechar</button></div>`);
     $('#modalCard').querySelectorAll('.pc').forEach(c => c.onclick = () => zoom(E.P(c.dataset.id).img));
   }
+  // botão "Propor troca" no perfil: na minha vez, para um adversário humano
+  function podeProporPara(q) { return !!st && souEu(st.vez) && E.podeProporTroca(st) && E.alvosProposta(st).includes(q.id); }
   function mProporTroca() {
     if (!E.podeProporTroca(st)) return fecharModal();
     const p = E.J(st), alvos = E.alvosProposta(st), M = E.MAX_PROPOSTA;
@@ -1031,15 +1031,16 @@
   function sugestoesTroca(p, q, cores) {
     const pares = E.paresTroca(p, q, cores), deles = [...new Set(pares.map(x => x[1]))];
     const minhas = new Set(p.pokemon.map(id => E.P(id).familia || id));
-    const forca = id => E.forcaBase(q, id);
-    const mesma = deles.filter(id => minhas.has(E.P(id).familia || id)).sort((a, b) => forca(b) - forca(a));
-    const lista = (mesma.length ? mesma : deles.slice().sort((a, b) => forca(b) - forca(a))).slice(0, 3);
+    const forca = id => E.forcaBase(q, id), porForca = (a, b) => forca(b) - forca(a);
+    const mesma = deles.filter(id => minhas.has(E.P(id).familia || id)).sort(porForca);
+    const fortes = deles.filter(id => !mesma.includes(id)).sort(porForca);
+    const lista = mesma.map(id => [id, true]).concat(fortes.map(id => [id, false])).slice(0, 3);
     if (!lista.length) return '<span class="mut">sem trocas possíveis</span>';
-    return `<span class="sugT" title="${mesma.length ? 'Da mesma linha evolutiva de um Pokémon seu' : 'Os mais fortes que você pode receber'}"><span class="mut">${mesma.length ? '🔗 mesma linha' : '💪 mais fortes'}</span>${lista.map(id => `<img src="${E.P(id).img}" data-z="${E.P(id).img}" title="${esc(E.P(id).nome)} — força ${E.forcaBase(q, id)}">`).join('')}</span>`;
+    return `<span class="sugT">${lista.map(([id, m]) => `<span class="sugC"><img src="${E.P(id).img}" data-z="${E.P(id).img}" title="${esc(E.P(id).nome)} — força ${forca(id)}"><span title="${m ? 'mesma linha' : 'mais forte'}">${m ? '🔗' : '💪'}</span></span>`).join('')}</span>`;
   }
   function mAlvo(pd, p) {
     abrirModal(`<h2>${esc(pd.titulo)}</h2>${pd.bloqueavel ? '<p class="mut">Este efeito pode ser bloqueado por Poké-Boneca.</p>' : ''}
-      ${['troca', 'ssanne'].includes(pd.acao) ? '<p class="mut">Ao lado de cada oponente, até 3 Pokémons dele que você pode receber: primeiro os da mesma linha evolutiva de algum seu; senão, os mais fortes.</p>' : ''}
+      ${['troca', 'ssanne'].includes(pd.acao) ? '<p class="mut ajudaT" title="Até 3 Pokémons do oponente que você pode receber: primeiro os da mesma linha evolutiva de algum seu (🔗), depois os mais fortes (💪).">❔ Ao lado de cada oponente há sugestões de troca.</p>' : ''}
       <div style="display:grid;gap:8px">${pd.opcoes.map(i => { const q = E.J(st, i); const t = q.treinador && E.idx().tr[q.treinador]; return linhaJogador(q, `${q.id === p.id ? '<span class="tag">você</span>' : ''}${['troca', 'ssanne'].includes(pd.acao) ? sugestoesTroca(p, q, pd.cores) : `<span class="mut">${t ? esc(t.nome) : ''}</span>${insignias(q, true)}`}`); }).join('')}</div>`);
     $('#modalCard').querySelectorAll('.pj').forEach(c => c.onclick = () => agir('escolherAlvo', +c.dataset.p));
     $('#modalCard').querySelectorAll('.sugT img').forEach(i => i.onclick = ev => { ev.stopPropagation(); zoom(i.dataset.z); });
@@ -1215,7 +1216,8 @@
       <div class="row" style="margin:8px 0 14px">${insignias(q)}<span class="mut">${q.itens.length} itens · ${q.capturas} capturas${q.planalto ? ' · chegou ao Planalto' : ''}</span></div>
       ${timeAgrupado(q, 90)}
       ${tr ? `<div class="trainer"><img src="${tr.img}"><div><b>${esc(tr.nome)}</b><p>${esc(tr.texto)}</p></div></div>` : ''}
-      <div class="mfoot">${NET.modo === 'host' && q.id !== NET.eu ? `<button id="mjIA">${q.ia ? '🙂 Devolver o lugar ao jogador' : '🤖 Passar este lugar para a IA'}</button>` : ''}<button class="pri" data-x>Fechar</button></div>`);
+      <div class="mfoot">${podeProporPara(q) ? `<button class="pri" id="mjTroca" title="Proponha uma troca de até ${E.MAX_PROPOSTA} Pokémons com ${esc(q.nome)}">🤝 Propor troca</button>` : ''}${NET.modo === 'host' && q.id !== NET.eu ? `<button id="mjIA">${q.ia ? '🙂 Devolver o lugar ao jogador' : '🤖 Passar este lugar para a IA'}</button>` : ''}<button class="${podeProporPara(q) ? '' : 'pri'}" data-x>Fechar</button></div>`);
+    const mt = $('#mjTroca'); if (mt) mt.onclick = () => { selProp = { para: q.id, meus: [], deles: [] }; mProporTroca(); };
     const mj = $('#mjIA'); if (mj) mj.onclick = () => { q.ia = !q.ia; if (!q.ia) q.remoto = true; salvar(); fecharModal(); render(); NET.difundir && NET.difundir(); };
     $('#modalCard').querySelectorAll('.pc').forEach(c => c.onclick = () => zoom(E.P(c.dataset.id).img));
   }

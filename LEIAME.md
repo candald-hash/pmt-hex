@@ -10,6 +10,7 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- "Propor troca" saiu da barra de botões e foi para o perfil do jogador (clique no adversário na lista de Jogadores). Sugestões de troca: sempre até 3 (mesma linha 🔗, depois mais fortes 💪), com o ícone sob cada carta.
 - Negociador e Criadores Pokémon: a tela de resultado mostra os Pokémons devolvidos para fora do jogo.
 - Eventos de troca (Troca Pokémon, S.S. Anne): na escolha do oponente, cada um mostra até 3 Pokémons que você pode receber — da mesma linha evolutiva de algum seu ou, se não houver, os mais fortes.
 - Elenco alternativo de Pokémons (225 cartas): escolha "Elenco de Pokémons" ao criar a partida (local) ou na sala on-line (o anfitrião escolhe). Página de conferência das cartas: elenco.html.
