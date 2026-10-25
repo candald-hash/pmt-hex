@@ -423,3 +423,9 @@ button.celebi:hover:not(:disabled){background:rgba(244,114,182,.15);border-color
 @keyframes bikePedal{to{background-position:-456px 0}}
 @media (max-width:760px){.bikeSpr{width:57px;height:57px;background-size:342px 57px;animation-name:bikePedalM}}
 @keyframes bikePedalM{to{background-position:-342px 0}}
+.fxBand.voar{top:8%;height:56px;background:linear-gradient(90deg,rgba(12,40,70,.85),rgba(30,90,150,.9),rgba(12,40,70,.85));border-top:3px solid #7dd3fc;border-bottom:3px solid #7dd3fc;animation-duration:3s}
+.cartaAviso{display:flex;align-items:center;gap:10px;margin:-4px 0 12px;padding:8px 12px;border-radius:10px;background:var(--bg2);border:1px solid var(--line);font-size:14px}
+.cartaAviso img{width:44px;border-radius:4px}
+.cartaAviso img.riscada{opacity:.55;filter:grayscale(.7)}
+.premLin{display:flex;align-items:center;gap:8px;margin:6px 0;flex-wrap:wrap}
+.premLin .dot{display:inline-block;width:12px;height:12px}

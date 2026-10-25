@@ -487,7 +487,7 @@
       if (!nova) { st.pend = null; continuar(st); return; }
       const c2 = (pd.baralho === 'evento' ? idx().ev : idx().sev)[nova];
       log(st, `Novo ${pd.baralho === 'evento' ? 'Evento' : 'Super Evento'}: "${c2.nome}".`, '', [[pd.baralho === 'evento' ? 'ev' : 'sev', nova]]);
-      st.pend = { tipo: 'carta', baralho: pd.baralho, carta: nova, ativado: false, titulo: c2.nome };
+      st.pend = { tipo: 'carta', baralho: pd.baralho, carta: nova, ativado: false, titulo: c2.nome, substituiu: { carta: pd.carta, por: q.id } };
       iniciarReacoes(st); return;
     }
     pd.copias = ordem.filter(j => R.resp[j] === 'exp' || R.resp[j] === 'may'); pd.copiaFonte = {}; pd.copias.forEach(j => pd.copiaFonte[j] = R.resp[j]);
@@ -500,23 +500,24 @@
     if (reacaoAberta(st)) return;
     pd.ativado = true;
     const card = (pd.baralho === 'evento' ? idx().ev : idx().sev)[pd.carta];
-    st.cartaAtiva = card.nome; st.ganhosCarta = []; st.trocasCarta = []; st.reveladosCarta = [];
+    st.cartaAtiva = card.nome; st.ganhosCarta = []; st.trocasCarta = []; st.reveladosCarta = []; st.premiosCarta = [];
     const passos = passosCarta(card);
     if (!passos.length) { log(st, 'Efeito manual: use a caixa de ferramentas para aplicar.'); return; }
     const resto = { pend: st.pend }; st.pend = null; executar(st, passos.concat([['voltarCarta', resto.pend]]));
   }
   function concluirCarta(st) {
     let pd = st.pend; if (!pd || pd.tipo !== 'carta') return;
+    if (pd.copia) { st.pend = null; st.ganhosCarta = null; st.trocasCarta = null; st.reveladosCarta = null; st.premiosCarta = null; st.ator = pd.copia.atorAntes == null ? null : pd.copia.atorAntes; continuar(st); return; }
     if (pd.reacao == null) iniciarReacoes(st);
     if (reacaoAberta(st)) encerrarReacoes(st);
     if (st.pend !== pd) return; // a Flauta trocou o Evento
     pd = st.pend;
     if (pd.carta !== 'gsball') st.descartes[pd.baralho].push(pd.carta);
-    st.pend = null; st.ganhosCarta = null; st.trocasCarta = null; st.reveladosCarta = null;
+    st.pend = null; st.ganhosCarta = null; st.trocasCarta = null; st.reveladosCarta = null; st.premiosCarta = null;
     const card = (pd.baralho === 'evento' ? idx().ev : idx().sev)[pd.carta];
     (st.efeitos || []).filter(e => e.tipo === 'suborno' && e.dono !== atv(st)).forEach(e => {
       const d = J(st, e.dono); e.copiou = true;
-      if (card.auto && card.auto.length && card.autoCompleto) { log(st, `Suborno Rocket: ${d.nome} copia "${card.nome}".`, 'destaque', [[pd.baralho === 'evento' ? 'ev' : 'sev', pd.carta]]); st.fila = [['comoJogador', e.dono, passosCarta(card)]].concat(st.fila || []); }
+      if (card.auto && card.auto.length && card.autoCompleto) { log(st, `Suborno Rocket: ${d.nome} copia "${card.nome}".`, 'destaque', [[pd.baralho === 'evento' ? 'ev' : 'sev', pd.carta]]); st.fila = [['cartaCopia', e.dono, { carta: pd.carta, baralho: pd.baralho, fonte: 'suborno' }]].concat(st.fila || []); }
       else log(st, `Suborno Rocket: ${d.nome} copia "${card.nome}" — aplique o efeito para ${d.nome} pela caixa de ferramentas.`, 'destaque', [[pd.baralho === 'evento' ? 'ev' : 'sev', pd.carta]]);
     });
     const copias = [];
@@ -527,7 +528,7 @@
         if (!temMay(q)) return; refF = ['tr', q.treinador]; nomeF = 'May';
         st.descartes.treinador.push(q.treinador); q.treinador = null; log(st, `${q.nome} reciclou a May.`, '', [refF]); reporTreinadores(st);
       } else { const it = itemDe(q, 'expshare'); if (!it) return; descartarItem(st, q, it); nomeF = 'Exp. Share'; refF = ['it', 'expshare']; }
-      if (card.auto && card.auto.length && card.autoCompleto) { log(st, `${nomeF}: ${q.nome} copia "${card.nome}".`, 'destaque', [refF, ref]); copias.push(['comoJogador', j, passosCarta(card)]); }
+      if (card.auto && card.auto.length && card.autoCompleto) { log(st, `${nomeF}: ${q.nome} copia "${card.nome}".`, 'destaque', [refF, ref]); copias.push(['cartaCopia', j, { carta: pd.carta, baralho: pd.baralho, fonte }]); }
       else log(st, `${nomeF}: ${q.nome} copia "${card.nome}" — aplique o efeito para ${q.nome} pela caixa de ferramentas.`, 'destaque', [refF, ref]);
     });
     if (copias.length) st.fila = copias.concat(st.fila || []);
@@ -579,6 +580,7 @@
       else if (op === 'turnoExtra') { st.turno.turnoExtra = true; log(st, `${p.nome} terá um turno extra.`); }
       else if (op === 'comoJogador') { st.fila = b.concat([['fimAtor', st.ator == null ? null : st.ator]], st.fila); st.ator = a; }
       else if (op === 'fimAtor') { st.ator = a; }
+      else if (op === 'cartaCopia') { const c = (b.baralho === 'evento' ? idx().ev : idx().sev)[b.carta]; st.pend = { tipo: 'carta', baralho: b.baralho, carta: b.carta, ativado: false, reacao: 'ok', titulo: c.nome, copia: { j: a, fonte: b.fonte, atorAntes: st.ator } }; st.ator = a; }
       else if (op === 'slotSel') slotSel(st, Object.assign({}, a, a.coresDelibird ? { cores: noPlanalto(st) ? ESCALA : [corEspaco(st)] } : {}));
       else if (op === 'rota') rotaBloqueada(st);
       else if (op === 'tempestade') tempestade(st);
@@ -1050,7 +1052,7 @@
     if (it.id === 'voar') {
       if (!turnoLivre) { log(st, 'Voar deve ser a única ação do turno: use antes de rolar o dado.'); return; }
       descartarItem(st, p, inst); log(st, `${p.nome} usou Voar.`, '', [['it', it.id]]);
-      st.fase = 'acao'; st.turno.moveu = true; st.turno.voou = true; pedirEspaco(st, { ativar: true, titulo: 'Voar: escolha qualquer espaço deste hexágono' }); return;
+      st.fase = 'acao'; st.turno.moveu = true; st.turno.voou = true; pedirEspaco(st, { ativar: true, voo: true, titulo: 'Voar: escolha qualquer espaço deste hexágono' }); return;
     }
     if (it.id === 'lura') {
       if (st.pend || !luraOpcoes(st).length) { log(st, 'Módulo de Lura: não há dois Pokémons da mesma cor (com pelo menos um revelado) para trocar.'); return; }
@@ -1341,7 +1343,8 @@
   }
   function iniciarRanking(st, o) {
     const cands = st.jogadores.filter(q => !q.eliminado && !(o.excluirAtivo && q.id === atv(st))).map(q => ({ id: q.id, v: metrica(st, q, o.metrica) }));
-    passoRanking(st, { o, restantes: cands, ganhadores: [] });
+    const vals = {}; cands.forEach(c => vals[c.id] = c.v);
+    passoRanking(st, { o, restantes: cands, ganhadores: [], vals });
   }
   function passoRanking(st, R) {
     const n = Math.min(R.o.premios.length, R.ganhadores.length + R.restantes.length);
@@ -1364,6 +1367,8 @@
   function finalizarRanking(st, R) {
     const extra = [];
     R.ganhadores.forEach((id, k) => extra.push(['paraJogador', id, R.o.premios[k], R.o.nomes[k]]));
+    const crit = { itens: ['menos Itens em mão', 'mais Itens em mão'], capturas: ['menos capturas', 'mais capturas'], forcaMax: ['Pokémon mais forte mais fraco', 'Pokémon mais forte'] }[R.o.metrica] || ['', ''];
+    if (st.premiosCarta) R.ganhadores.forEach((id, k) => st.premiosCarta.push({ j: id, premio: R.o.nomes[k], crit: crit[R.o.ordem === 'min' ? 0 : 1], v: R.vals ? R.vals[id] : null, metrica: R.o.metrica }));
     st.fila = extra.concat(st.fila || []);
   }
   function paraJogador(st, id, passos, nome) {
@@ -1503,7 +1508,7 @@
     const ops = Object.values(g.nodes).filter(n => n.pos === hexEu && n.key !== eu.pos && !['porta', 'passagem'].includes(n.kind) && !(n.especial === 'planalto' && nInsignias(eu) < 6)).map(n => n.key);
     if (o.ficar) ops.push(eu.pos);
     if (!ops.length) return;
-    st.pend = { tipo: 'espaco', opcoes: ops, ativar: o.ativar !== false, titulo: o.titulo || 'Escolha um espaço neste hexágono' };
+    st.pend = { tipo: 'espaco', opcoes: ops, ativar: o.ativar !== false, voo: !!o.voo, titulo: o.titulo || 'Escolha um espaço neste hexágono' };
   }
   function adjacentes(st, k) {
     const g = grafo(st), p = J(st), out = new Set(), vis = new Set([k]);
@@ -1517,7 +1522,9 @@
   function escolherEspaco(st, k) {
     const pd = st.pend; if (!pd || pd.tipo !== 'espaco' || !pd.opcoes.includes(k)) return; const p = J(st);
     if (pd.sóAtivar) { st.pend = null; log(st, `${p.nome} ativou ${nomeEspaco(st, k)}.`); chegar(st, k, { remoto: k !== p.pos }); continuar(st); return; }
-    st.pend = null; if (k === p.pos) { log(st, `${p.nome} ficou onde estava.`); continuar(st); return; } p.pos = k; addU(p.passou, k); log(st, `${p.nome} foi para ${nomeEspaco(st, k)}.`);
+    st.pend = null; if (k === p.pos) { log(st, `${p.nome} ficou onde estava.`); continuar(st); return; }
+    if (pd.voo) st.mov = { j: p.id, cam: [p.pos, k], seq: ((st.mov && st.mov.seq) || 0) + 1, voo: true };
+    p.pos = k; addU(p.passou, k); log(st, `${p.nome} foi para ${nomeEspaco(st, k)}.`);
     if (pd.ativar) chegar(st, k); continuar(st);
   }
   function novoInicio(st) {

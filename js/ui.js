@@ -200,7 +200,7 @@
       ps.forEach((p, i) => {
         const ang = ps.length > 1 ? (i / ps.length) * Math.PI * 2 : 0, rr = ps.length > 1 ? 52 : 0;
         let x = n.wx + Math.cos(ang) * rr, y = n.wy + Math.sin(ang) * rr - 20;
-        if (anim && anim.j === p.id) { const q = posAnim(); if (q) { x = q.x; y = q.y; } }
+        if (anim && anim.j === p.id) { if (anim.voo) return; const q = posAnim(); if (q) { x = q.x; y = q.y; } }
         const gg = el('g', { class: 'pawn' + (p.id === st.vez && st.vencedor == null ? ' vez' : ''), 'data-j': p.id, transform: `translate(${x},${y})` }, gW);
         if (p.id === st.vez && st.vencedor == null) el('circle', { class: 'pulso', r: 46 }, gg);
         el('ellipse', { cx: 0, cy: 46, rx: 34, ry: 12, fill: 'rgba(0,0,0,.45)' }, gg);
@@ -222,11 +222,45 @@
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const g = E.grafo(st), pts = m.cam.map(k => g.nodes[k]).filter(Boolean).map(n => ({ x: n.wx, y: n.wy - 20 }));
     if (pts.length < 2) return;
+    if (m.voo) return animVoo(m, pts[0], pts[1]);
     anim = { seq: m.seq, j: m.j, pts, t0: performance.now(), dur: Math.min(3000, Math.max(350, (pts.length - 1) * (m.trem ? 700 : PASSO_MS))) };
     const passo = () => {
       if (!anim) return; const q = posAnim(), gp = document.querySelector(`#lPawns .pawn[data-j="${anim.j}"]`);
       if (gp && q) gp.setAttribute('transform', `translate(${q.x},${q.y})`);
       if (performance.now() - anim.t0 >= anim.dur) { anim = null; render(); return; }
+      requestAnimationFrame(passo);
+    };
+    requestAnimationFrame(passo);
+  }
+  // ---------- Voar: o Pidgeot busca o peão e o larga no destino ----------
+  const PID = { cima: [0, 1], baixo: [2, 3], esq: [4, 5] }, PS = 7, PW = 32 * PS;
+  function animVoo(m, A, B) {
+    const q = E.J(st, m.j), dur = 3800;
+    anim = { voo: true, seq: m.seq, j: m.j, t0: performance.now(), dur };
+    fxTexto(`🕊 <b>${esc(q.nome)}</b> usou Voar!`, 'voar');
+    let lv = document.getElementById('lVoo'); if (!lv) { lv = document.createElementNS('http://www.w3.org/2000/svg', 'g'); lv.id = 'lVoo'; $('#vp').appendChild(lv); }
+    lv.innerHTML = `<g class="vooPeao"><ellipse cx="0" cy="46" rx="34" ry="12" fill="rgba(0,0,0,.45)"/><circle r="40" fill="${COR_HEX[q.cor]}" stroke="#000" stroke-width="6"/><text text-anchor="middle" y="16" font-size="46" font-weight="700" font-family="Inter,sans-serif" fill="${['branco', 'amarelo'].includes(q.cor) ? '#111' : '#fff'}">${esc(rotulo(q))}</text></g>
+      <ellipse class="vooSombra" rx="70" ry="20" fill="rgba(0,0,0,.35)"/><g class="vooAve"><svg x="${-PW / 2}" y="${-PW / 2}" width="${PW}" height="${PW}" viewBox="0 0 32 32" overflow="hidden"><image href="img/fx/pidgeot.png" x="0" y="0" width="256" height="32" style="image-rendering:pixelated"/></svg></g>`;
+    const peao = lv.querySelector('.vooPeao'), ave = lv.querySelector('.vooAve'), sv = ave.querySelector('svg'), sombra = lv.querySelector('.vooSombra');
+    const PEG = 78, ALT = 1300, lerp = (a, b, t) => a + (b - a) * t, ease = t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+    const E1 = { x: A.x + 760, y: A.y - 700 }, E2 = { x: B.x - 760, y: B.y - 700 };
+    const passo = () => {
+      if (!anim || !anim.voo) { lv.innerHTML = ''; return; }
+      const now = performance.now(), f = Math.min(1, (now - anim.t0) / dur), flap = Math.floor(now / 130) % 2;
+      let bx, by, dir = 'esq', px = A.x, py = A.y, preso = false, solo = null;
+      const fase = (a, b) => ease(Math.min(1, Math.max(0, (f - a) / (b - a))));
+      if (f < .25) { const t = fase(0, .25); bx = lerp(E1.x, A.x, t); by = lerp(E1.y, A.y - PEG, t); solo = A; }
+      else if (f < .32) { bx = A.x; by = A.y - PEG + Math.sin((f - .25) / .07 * Math.PI) * 10; dir = 'baixo'; solo = A; }
+      else if (f < .5) { const t = fase(.32, .5); bx = A.x; by = lerp(A.y - PEG, A.y - PEG - ALT, t); dir = 'cima'; preso = true; }
+      else if (f < .72) { const t = fase(.5, .72); bx = B.x; by = lerp(B.y - PEG - ALT, B.y - PEG, t); dir = 'baixo'; preso = true; solo = B; }
+      else if (f < .8) { const t = fase(.72, .8); bx = B.x; by = B.y - PEG - t * 12; dir = 'baixo'; px = B.x; py = B.y; solo = B; }
+      else { const t = fase(.8, 1); bx = lerp(B.x, E2.x, t); by = lerp(B.y - PEG, E2.y, t); px = B.x; py = B.y; solo = t < .3 ? B : null; }
+      if (preso) { px = bx; py = by + PEG; }
+      const fr = PID[dir][flap]; sv.setAttribute('viewBox', `${fr * 32} 0 32 32`);
+      ave.setAttribute('transform', `translate(${bx},${by})`);
+      peao.setAttribute('transform', `translate(${px},${py})`);
+      if (solo) { sombra.setAttribute('cx', solo.x); sombra.setAttribute('cy', solo.y + 46); sombra.setAttribute('opacity', 1); } else sombra.setAttribute('opacity', 0);
+      if (f >= 1) { anim = null; lv.innerHTML = ''; render(); return; }
       requestAnimationFrame(passo);
     };
     requestAnimationFrame(passo);
@@ -282,7 +316,7 @@
     iniciarAnim();
     setTimeout(tocarFx, 0);
     renderBoard();
-    const p = E.J(st), t = st.turno || {};
+    const p = E.J(st, st.vez), t = st.turno || {};
     // --- turno ---
     const tb = $('#turnBox');
     const tr = p.treinador && E.idx().tr[p.treinador];
@@ -844,6 +878,7 @@
     const el = h(`<div class="fxBand bike" style="--cor:${cor}"><div class="fxTxt">🚲 TURNO EXTRA <span>·</span> <b>${esc(q.nome)}</b> usou a Bicicleta</div><div class="fxBici"><div class="bikeSpr" style="background-image:url(img/fx/bike_${q.cor}.webp)"></div></div></div>`);
     c.appendChild(el); setTimeout(() => el.remove(), 3000);
   }
+  function fxTexto(html, cls) { const c = camadaFx(), el = h(`<div class="fxBand ${cls || ''}"><div class="fxTxt">${html}</div></div>`); c.appendChild(el); setTimeout(() => el.remove(), 3000); }
   function centroPeao(j) {
     const g = document.querySelector(`#lPawns .pawn[data-j="${j}"]`), W = $('#boardWrap').getBoundingClientRect();
     if (!g) return { x: W.left + W.width / 2, y: W.top + W.height / 2 };
@@ -1029,10 +1064,15 @@
       ligarReacao(); return;
     }
     const auto = card.auto && card.auto.length;
-    abrirModal(`<div class="mgrid"><img src="${card.img}"><div>
+    const IXc = pd.baralho === 'evento' ? E.idx().ev : E.idx().sev;
+    const fonteImg = f => f === 'may' ? (E.idx().tr.may2 || {}).img : f === 'suborno' ? null : E.idx().it.expshare && E.idx().it.expshare.img;
+    const topo = pd.substituiu ? `<div class="cartaAviso"><img src="${IXc[pd.substituiu.carta].img}" class="riscada"><img src="${E.idx().it.pokeflute.img}"><span><b>${esc(IXc[pd.substituiu.carta].nome)}</b> foi substituído pela Poké-Flauta de <b>${esc(E.J(st, pd.substituiu.por).nome)}</b>.</span></div>`
+      : pd.copia ? `<div class="cartaAviso">${fonteImg(pd.copia.fonte) ? `<img src="${fonteImg(pd.copia.fonte)}">` : ''}<span><b>${esc(E.J(st, pd.copia.j).nome)}</b> está copiando este ${pd.baralho === 'evento' ? 'Evento' : 'Super Evento'} com ${pd.copia.fonte === 'may' ? 'a May' : pd.copia.fonte === 'suborno' ? 'o Suborno Rocket' : 'Exp. Share'}.</span></div>` : '';
+    abrirModal(`${topo}<div class="mgrid"><img src="${card.img}"><div>
       <h2>${esc(card.nome)}</h2><span class="tag">${pd.baralho === 'evento' ? 'Evento' : 'Super Evento'}</span>${card.bloqueavel ? ' <span class="tag" style="color:#fca5a5">bloqueável por Poké-Boneca</span>' : ''}${card.continuado ? ` <span class="tag">continuado: ${card.continuado} turnos</span>` : ''}
       <p style="font-size:16px;margin:14px 0">${esc(card.texto)}</p>
       ${card.duelo ? `<p class="mut">Duelo — +1: ${card.duelo.mais1.map(t => E.TIPOS_NOME[t]).join(', ')} · −1: ${card.duelo.menos1.map(t => E.TIPOS_NOME[t]).join(', ')}</p>` : ''}
+      ${pd.ativado && (st.premiosCarta || []).length ? `<div class="ganhos surge"><div class="mut">Prêmio${st.premiosCarta.length > 1 ? 's' : ''}:</div>${st.premiosCarta.map(x => { const q = E.J(st, x.j); return `<div class="premLin"><span class="dot" style="background:${COR_HEX[q.cor]}"></span><b>${esc(q.nome)}</b><span class="mut">${esc(x.crit)}${x.v != null ? ' (' + x.v + ')' : ''}</span><span>→ ${esc(x.premio)}</span></div>`; }).join('')}</div>` : ''}
       ${pd.ativado && (st.reveladosCarta || []).length ? `<div class="ganhos surge"><div class="mut">Revelado${st.reveladosCarta.length > 1 ? 's' : ''} no tabuleiro:</div><div class="row" style="gap:12px;flex-wrap:wrap">${st.reveladosCarta.filter(k => st.slots[k] && st.slots[k].carta).map(k => { const id = st.slots[k].carta; return `<div class="gpk"><img src="${E.P(id).img}" data-z="${E.P(id).img}"><div><b>${esc(E.P(id).nome)}</b><br><span class="mut">hexágono ${esc(nomeHex(k))}</span></div></div>`; }).join('')}</div></div>` : ''}${pd.ativado ? blocoTrocasCarta() : ''}${pd.ativado && (st.ganhosCarta || []).length ? `<div class="ganhos surge"><div class="mut">Pokémon${st.ganhosCarta.length > 1 ? 's' : ''} recebido${st.ganhosCarta.length > 1 ? 's' : ''}:</div><div class="row" style="gap:12px;flex-wrap:wrap">${st.ganhosCarta.map(([j, id]) => `<div class="gpk"><img src="${E.P(id).img}" data-z="${E.P(id).img}"><div><b>${esc(E.P(id).nome)}</b>${j !== p.id || st.ganhosCarta.some(x => x[0] !== p.id) ? `<br><span class="mut">${esc(E.J(st, j).nome)}</span>` : ''}</div></div>`).join('')}</div></div>` : ''}
       ${pd.ativado ? `<div class="result">${card.autoCompleto ? 'Efeito aplicado.' : auto ? 'Efeitos automáticos aplicados. O anfitrião pode completar o que faltar pela caixa de ferramentas.' : 'Este efeito é aplicado à mão pela caixa de ferramentas.'}</div>` : ''}
       <div class="mfoot">

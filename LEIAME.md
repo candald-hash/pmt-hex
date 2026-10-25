@@ -10,6 +10,10 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- Prof. Birch (e outros Eventos de ranking): a tela de resultado mostra quem ganhou o prêmio e por quê (ex.: menos Itens em mão).
+- Poké-Flauta: o novo Evento mostra no topo o Evento substituído e a Flauta de quem tocou.
+- Exp. Share / May / Suborno Rocket: quem copia ganha a própria tela do Evento, com o aviso de que está copiando.
+- Voar: animação do Pidgeot buscando o peão e largando-o no destino.
 - Bicicleta: o ciclista da animação agora usa os sprites em pixel art (6 quadros de pedalada), na cor do jogador.
 - Efeitos na tela: faixa animada de "Turno extra" com um ciclista atravessando a tela (Bicicleta) e faixa de "Truque Rocket" com a carta voando da vítima para o ladrão (vale também para Eventos que roubam Itens; só os dois envolvidos veem qual Item foi).
 - Pokédex: a tela de conclusão mostra as cartas reveladas e seus hexágonos.
