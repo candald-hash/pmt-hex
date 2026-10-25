@@ -416,7 +416,7 @@
   }
   function encerrarRepel(st) { const pd = st.pend; if (!pd || pd.tipo !== 'repel') return; pd.opcoes.forEach(x => { if (pd.resp[x] == null) pd.resp[x] = 'nao'; }); finalizarRepel(st); }
   function finalizarRepel(st) {
-    const pd = st.pend, N = st.jogadores.length, g = grafo(st), trocados = [];
+    const pd = st.pend, N = st.jogadores.length, g = grafo(st), trocados = [], usos = [];
     const ordem = st.jogadores.map((_, k) => (pd.ativador + k) % N).filter(j => pd.opcoes.includes(j));
     ordem.forEach(j => {
       const k = pd.resp[j]; if (!pd.slots.includes(k) || trocados.includes(k)) return;
@@ -425,10 +425,11 @@
       if (!dk.length) { log(st, `Repel: não há outro Pokémon ${cor} fora do jogo para trocar ${P(velho).nome}.`); return; }
       descartarItem(st, q, inst);
       const novo = dk.splice(Math.floor(rnd(st) * dk.length), 1)[0]; devolver(st, cor, velho);
-      st.slots[k] = { carta: novo, aberta: true, fraco: false }; trocados.push(k);
+      st.slots[k] = { carta: novo, aberta: true, fraco: false }; trocados.push(k); usos.push({ j, velho, novo });
       log(st, `${q.nome} usou Repel: ${P(velho).nome} foi trocado por ${P(novo).nome}.`, 'destaque', [['it', 'repel'], ['pk', velho], ['pk', novo]]);
     });
     const dep = pd.depois;
+    if (dep && usos.length) dep.repelInfo = (dep.repelInfo || []).concat(usos);
     if (dep && dep.tipo === 'captura' && dep.slot && trocados.includes(dep.slot)) { dep.carta = st.slots[dep.slot].carta; dep.cor = P(dep.carta).cor; dep.titulo = 'Captura: ' + P(dep.carta).nome; }
     st.pend = dep;
     if (trocados.length) janelaRepel(st, trocados); // a carta nova também é uma revelação

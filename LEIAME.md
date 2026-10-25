@@ -10,6 +10,8 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- Repel: a tela seguinte (ex.: a captura) mostra no topo o Pokémon trocado e o Repel de quem usou.
+- Truque Rocket: a faixa usa dois sprites de membros da Equipe Rocket, um de cada lado do texto.
 - Prof. Birch (e outros Eventos de ranking): a tela de resultado mostra quem ganhou o prêmio e por quê (ex.: menos Itens em mão).
 - Poké-Flauta: o novo Evento mostra no topo o Evento substituído e a Flauta de quem tocou.
 - Exp. Share / May / Suborno Rocket: quem copia ganha a própria tela do Evento, com o aviso de que está copiando.

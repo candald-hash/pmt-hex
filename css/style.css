@@ -429,3 +429,5 @@ button.celebi:hover:not(:disabled){background:rgba(244,114,182,.15);border-color
 .cartaAviso img.riscada{opacity:.55;filter:grayscale(.7)}
 .premLin{display:flex;align-items:center;gap:8px;margin:6px 0;flex-wrap:wrap}
 .premLin .dot{display:inline-block;width:12px;height:12px}
+.fxTxt .rkt{width:62px;height:66px;image-rendering:pixelated;vertical-align:middle;margin:0 14px}
+@media (max-width:760px){.fxTxt .rkt{width:40px;height:43px;margin:0 6px}}

@@ -887,7 +887,7 @@
   function fxRoubo(f) {
     const c = camadaFx(), ladrao = E.J(st, f.de), vit = E.J(st, f.para);
     const meu = online() && (NET.eu === f.de || NET.eu === f.para), it = f.itens[0], face = meu && it && it !== 'oculto' ? E.ITEM(it) : null;
-    const txt = f.nome === 'Truque Rocket' ? `🎭 TRUQUE ROCKET <span>·</span> <b>${esc(ladrao.nome)}</b> pegou ${f.itens.length > 1 ? f.itens.length + ' Itens' : 'um Item'} de <b>${esc(vit.nome)}</b>` : `🎭 ${esc(f.nome)} <span>·</span> <b>${esc(ladrao.nome)}</b> pegou ${f.itens.length > 1 ? f.itens.length + ' Itens' : 'um Item'} de <b>${esc(vit.nome)}</b>`;
+    const txt = f.nome === 'Truque Rocket' ? `<img class="rkt" src="img/fx/rocket1.png">TRUQUE ROCKET <span>·</span> <b>${esc(ladrao.nome)}</b> pegou ${f.itens.length > 1 ? f.itens.length + ' Itens' : 'um Item'} de <b>${esc(vit.nome)}</b><img class="rkt" src="img/fx/rocket2.png">` : `${esc(f.nome)} <span>·</span> <b>${esc(ladrao.nome)}</b> pegou ${f.itens.length > 1 ? f.itens.length + ' Itens' : 'um Item'} de <b>${esc(vit.nome)}</b>`;
     const band = h(`<div class="fxBand roubo"><div class="fxTxt">${txt}</div></div>`); c.appendChild(band); setTimeout(() => band.remove(), 3200);
     const a = centroPeao(f.para), b = centroPeao(f.de), W = c.getBoundingClientRect();
     f.itens.forEach((inst, k) => {
@@ -897,7 +897,7 @@
         { transform: `translate(${(x0 + x1) / 2}px,${my}px) scale(1.15) rotate(10deg)`, offset: .55 }, { transform: `translate(${x1}px,${y1}px) scale(.8) rotate(0deg)`, opacity: 1, offset: .9 }, { transform: `translate(${x1}px,${y1}px) scale(.3)`, opacity: 0 }],
         { duration: 2200, delay: 250 + k * 250, easing: 'ease-in-out', fill: 'both' }).onfinish = () => carta.remove();
     });
-    if (meu && face) setTimeout(() => toast(NET.eu === f.de ? `🎭 Você pegou: ${esc(face.nome)}` : `🎭 ${esc(ladrao.nome)} pegou seu ${esc(face.nome)}`), 1800);
+    if (meu && face) setTimeout(() => toast(NET.eu === f.de ? `Você pegou: ${esc(face.nome)}` : `${esc(ladrao.nome)} pegou seu ${esc(face.nome)}`), 1800);
   }
   function mCampeao(pd) {
     const q = E.J(st, pd.jogador), es = q.stats || { eventos: 0, superEventos: 0, bat: {} }, B = es.bat || {};
@@ -958,6 +958,9 @@
   function rolagemAnimada(r) {
     return `<div class="rolling">${r.dados.map(() => `<div class="die3d"><span>${1 + Math.floor(Math.random() * 6)}</span></div>`).join('')}<span class="mut">rolando…</span></div>`;
   }
+  function avisoRepel(pd) {
+    return (pd && pd.repelInfo || []).map(u => `<div class="cartaAviso"><img src="${E.P(u.velho).img}" class="riscada"><img src="${E.idx().it.repel.img}"><span><b>${esc(E.J(st, u.j).nome)}</b> usou Repel: <b>${esc(E.P(u.velho).nome)}</b> foi trocado por <b>${esc(E.P(u.novo).nome)}</b>.</span></div>`).join('');
+  }
   function mCaptura(pd, p) {
     const c = E.P(pd.carta), r0 = pd.resultado;
     const k = r0 ? chaveCap(pd) : null, animando = r0 && animCap.feito !== k;
@@ -973,7 +976,7 @@
     const chance = b => window.AI ? window.AI.pCaptura(st, p, pd.carta, b, pd.slot) : null;
     const chBase = chance(null), chSel = chance(escolhida);
     const tr = p.treinador && E.idx().tr[p.treinador];
-    abrirModal(`<div class="mgrid"><img src="${c.img}"><div>
+    abrirModal(`${avisoRepel(pd)}<div class="mgrid"><img src="${c.img}"><div>
       <h2>${esc(pd.titulo)}</h2><div class="mut">Pokémon ${esc(c.cor)} · força ${c.forca}${pd.slot && st.slots[pd.slot] && st.slots[pd.slot].fraco ? ' · <b style="color:#fbbf24">enfraquecido (±1)</b>' : ''}</div>
       <p style="margin:10px 0 2px">Dados que capturam:</p>${c.captura.length ? faces(c.captura) : '<p class="mut">Este Pokémon não pode ser capturado.</p>'}
       ${animando ? rolagemAnimada(r0) : ''}
@@ -1068,7 +1071,7 @@
     const fonteImg = f => f === 'may' ? (E.idx().tr.may2 || {}).img : f === 'suborno' ? null : E.idx().it.expshare && E.idx().it.expshare.img;
     const topo = pd.substituiu ? `<div class="cartaAviso"><img src="${IXc[pd.substituiu.carta].img}" class="riscada"><img src="${E.idx().it.pokeflute.img}"><span><b>${esc(IXc[pd.substituiu.carta].nome)}</b> foi substituído pela Poké-Flauta de <b>${esc(E.J(st, pd.substituiu.por).nome)}</b>.</span></div>`
       : pd.copia ? `<div class="cartaAviso">${fonteImg(pd.copia.fonte) ? `<img src="${fonteImg(pd.copia.fonte)}">` : ''}<span><b>${esc(E.J(st, pd.copia.j).nome)}</b> está copiando este ${pd.baralho === 'evento' ? 'Evento' : 'Super Evento'} com ${pd.copia.fonte === 'may' ? 'a May' : pd.copia.fonte === 'suborno' ? 'o Suborno Rocket' : 'Exp. Share'}.</span></div>` : '';
-    abrirModal(`${topo}<div class="mgrid"><img src="${card.img}"><div>
+    abrirModal(`${topo}${avisoRepel(pd)}<div class="mgrid"><img src="${card.img}"><div>
       <h2>${esc(card.nome)}</h2><span class="tag">${pd.baralho === 'evento' ? 'Evento' : 'Super Evento'}</span>${card.bloqueavel ? ' <span class="tag" style="color:#fca5a5">bloqueável por Poké-Boneca</span>' : ''}${card.continuado ? ` <span class="tag">continuado: ${card.continuado} turnos</span>` : ''}
       <p style="font-size:16px;margin:14px 0">${esc(card.texto)}</p>
       ${card.duelo ? `<p class="mut">Duelo — +1: ${card.duelo.mais1.map(t => E.TIPOS_NOME[t]).join(', ')} · −1: ${card.duelo.menos1.map(t => E.TIPOS_NOME[t]).join(', ')}</p>` : ''}
