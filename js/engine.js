@@ -142,7 +142,7 @@
   function bonusEvolucao(p, id, cores) {
     const c = P(id); if (!c.familia) return 0;
     const fam = p.pokemon.map(P).filter(x => x.familia === c.familia && (!cores || cores.includes(x.cor)));
-    if (c.familiaRamificada) return (c.estagio > 0 && fam.some(x => x.estagio < c.estagio)) ? 2 : 0;
+    if (c.familiaRamificada) return (c.preEvo ? fam.some(x => c.preEvo.includes(x.id)) : (c.estagio > 0 && fam.some(x => x.estagio < c.estagio))) ? 2 : 0;
     const est = new Set(fam.map(x => x.estagio)); const max = Math.max(...est);
     if (c.estagio !== max) return 0;
     return est.size >= 3 ? 4 : est.size === 2 ? 2 : 0;

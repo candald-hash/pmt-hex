@@ -8,6 +8,11 @@ for c in poke:
     if c['id'] == 'electrode': c['cor'] = 'verde'
     c['img'] = 'img/pokemon/' + base(c['img']) + '.webp'
     if c['familia'] in ('eevee2', 'slowpoke2'): c['familiaRamificada'] = True
+# famílias ramificadas: cada evolução só ganha bônus com a pré-evolução de verdade (não com as "irmãs")
+PRE_EVO = {'eevee': ['eevee2'], 'jolteon': ['eevee2', 'eevee'], 'vaporeon': ['eevee2', 'eevee'], 'umbreon': ['eevee2', 'eevee'],
+           'slowbro': ['slowpoke2'], 'galarian slowking': ['slowpoke2']}
+for c in poke:
+    if c['id'] in PRE_EVO: c['preEvo'] = PRE_EVO[c['id']]
 for c in poke: c['elencos'] = ['padrao']
 # elenco alternativo: cartas novas + as repetidas (iguais às do padrão)
 porId = {c['id']: c for c in poke}
