@@ -147,8 +147,8 @@
     if (c.estagio !== max) return 0;
     return est.size >= 3 ? 4 : est.size === 2 ? 2 : 0;
   }
-  function maisEvoluido(p, fam) { const l = p.pokemon.map(P).filter(x => x.familia === fam); if (!l.length) return null; return l.reduce((a, b) => b.estagio > a.estagio ? b : a).id; }
-  function bonusTravada(p, id) { const c = P(id); let b = p.mais1[id] || 0; if (c.familia && p.travadas.includes(c.familia) && maisEvoluido(p, c.familia) === id) b += 1; return b; }
+  function maisEvoluido(p, fam) { const l = p.pokemon.map(P).filter(x => (x.familia || x.id) === fam); if (!l.length) return null; return l.reduce((a, b) => b.estagio > a.estagio ? b : a).id; }
+  function bonusTravada(p, id) { const c = P(id), f = c.familia || c.id; let b = p.mais1[id] || 0; if (p.travadas.includes(f) && maisEvoluido(p, f) === id) b += 1; return b; }
   function bonusTreinador(p, id) {
     const t = p.treinador && idx().tr[p.treinador]; if (!t) return 0; const c = P(id);
     if (t.especialista && c.tipos.some(x => t.especialista.includes(x))) return 1;
@@ -161,7 +161,7 @@
   function vantagem(atacanteVant, defensorTipos) { return defensorTipos.filter(t => atacanteVant.includes(t)).length * 2; }
   function bonusItemBatalha(inst, id) { const it = ITEM(inst); if (!it || it.uso !== 'batalha' || !it.bonus) return 0; if (it.tipos && !P(id).tipos.some(t => it.tipos.includes(t))) return 0; return it.bonus; }
   function moverMais1(de, para, id) { if (de.mais1 && de.mais1[id]) { para.mais1 = para.mais1 || {}; para.mais1[id] = (para.mais1[id] || 0) + de.mais1[id]; delete de.mais1[id]; } }
-  function familiaTravada(p, id) { const c = P(id); return c.familia && p.travadas.includes(c.familia); }
+  function familiaTravada(p, id) { const c = P(id); return p.travadas.includes(c.familia || c.id); }
 
   // ---------- movimento ----------
   function destinos(st, pi, n, opts) {

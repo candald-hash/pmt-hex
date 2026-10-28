@@ -13,7 +13,9 @@ PRE_EVO = {'eevee': [], 'eevee2': [], 'jolteon': ['eevee2', 'eevee'], 'vaporeon'
            'slowbro': ['slowpoke2'], 'galarian slowking': ['slowpoke2']}
 for c in poke:
     if c['id'] in PRE_EVO: c['preEvo'] = PRE_EVO[c['id']]
-for c in poke: c['elencos'] = ['padrao']
+for c in poke:
+    c['elencos'] = ['padrao']
+    if not c.get('familia'): c['familia'] = c['id']  # Pokémon sem evolução: família própria (pode ser travada)
 # elenco alternativo: cartas novas + as repetidas (iguais às do padrão)
 porId = {c['id']: c for c in poke}
 for c in J(D + '/pokemon_alt.json')['cartas']:

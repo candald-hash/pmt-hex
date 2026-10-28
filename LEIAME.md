@@ -10,6 +10,7 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- Correção: travar um Pokémon sem evolução (ex.: Lendários, Lapras, Absol) agora dá o +1 e protege de trocas, como nas famílias.
 - Correção: nas famílias ramificadas (Eevee, Slowpoke), evoluções "irmãs" (ex.: Vaporeon + Umbreon, Slowbro + Slowking) não dão mais bônus de evolução entre si; é preciso ter a pré-evolução (Eevee / Slowpoke). Os dois Eevees (rosa e verde) não dão bônus um ao outro.
 - Repel: a tela seguinte (ex.: a captura) mostra no topo o Pokémon trocado e o Repel de quem usou.
 - Truque Rocket: a faixa usa dois sprites de membros da Equipe Rocket, um de cada lado do texto.
