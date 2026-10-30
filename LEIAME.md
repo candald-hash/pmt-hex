@@ -10,6 +10,7 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- Versão do jogo (v7.3) ao lado de "versão web"; links para a nova página de Changelog (changelog.html) e para a de Elencos na tela inicial.
 - Nova tela inicial: fundo com o tabuleiro (escurecido/clareado conforme o tema), logo do jogo ao lado do título, textos enxutos e layout melhor no celular.
 - Remédio: sprite da poção nos botões; ao usar (Ginásio ou Liga) aparece uma faixa verde para todos e, na Liga, um aviso na tela da batalha.
 - Faixas de aviso (Truque Rocket, Bicicleta, Voar) crescem quando o texto quebra em duas linhas.

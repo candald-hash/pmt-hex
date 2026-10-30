@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Changelog PMT HEX</title>
+<style>
+:root{--bg:#101318;--panel:#1c2129;--line:#323a47;--txt:#eef1f5;--mut:#9aa3b2;--acc:#ffcb05;--ok:#4ade80;--fix:#f59e0b}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bg:#eef1f5;--panel:#fff;--line:#d5dae3;--txt:#151a22;--mut:#5d6675;--acc:#c99700;--ok:#15803d;--fix:#b45309}}
+:root[data-theme="light"]{--bg:#eef1f5;--panel:#fff;--line:#d5dae3;--txt:#151a22;--mut:#5d6675;--acc:#c99700;--ok:#15803d;--fix:#b45309}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--txt);font:15px/1.55 Inter,system-ui,sans-serif;padding:24px 16px;
+  background:linear-gradient(rgba(0,0,0,.5),rgba(0,0,0,.5)),url(img/ui/bghex.webp) center/cover fixed no-repeat,var(--bg)}
+:root[data-theme="light"] body{background:linear-gradient(rgba(255,255,255,.5),rgba(255,255,255,.5)),url(img/ui/bghex.webp) center/cover fixed no-repeat,var(--bg)}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) body{background:linear-gradient(rgba(255,255,255,.5),rgba(255,255,255,.5)),url(img/ui/bghex.webp) center/cover fixed no-repeat,var(--bg)}}
+main{max-width:720px;margin:0 auto;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px 28px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+header{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+header img{width:44px;height:44px;border-radius:9px}
+h1{font-size:24px;margin:0}h1 b{color:var(--acc)}
+.voltar{color:var(--mut);font-size:13.5px;text-decoration:none}.voltar:hover{color:var(--acc)}
+section{border-top:1px solid var(--line);padding-top:16px;margin-top:18px}
+h2{font-size:18px;margin:0 0 8px;display:flex;align-items:center;gap:8px}
+.atual{font-size:11.5px;font-weight:700;color:#111;background:var(--acc);border-radius:999px;padding:2px 8px}
+ul{margin:6px 0 10px;padding-left:20px}li{margin:3px 0}
+.k{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--mut);margin-top:10px}
+.k.fix{color:var(--fix)}
+</style></head><body>
+<main>
+  <header><img src="img/ui/logo.webp" alt=""><h1>Pokémon Master Trainer: <b>HEX</b> · Changelog</h1></header>
+  <a class="voltar" href="./">← Voltar ao jogo</a>
+
+  <section><h2>v7.3 <span class="atual">atual</span></h2>
+    <ul><li>Homepage de criação de jogo refeita.</li><li>Removida informação de casa atual no painel do jogador.</li><li>Propostas de troca agora são públicas.</li>
+      <li>Eventos de duelo agora permitem uma visualização rápida dos Pokémons dos adversários na tela de escolha.</li><li>Item: Adicionados gráficos na tela para informar uso de Remédio.</li></ul>
+    <div class="k fix">Correções</div>
+    <ul><li>Bug fix: Evento Bola GS agora funciona corretamente com evoluções.</li><li>Bug fix: consertado background do gráfico de uso de Truque Sujo.</li></ul>
+  </section>
+
+  <section><h2>v7.2</h2>
+    <ul><li>Item: Adicionados gráficos na tela para informar uso de Bicicleta e Truque Sujo.</li><li>Item: Adicionada animação no uso de Voar.</li>
+      <li>Item: Adicionadas informações adicionais nos modais após utilização de Repel, Exp. Share e Poké-Flauta.</li></ul>
+    <div class="k fix">Correções</div>
+    <ul><li>Bug fix: linha evolutiva de Eevee consertada.</li><li>Bug fix: lendários agora podem ser travados corretamente.</li></ul>
+  </section>
+
+  <section><h2>v7.1</h2>
+    <ul><li>Adicionado elenco alternativo.</li><li>Adicionada funcionalidade "Propor Troca" entre jogadores humanos.</li><li>Adicionadas chances no modal de captura.</li></ul>
+    <div class="k">Eventos</div>
+    <ul><li>Evento: Pokédex agora faz revelações no tabuleiro, não em modal.</li></ul>
+    <div class="k fix">Correções</div>
+    <ul><li>Bug fix: pioneiros nas cidades consertados.</li><li>Bug fix: eliminados na Liga devolvem seus Itens e Pokémon para o jogo.</li>
+      <li>Bug fix: adicionado check para jogadores presos em casas com passagem de tipo.</li></ul>
+  </section>
+
+  <section><h2>v7.0</h2>
+    <ul><li>Lançamento inicial da versão web.</li></ul>
+  </section>
+</main>
+<script>try { const t = JSON.parse(localStorage.getItem('pmthex-prefs') || '{}').tema || 'escuro'; document.documentElement.dataset.theme = t === 'claro' ? 'light' : 'dark'; } catch (e) {}</script>
+</body></html>

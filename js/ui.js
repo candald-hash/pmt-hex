@@ -2,6 +2,7 @@
 (function () {
   'use strict';
   const E = window.Engine, D = window.DATA;
+  const VERSAO = 'v7.3';
   const $ = (s, el) => (el || document).querySelector(s);
   const h = (html) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; };
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -47,7 +48,7 @@
     const draw = () => {
       if (modo === 'online') jog.forEach((j, i) => { j.tipo = i === 0 ? 'eu' : (j.ia ? 'ia' : 'remoto'); });
       box.innerHTML = `<div class="setupCard">
-        <div class="logo"><img class="logoJogo" src="img/ui/logo.webp" alt=""><h1>Pokémon Master Trainer: <b>HEX</b></h1><span class="tag">versão web</span></div>
+        <div class="logo"><img class="logoJogo" src="img/ui/logo.webp" alt=""><h1>Pokémon Master Trainer: <b>HEX</b></h1><span class="tag">versão web · ${VERSAO}</span></div>
         <div class="row modoTabs"><button class="${modo === 'local' ? 'pri' : ''}" data-modo="local">🏠 Local</button><button class="${modo === 'online' ? 'pri' : ''}" data-modo="online">🌐 On-line</button></div>
         <p class="mut">${modo === 'local' ? 'Modo local: todos jogam neste navegador, passando a vez. De 2 a 6 jogadores — humanos ou controlados pelo computador (🤖).' : 'Modo on-line: você cria a sala e manda o link para os amigos. O primeiro lugar é o seu; os outros podem ser 🌐 jogadores on-line ou 🤖 IA (que roda no seu navegador).'}</p>
         ${salvo && salvo.online && salvo.vencedor == null ? `<div class="result" style="margin:10px 0">Há uma partida on-line salva (sala <b>${esc(salvo.online.codigo)}</b>). <button class="sm pri" id="retomar">🌐 Retomar a sala</button></div>` : ''}
@@ -63,6 +64,7 @@
           <button class="pri" id="go">${modo === 'online' ? '🌐 Criar sala' : 'Começar partida'}</button>
         </div>
         <div class="row" style="margin-top:14px;gap:8px"><span>Elenco de Pokémons:</span>${selElenco(prefs.elenco)}</div>
+        <div class="linksIni"><a href="changelog.html" target="_blank" rel="noopener">📜 Changelog</a><a href="elenco.html" target="_blank" rel="noopener">📇 Elencos de Pokémons</a></div>
       </div>`;
       const pls = $('#pls');
       jog.forEach((j, i) => {
