@@ -10,6 +10,8 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- Faixas de aviso (Truque Rocket, Bicicleta, Voar) crescem quando o texto quebra em duas linhas.
+- Duelos e Festival de Praça: na escolha do oponente, o ícone 🔍 mostra os Pokémons de cada adversário (passe o mouse ou toque).
 - Correção: travar um Pokémon sem evolução (ex.: Lendários, Lapras, Absol) agora dá o +1 e protege de trocas, como nas famílias.
 - Correção: nas famílias ramificadas (Eevee, Slowpoke), evoluções "irmãs" (ex.: Vaporeon + Umbreon, Slowbro + Slowking) não dão mais bônus de evolução entre si; é preciso ter a pré-evolução (Eevee / Slowpoke). Os dois Eevees (rosa e verde) não dão bônus um ao outro.
 - Repel: a tela seguinte (ex.: a captura) mostra no topo o Pokémon trocado e o Repel de quem usou.

@@ -446,7 +446,7 @@
     avisoAnt = { vez, dec };
   }
   // ---------- modais ----------
-  function abrirModal(html) { $('#tip').hidden = true; const mc = $('#modalCard'); mc.classList.remove('ia', 'leitura'); if (!st || !st.pend) delete mc.dataset.pend; mc.innerHTML = html; $('#modal').hidden = false; $('#modalCard').querySelectorAll('[data-x]').forEach(b => b.onclick = fecharModal); }
+  function abrirModal(html) { $('#tip').hidden = true; $('#tip').className = ''; const mc = $('#modalCard'); mc.classList.remove('ia', 'leitura'); if (!st || !st.pend) delete mc.dataset.pend; mc.innerHTML = html; $('#modal').hidden = false; $('#modalCard').querySelectorAll('[data-x]').forEach(b => b.onclick = fecharModal); }
   function fecharModal() { const mc = $('#modalCard'); $('#modal').hidden = true; mc.innerHTML = ''; mc.classList.remove('ia'); delete mc.dataset.pend; if (st) setTimeout(agendarIA, 0); }
   // janelas informativas (sem decisão pendente) fecham com Esc ou clicando fora
   $('#modal').addEventListener('click', e => { if (e.target.id === 'modal' && !$('#modalCard').dataset.pend) fecharModal(); });
@@ -1142,9 +1142,15 @@
   function mAlvo(pd, p) {
     abrirModal(`<h2>${esc(pd.titulo)}</h2>${pd.bloqueavel ? '<p class="mut">Este efeito pode ser bloqueado por Poké-Boneca.</p>' : ''}
       ${['troca', 'ssanne'].includes(pd.acao) ? '<p class="mut ajudaT" title="Até 3 Pokémons do oponente que você pode receber: primeiro os da mesma linha evolutiva de algum seu (🔗), depois os mais fortes (💪).">❔ Ao lado de cada oponente há sugestões de troca.</p>' : ''}
-      <div style="display:grid;gap:8px">${pd.opcoes.map(i => { const q = E.J(st, i); const t = q.treinador && E.idx().tr[q.treinador]; return linhaJogador(q, `${q.id === p.id ? '<span class="tag">você</span>' : ''}${['troca', 'ssanne'].includes(pd.acao) ? sugestoesTroca(p, q, pd.cores) : `<span class="mut">${t ? esc(t.nome) : ''}</span>${insignias(q, true)}`}`); }).join('')}</div>`);
+      <div style="display:grid;gap:8px">${pd.opcoes.map(i => { const q = E.J(st, i); const t = q.treinador && E.idx().tr[q.treinador]; return linhaJogador(q, `${q.id === p.id ? '<span class="tag">você</span>' : ''}${['troca', 'ssanne'].includes(pd.acao) ? sugestoesTroca(p, q, pd.cores) : `<span class="mut">${t ? esc(t.nome) : ''}</span>${insignias(q, true)}`}${['duelo', 'praca'].includes(pd.acao) ? `<span class="verTime" data-vt="${q.id}" title="Ver os Pokémons de ${esc(q.nome)}">🔍</span>` : ''}`); }).join('')}</div>`);
     $('#modalCard').querySelectorAll('.pj').forEach(c => c.onclick = () => agir('escolherAlvo', +c.dataset.p));
     $('#modalCard').querySelectorAll('.sugT img').forEach(i => i.onclick = ev => { ev.stopPropagation(); zoom(i.dataset.z); });
+    $('#modalCard').querySelectorAll('.verTime').forEach(v => {
+      const q = E.J(st, +v.dataset.vt), tp = $('#tip');
+      const mostrar = ev => { tp.className = 'timeTip'; tp.innerHTML = `<div><b>Pokémons de ${esc(q.nome)}</b> <span class="mut">(${q.pokemon.length})</span>${timeAgrupado(q, 46, { carta: id => `<div class="pc ${E.obedece(q, E.P(id).cor) ? '' : 'off'}" title="${esc(E.P(id).nome)}"><img src="${E.P(id).img}"><span class="f">${E.forcaBase(q, id) + E.bonusTreinador(q, id)}</span></div>` })}<span class="mut" style="font-size:11.5px">Apagados: ainda não obedecem a ${esc(q.nome)}.</span></div>`; tp.hidden = false; moverDica(ev); };
+      v.onmouseenter = mostrar; v.onmousemove = moverDica; v.onmouseleave = () => { tp.hidden = true; tp.className = ''; };
+      v.onclick = ev => { ev.stopPropagation(); if (tp.hidden) mostrar(ev); else { tp.hidden = true; tp.className = ''; } };
+    });
   }
   let brineyTimer = null, treinTimer = null, junTimer = null, festTimer = null;
   function mBriney(pd, p) {
@@ -1369,13 +1375,13 @@
     return html;
   }
   function dicaCarta(ev, t, id) {
-    const c = refCarta(t, id); if (!c) return; const tp = $('#tip');
+    const c = refCarta(t, id); if (!c) return; const tp = $('#tip'); tp.className = '';
     const txt = c.texto || (t === 'pk' ? `Força ${c.forca} · ${c.tipos.map(x => E.TIPOS_NOME[x]).join('/')} · ${c.cor}` : t === 'ld' ? `Força ${c.forca}${c.dual ? ' · DUAL' : ''} · ${E.TIPOS_NOME[c.tipo]} · insígnia ${c.insignias}` : '');
     tp.innerHTML = `<img src="${c.img}"><div><b>${esc(c.nome)}</b><br>${esc(txt)}<br><span class="mut">clique para ampliar</span></div>`; tp.hidden = false; moverDica(ev);
   }
   // ---------- líderes ----------
   function dica(ev, L, k) {
-    const t = $('#tip'), n = E.grafo(st).nodes[k], c = n.cidade || {};
+    const t = $('#tip'), n = E.grafo(st).nodes[k], c = n.cidade || {}; t.className = '';
     const venc = st.jogadores.filter(q => q.lideresVencidos.includes(L.id)).map(q => q.nome);
     t.innerHTML = `<img src="${L.img}"><div><b>${esc(c.nome || '')}</b> · Líder <b>${esc(L.nome)}</b><br>Força <b>${L.forca}</b>${L.dual ? ' · DUAL' : ''} · ${E.TIPOS_NOME[L.tipo]} · insígnia ${L.insignias}<br><span class="mut">Vantagem contra: ${L.vantagens.map(x => E.TIPOS_NOME[x]).join(', ') || '—'}</span>${venc.length ? `<br><span class="mut">Vencido por: ${venc.map(esc).join(', ')}</span>` : ''}</div>`;
     t.hidden = false; moverDica(ev);
