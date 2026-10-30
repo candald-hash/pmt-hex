@@ -1,0 +1,66 @@
+v 5.1
+
+[GENERAL]
+- Changed the table to Lily's "The Kraken Table" (https://steamcommunity.com/sharedfiles/filedetails/?id=1222553243).
+- Added a Duel Board next to the main board.
+- Rulebook updated (thanks Ale_noite for lots of suggestions here).
+- Formats for Leagues from 2-6 players added to the rulebook. Also, in the next days expect an update with an alternative Pokémon League, fighting the Elite 4 (more similar to the original boardgame ending).
+- Personal Pads made bigger.
+- Added a small +1 token (to add to locked Pokémon families). 
+- You can now add unused starters to the game as Green Pokémon (there's a box with the Pokémon Cards inside).
+
+[HEXAGONS]
+- Changed the Item Cost on Fuchsia (C5) Safari Zone from 2 to 1 Item Card.
+- Minor tweaks to the Pokémon League hexagon (E1).
+- Fixed Mossdeep (D6) misplaced leader type symbol.
+
+[BADGES]
+- Badge rewards changed (Green obeys/Blue obeys/Red obeys/Yellow obeys/1 Blue Pokémon/1 Red Pokémon -> Blue obeys/Red obeys/1 Blue Pokémon/Yellow obeys/1 Red Pokémon/Lock and add +1) 
+- Green Pokémon no longer need a badge to obey you.
+
+[ITEMS]
+- Added 2 "Fishing Rod" ("This item can only be used before you move. Stay where you are and activate the space normally.") (0 -> 2)
+- Added 1 "Great Ball" (7 -> 8)
+- Removed 1 "Ultra Ball" (7 -> 6)
+- Changed "Fly" ("You can travel to any city space on the board OR travel to any space in the hexagon you are currently in").
+
+[EVENTS]
+- Added "Rocket Bribe".
+- Added "Magma Invasion".
+- Tweaked "Duel" Events (Now whoever activates the Event chooses his opponent).
+- Tweaked "N's Offer" (Legendary Pokémon now can't be obtained via this event).
+- Tweaked "Trade" (Starter Pokémon are now tradeable).
+- Minor tweaks to a lot of Events (typo fixes, changes to artwork, etc).
+
+[POKEMON]
+- Added Venonat/Venomoth (2/5, Pink/Green, Poison/Bug).
+- Added Tentacool/Tentacruel (3/7, Green/Blue, Water/Poison).
+- Added Tangela/Tangrowth (4/7, Green/Blue, Grass).
+- Added Natu/Xatu (2/5, Pink/Green, Flying/Psychic).
+- Added Chinchou/Lanturn (3/6, Pink/Blue, Water/Electric).
+- Added Aron/Lairon/Aggron (3/5/8, Pink/Green/Red, Steel/Rock).
+- Added Baltoy/Claydol (3/7, Pink/Blue, Ground/Psychic).
+- Added Sylveon (7, Blue, Fairy).
+- Added Dusknoir (6, Blue, Ghost).
+- Added Absol (7, Blue, Dark).
+- Added Latias (11, Yellow, Dragon).
+- Added Regigigas (11, Yellow, Normal).
+- Added Darkrai (11, Yellow, Dark).
+
+- Removed Seel/Dewgong.
+- Removed Kabuto/Kabutops.
+- Removed Togepi/Togetic/Togekiss.
+- Removed Poochyena/Mightyena.
+- Removed Espeon.
+- Removed Leafeon.
+- Removed Glaceon.
+- Removed Rayquaza.
+
+- Modified Butterfree: 5/Blue -> 6/Blue.
+- Modified Scyther/Scizor: 6/8 Blue/Red -> 5/7 Green/Blue.
+- Modified Weezing: 7/Blue Poison -> 8/Red Poison/Fairy.
+- Modified Manectric: 6/Blue -> 7/Blue.
+- Modified Dusknoir/Dusclops: 3/6 Green/Blue -> 3/5 Pink/Green 
+- Modified Scolipede: 7/Blue -> 7/Red.
+- Modified Mewtwo: 11/Yellow -> 12/Yellow.
+- Modified Articuno, Celebi, Raikou, Entei and Suicune: 10/Yellow -> 11/Yellow.

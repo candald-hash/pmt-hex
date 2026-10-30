@@ -1,0 +1,34 @@
+Version 5.4 is here with the often requested Elite 4 Mode, an alternative to the endgame. Playing this mode will make the Pokémon League more similar to the one in the original 1999 boardgame (and to the videogames), where you face the Elite trainers of the world for the title of Champion. As a new mechanic in the game, please send any feedback you got on them.
+
+This update is also focused on tweaking the Trainer Cards. New trainers were added and some necessary balance changes were made to others.
+
+There were also minor changes to some Events and Super Events, which you can check on the full changelog below. Got questions, any feedback or requests? Message me on Steam or tweet @dcandal. Thanks for playing.
+
+-----------
+v 5.4 CHANGELOG
+
+[GENERAL]
+- Added the "Elite 4" League Mode, an alternative for the Pokémon League that is more similar to the original boardgame endgame.
+- Rulebook: there's now an appendix with the list of all Pokémon on the game and their evolution. Also, there is a more detailed guide for individual Items, Events, Super Events and Trainer Cards.
+
+[ELITE 4]
+- Added 26 Elite Trainer Cards: Aaron, Agatha, Alder, Bertha, Blue, Bruno, Carl, Cynthia, Diantha, Drake, Eusine, Giovanni, Glacia, Kahili, Karen, Koga, Lance, Leon, Lorelei, Phillip, Phoebe, Red,Sidney, Steven, Theo and Will.
+
+[EVENTS]
+- Added "Diglett's Cave".
+- Added "Radio Quiz".
+- Removed "National Park".
+- Removed 1 "Traveling Salesman" (2 -> 1).
+- Renamed "Aqua Invasion", "Magma Invasion" and "Rocket Executives" to "Team Aqua Strikes", "Team Magma Strikes" and "Team Rocket Strikes".
+
+[SUPER EVENTS]
+- Added "Magma Operation".
+- Renamed "Aqua+Magma Strike" to "Aqua Operation".
+
+[TRAINERS]
+- Added Cynthia ("Whenever a player in your hexagon fails a capture you can try to catch that Pokémon.")
+- Added Silver ("Draw 2 Item Cards whenever you roll a 6 on any dice."
+- Added Steven ("You can skip your turn and draw 2 Item Cards.")
+- Buffed Green ("You can reroll once the dice you use to travel the board." -> "You can roll 3 dices for movement and choose one of them.")
+- Buffed May ("Green Pokémon get +1 power." -> "Green Pokémon get +2 power.")
+- Buffed Wally ("Pink Pokémon get +2 power." -> "Pink Pokémon get +2 power. You can add or subrtact 1 to capture rolls of a Pokémon from the same evolutionary line as one of your Pokémon.")

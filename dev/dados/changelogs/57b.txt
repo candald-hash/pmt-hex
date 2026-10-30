@@ -1,0 +1,28 @@
+(5.7b)
+This minor update is focused on adding the Inactive Pokémon so players can add any of them to the game if they choose to do so. Now to the left of the main board you can see every Pokémon not in the active roster up to the 6th generation. Their 3D models are also added. 
+
+Keep in mind that the active roster is picked in order to make sure the different types are balanced, and the number of active Pokémon is meant to be reasonably balanced for 6 players.
+
+Also, there are minor tweaks to the Stadium: there are now hidden slots for each player near the Stadium so preparation for battles is a little better. There are 6 slots for each color, placing your Pokémon there will keep them visible only to you. Then you can flip the cards and place them on the Stadium, so it's a little easier to prepare for battles.
+
+Got questions, any feedback or requests? Message me on Steam, tweet @dcandal or try r/pokemonmastertrainer on reddit. Thanks for playing.
+-----------
+v 5.7b CHANGELOG
+
+[GENERAL]
+- Added Inactive Pokémon (and their 3D models) up to the 6th generation. Players can now add any of them to the game if they want to.
+- Added Hidden Zones with Pokémon Slots for each player near the stadium for better battle preparation.
+- Minor changes to the Stadium background.
+
+[HEXAGONS]
+- Fixed Saffron's Gym type icon.
+
+[POKEMON]
+- Added Mewtwo (11, Yellow, Psychic).
+- Removed Chinchou/Lanturn.
+- Removed Honedge/Doublade/Aegislash.
+- Removed Cubchoo/Beartic.
+- Removed Laversta/Volcarona.
+- Lapras is now also a Water type.
+- Swapped Mudkip/Marshtomp/Feraligatr for Totodile/Croconaw/Feraligatr.
+- Swapped Giratina for Darkrai.

@@ -1,0 +1,11 @@
+v 5.4b CHANGELOG
+
+[ELITE 4]
+- Bonus Power roll rescaled from +2/+3/+4/+5 to +1/+2/+3/+4.
+- Nerfed Aaron, Bertha, Glacia, Kahili, Phoebe and Will: Base Power 12/12 -> 10/11
+- Nerfed Agatha, Alder, Blue, Bruno, Carl, Diantha, Drake, Karen, Koga, Leon, Lorelei, Phillip, Sidney, Steven and Theo: Base Power 11/13 -> 10/11
+- Nerfed Cynthia and Lance: Base Power 11/14 -> 10/12
+- Nerfed Giovanni: Base Power 10/14 -> 9/12
+- Nerfed Eusine: Base Power 11/13 -> 9/12
+- Nerfed Red: Base Power 11/13 -> 10/12
+- Carl: Swapped Weezing for Alakazam.

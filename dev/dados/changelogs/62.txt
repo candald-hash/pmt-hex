@@ -1,0 +1,15 @@
+v 6.2 CHANGELOG
+
+[SCRIPTING]
+- There's a new type of scripted setup: Custom Setup, where you manually select which generations you want in the game by clicking the buttons above each deck (thanks to smurfjames101 for yet another amazing addition).
+- Simplified "Setup Button" text.
+- Each user can now discard the cards they are hovering over, without affecting another player (oops).
+- The next turn hotkey only works for the current player (preventing other players skipping a player).
+- Roll dice now rolls the dice on the player Area of the player that pressed the key (it only rolls once I've noticed).
+- Added cards changed in V6.1 To "Discard" button.
+
+[FIXES]
+- Removed duplicates for Shuppet, Rhyperior, Deino, Zweilous and Hydreigon.
+
+[POKÉMON]
+- Nerfed Gigalith (8/Red -> 6/Blue).

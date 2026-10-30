@@ -1,0 +1,94 @@
+(v 5.7)
+
+It's been some time since I added more hexagons, mostly because adding them takes some more work due to scripting. Because of that I gathered all the hexagons I wanted to add in a single update, so our scripting wizard Saucekay won't kill me with my constant bothering. Anyway, every gym up to Gen 3 is now in the game - including the Kanto ones, which I was avoiding since the type specialist Trainer Cards are based on those Leaders, so I was not sure if I should add them or not. I did.
+
+And talking about the type specialist Trainer Cards, those were tweaked too. I felt that they needed a little buff for some time, so they now get capturing bonuses (thanks reddit user PyreForMonitor - your feedback back on january is what put that on my mind.)
+
+There was also a major reshuffle on the roster, check the full changelog below for all the changes. I'm thinking of adding all the Pokémon not currently in the roster as available to the game (Steam user painfulnoob has requested that recently, but it's been on my mind for some time), so I'll probably work on that next. Maybe adding each Generation with a mini-update.
+
+Full changelog below. Got questions, any feedback or requests? Message me on Steam, tweet @dcandal or try r/pokemonmastertrainer on reddit. Thanks for playing.
+
+-----------
+v 5.7 CHANGELOG
+
+[HEXAGONS]
+- Added B7 (Dewford, Leader Brawly). Tier 1.
+- Added B8 (Mauville, Leader Wattson). Tier 1.
+- Added C7 (Saffron, Leader Sabrina). Tier 2.
+- Added C8 (Vermilion, Leader Surge). Tier 2.
+- Added C9 (Celadon, Leader Erika). Tier 2.
+- Added C10 (Petalburg, Leader Norman). Tier 2.
+- Added D7 (Cinnabar, Leader Blaine). Tier 3.
+- Added D8 (Viridian, Leader Giovanni). Tier 3.
+- Added D9 (Fortree, Leader Winona). Tier 3.
+- Swapped B4 (Rustboro for Pewter).
+- Swapped B6 (Hulbury for Cerulean).
+- Changed the effect for Cianwood's (C4) pioneer ("Draw 3 Item Cards" -> "Draw 4 Item Cards. Choose an opponent to draw 2 Item Cards.")
+- Changed the effect for Mossdeep's (D6) first visit ("Draw 3 Item Cards" -> "Draw 3 Item Cards and 2 Trainer Cards.")
+
+[LEADERS]
+- Added Brawly (B7, Fighting, 8).
+- Added Wattson (B8, Electric, 11 Dual).
+- Added Sabrina (C7, Psychic, 17 Dual).
+- Added Surge (C8, Electric, 11).
+- Added Erika (C9, Grass, 17 Dual).
+- Added Norman (C10, Normal, 17 Dual).
+- Added Blaine (D7, Fire, 14).
+- Added Giovanni (D8, Ground, 14).
+- Added Winona (D9, Flying, 14).
+- Swapped B4 (Roxanne for Brock).
+- Swapped B6 (Nessa for Misty).
+
+[EVENTS]
+- Tweaked "Pokedex" (it now reveals 4 face-down Pokémon instead of 2).
+- Tweaked "Prepare for Trouble" (now won't affect the player activating it).
+
+[TRAINERS]
+- Added Cheren ("Every Pokémon get +1 power. You can only hold up to 3 Item Cards on your hands.").
+- Buffed all type specialist trainers (Agatha, Blaine, Brock, Bruno, Erika, Giovanni, Koga, Lance, Lorelei, Misty, Sabrina, Surge and Victor): now they also get a bonus to capture their respective types.
+
+[POKEMON]
+- Added Nidoran/Nidorina/Nidoqueen (2/5/6, Pink/Green/Blue, Poison/Ground).
+- Added Igglybuff/Jigglypuff/Wigglytuff (1/3/6, Pink/Green/Blue, Fairy/Normal).
+- Added Azurill/Marill/Azumarill (1/3/6, Pink/Green/Blue, Water/Fairy).
+- Added Hoppip/Skiploom/Jumpluff (2/4/6, Pink/Green/Blue, Grass/Flying).
+- Added Murkrow/Honchkrow (5/8, Green/Red, Flying/Dark).
+- Added Wynaut/Wobbuffet (1/8, Pink/Red, Psychic).
+- Added Girafarig (7, Blue, Psychic/Normal).
+- Added Heracross (8, Red, Bug/Fighting).
+- Added Slugma/Magcargo (3/6, Green/Blue, Fire/Rock).
+- Added Lotad/Lombre/Ludicolo (2/4/7, Pink/Green/Blue, Water/Grass).
+- Added Riolu/Lucario (4/8, Green/Red, Fighting/Steel).
+- Added Snorunt/Froslass (3/6, Pink/Blue, Ice/Ghost).
+- Added Honedge/Doublade/Aegislash (2/5/7, Pink/Blue/Red, Steel/Ghost).
+- Added Gothita/Gothorita/Gothitelle (1/4/6, Pink/Green/Blue, Psychic).
+- Added Larvesta/Volcarona (2/8, Pink/Red, Bug/Fire).
+- Added Turtonator (8, Red, Dragon/Fire).
+- Removed Mankey/Primeape.
+- Removed Psyduck/Golduck.
+- Removed Cubone/Marowak.
+- Removed Mr. Mime.
+- Removed Pinsir.
+- Removed Skarmory.
+- Removed Budew/Roselia.
+- Removed Aron/Lairon/Aggron.
+- Removed Numel/Camerupt.
+- Removed Phantump/Trevenant.
+- Removed Croagunk/Toxicroak.
+- Removed Litleo/Pyroar.
+
+- Buffed Golem (7/Red -> 8/Red).
+- Buffed Steelix (7/Red -> 8/Red).
+- Nerfed Mamoswine (8/Red -> 7/Red).
+- Nerfed Krookodile (7/Red -> 6/Blue).
+- Gengar is now also a Poison type.
+
+- Swapped Alolan Vulpix/Alolan Ninetales for Vulpix/Ninetales.
+- Swapped Exeggutor for Alolan Exeggutor.
+- Swapped Ho-oh for Moltres.
+- Swapped Lugia for Mew.
+- Swapped Regice for Articuno.
+- Swapped Genesect for Celebi.
+
+[FIXES]
+- Fixed the language on the Arena background.

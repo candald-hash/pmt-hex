@@ -1,0 +1,14 @@
+[HEXAGONS]
+- Added G4 (Rustboro City, Leader Roxanne)
+
+[ITEMS]
+- Changed Pokénav Plus (now forces the target to draw 2 Trainer Cards instead of 1)
+
+[EVENTS]
+- Added "N"
+
+[TRAINER CARDS]
+- Added Hilbert ("You can discard an Item Card in battle to receive +1 Power")
+
+[LEADERS]
+- Added Roxanne (G4/Rustboro, Rock type, 8 Power, 1-2 Badge)

@@ -1,0 +1,25 @@
+We have scripts!
+
+Provided by the amazing Saucekay and Deepish, there is now a scripted setup to the game, placing hexagons, Pokémon and even dealing Items, Trainer Cards and Starters to every player. Lots of thanks to Saucekay and Deepish for the brilliant work!
+
+The next balance update (the Elite Four patch) is not ready yet, but they work FAST and I coudn't wait to release it. 
+
+Still, I made some very small changes that were already good to go: A new trainer that can repel wild Pokémon, a new Event and a buff to a Super Event that has been criticized for a long time.
+ 
+You can check the changelog below. Questions? Feedback? Requests? Message me on Steam or tweet @dcandal. Stay safe and thanks for playing.
+
+-----------
+v 5.3 CHANGELOG
+
+[GENERAL]
+- Added a scripted start, courtesy of Saucekay and Deepish, who did amazing work. Now you just have to press the buttons below the Arena to setup the board.
+- Fixed some badge snap points.
+
+[TRAINERS]
+- Added Lucas ("When revealing a Pokémon you may try to repel it if you roll a 4, 5 or a 6 on a dice")
+
+[EVENTS]
+- Added "GS Ball".
+
+[SUPER EVENTS]
+- Buffed "Aqua+Magma Strike" (now, after your opponents discard their items, you can draw 3 Item Cards from those discarded or from the Item Card pile)

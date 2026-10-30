@@ -453,5 +453,6 @@ button.celebi:hover:not(:disabled){background:rgba(244,114,182,.15);border-color
   .pl{grid-template-columns:28px 1fr}
   .pl>.row:last-child{grid-column:1 / -1}
 }
-.linksIni{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:13.5px}
+.linksIni{display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:13.5px}
 .linksIni a{color:var(--mut);text-decoration:none}.linksIni a:hover{color:var(--acc)}
+.linksIni #temaS{margin-left:auto}

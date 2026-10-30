@@ -1,0 +1,138 @@
+v 6.3 CHANGELOG
+
+[GENERAL]
+- The rulebook was fully redesigned and rewritten from scratch. I hope it has clearer, simpler instructions (and is prettier to look at).
+- Added 3D Models for some Gen 8 Pokémon (many thanks to Multhor, check his models here: https://steamcommunity.com/sharedfiles/filedetails/?id=2425249259).
+- Added a new background ("Pokémon Center in the evening" by FristiStains).
+- This update changes some type pairings that are used for balancing purposes. These changes reflect mainly on +4 Battle Items, Trainers and on the balanced roster. They were:
+-- Rock and Fighting are no longer paired.
+-- Normal + Steel pairings changed to Normal + Fairy.
+-- Ice + Fairy pairings changed to Ice + Steel.
+
+[HEXAGONS]
+- Added Motostoke (B10, Leader Kabu). Tier 1.
+- Added Mistralton (C12, Leader Skyla). Tier 2.
+
+[LEADERS]
+- Added Kabu (B10, Fire, 8).
+- Added Skyla (C12, Flying, 17 Dual).
+
+[EVENTS]
+- Added continuous Event "National Park" (not the same as the old "National Park" that was removed in v5.4).
+
+[ITEMS]
+- Added Black Belt (+4 Fighting battle item).
+- Added Fishing Rod (Activate the space you're in or one of the adjacent).
+- Added Hard Stone (+4 Rock battle item).
+- Added Rare Crystal (+4 Ice/Steel item).
+- Added Silk Scarf (+4 Normal/Fairy battle item).
+- Removed Focus Band.
+- Removed Metal Coat.
+- Removed Never-melt Ice.
+- Removed Quick Trade.
+- Increased image quality for Charcoal, Dragon Fang, Exp. Share, Magnet, Miracle Seed, Mystic Water, Potion, Repel, Sharp Beak, Soft Sand, Spell Tag and Twisted Spoon.
+
+[TRAINERS]
+- Reworked Wally ("Before drawing Item Cards, you may discard up to 1 Item from your hand and draw 1 extra Item Card").
+- Added Alder (same as the old Cheren, +1 to all Pokémon, hand limit reduced to 3).
+- Added Brock (+1 to Rock).
+- Tweaked Cheren (now gives +1 to Normal/Fairy).
+- Tweaked Bruno (+1 to Rock/Fighting -> +1 to Fighting).
+- Tweaked Lorelei (+1 to Ice/Fairy -> +1 to Ice/Steel).
+- Removed Hau.
+- Removed Steven.
+
+[ELITE 4]
+- Increased image quality for Elite 4 Cards.
+- Bonus Power roll buffed from +1/+2/+3/+4 to +2/+3/+4/+5.
+
+[BALANCED ROSTER]
+- Starters: Swapped Totodile and Torchic for Mudkip and Chimchar.
+
+- Legendaries: Added Zapdos, Moltres, Kyogre, Xerneas, Yveltal.
+- Legendaries: Removed Regice, Mew, Suicune, Raikou, Entei, Regigigas, Darkrai.
+
+- Added Alolan Vulpix/Ninetales.
+- Added Aron/Lairon/Aggron.
+- Added Bonsly/Sudowoodo.
+- Added Diglett/Dugtrio.
+- Added Galarian Farfetch'd/Sirfetch'd.
+- Added Heracross.
+- Added Meditite/Medicham.
+- Added Meowth/Persian.
+- Added Pancham/Pangoro.
+- Added Roggenrola/Boldore/Gigalith.
+- Added Rookidee/Corvisquire/Corviknight.
+- Added Shellder/Cloyster.
+- Added Tangela/Tangrowth.
+- Added Tauros.
+- Added Tentacool/Tentacruel.
+- Added Timburr/Gurdurr/Conkeldurr.
+- Added Toxel/Toxtricity.
+- Added Vaporeon.
+- Added Yamper/Boltund.
+
+- Removed Alolan Sandshrew/Sandslash.
+- Removed Blitzle/Zebstrika.
+- Removed Croagunk/Toxicroak.
+- Removed Cubone/Marowak.
+- Removed Deino/Zweilous/Hydreigon.
+- Removed Electrike/Manectric.
+- Removed Espeon.
+- Removed Fletchling/Fletchinder/Talonflame.
+- Removed Golett/Golurk.
+- Removed Grimer/Muk.
+- Removed Helioptile/Heliolisk.
+- Removed Honedge/Doublade/Aegislash.
+- Removed Kangaskhan.
+- Removed Magikarp/Gyarados.
+- Removed Pinsir.
+- Removed Skrelp/Dragalge.
+- Removed Snover/Abomasnow.
+- Removed Staryu/Starmie.
+- Removed Vulpix/Ninetales.
+- Removed Weedle/Kakuna/Beedrill.
+- Removed Wooper/Quagsire. 
+
+- Swapped Hitmonchan for Hitmonlee.
+- Swapped Nidoking family for Nidoqueen family.
+- Swapped Slowking for Galarian Slowking.
+
+[ALTERNATE ROSTER]
+- Alternate roster remade aswell.
+
+[POKÉMON CHANGES]
+- Buffed Aegislash (Blue/6 -> Red/7)
+- Buffed Alolan Ninetales (Blue/7 -> Red/8)
+- Buffed Archeops (Blue/7 -> Red/8)
+- Buffed Chandelure (Blue/6 -> Red/7)
+- Buffed Girafarig (7 -> 8)
+- Buffed Heatmor (7 -> 8)
+- Buffed Kommo-o (Blue/6 -> Red/7)
+- Buffed Lickilicky (7 -> 8)
+- Buffed Machamp (7 -> 8)
+- Buffed Nidoking (Blue/6 -> Red/8)
+- Buffed Pangoro (7 -> 8)
+- Buffed Pidgeot (6 -> 7)
+- Buffed Poliwrath (6 -> 7)
+- Buffed Skarmory (7 -> 8)
+- Buffed Slowbro and Galarian Slowbro (Blue/6 -> Red/8)
+- Buffed Slowking and Galarian Slowking (7 -> 8)
+- Buffed Sudowoodo (6 -> 7)
+
+- Nerfed Axew (Green/3 -> Pink/2)
+- Nerfed Coalossal (8 -> 7)
+- Nerfed Corviknight (Red/7 -> Blue/6)
+- Nerfed Dragapult (Red/8 -> Blue/6)
+- Nerfed Drakloak (Blue/5 -> Green/4)
+- Nerfed Dugtrio (Blue/6 -> Green/5)
+- Nerfed Dusknoir (Red/7 -> Blue/6)
+- Nerfed Fraxure (Blue/5 -> Green/4)
+- Nerfed Haxorus (Red/7 -> Blue/6)
+- Nerfed Krookodile (7 -> 6)
+- Nerfed Mamoswine (8 -> 7)
+- Nerfed Staraptor (7 -> 6)
+- Nerfed Vanilluxe (Red/7 -> Blue/6)
+
+- Changed color for Cofragrigus, Donphan, Hippowdon, Houndoom and Tauros (Red -> Blue).
+- Changed color for Throh and Sawk (Blue -> Green).

@@ -1,0 +1,17 @@
+v 6.1 CHANGELOG
+
+[GENERAL]
+- The scripted setup has been improved, thanks to our colaborator smurfjames101. Now you can choose from 3 types of setups with a different roster of Pokémon:
+-- Balanced Setup: the normal game, balanced between the different types.
+-- Alternate Setup: here you will get a different roster of Pokémon, also balanced between different types. Think of it as the "Pokémon Red" to Balanced Mode's "Pokémon Blue".
+-- Random Setup: with this one you will get a fully random roster of Pokémon in the game, not necessarily balanced for the types, but with their evolutionary families available.
+- Added support for Game Keys. Check [Options]->[Game Keys] to assign keys for Discarding, Rolling a Dice and Skiping your turn (also thanking smurfjames101 for that).
+
+[INACTIVE POKÉMON]
+- Lots of small changes on inactive Pokémon in order to fit in the Alternate Setup, they were:
+-- Buffs to Weavile, Sharpedo, Dustox, Toucannon, Pyroar, Beartic, Pelipper, Aggron, Porygon-Z, Victreebel.
+-- Nerfs to Grimmsnarl, Haxorus, Hippowdon, Jangmo-o, Hakamo-o, Kommo-o, Noivern, Zoroark.
+-- Changed the color for Torkoal, Heracross.
+- Fixed Alolan Raichu's type.
+- Fixed Simipour's type.
+- Fixed Porygon2 not being available.

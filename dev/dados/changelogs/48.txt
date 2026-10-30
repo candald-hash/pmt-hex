@@ -1,0 +1,17 @@
+v 4.8
+
+[HEXAGONS]
+- Added H4 (Blue, Lavaridge Town, Leader Flannery)
+- Added I4 (Red, Sunyshore City, Leader Volkner)
+
+[ITEMS]
+- Redesigned ALL Item Cards so they inform players when can they be used.
+
+[EVENTS]
+- There are Continuous Events now. These events stay active, affecting every player for the number of turns stated on the card.
+- Added continuous event National Park
+- Added continuous event Prepare for Troube
+
+[LEADERS]
+- Added Flannery (H4Rustboro, Fire type, 10 Power, 3-4 Badge)
+- Added Volkner (I4Sunyshore, Electric type, 13 Power, 5-6 Badge)

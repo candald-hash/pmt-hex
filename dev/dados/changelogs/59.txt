@@ -1,0 +1,57 @@
+v 5.9 CHANGELOG
+
+[HEXAGONS]
+- Minor tweaks on how Item Passages work (you can now access those passages whenever you pass the adjacent space, more on the rulebook).
+- Removed Bicycle Paths from Hexagons (most of them were already removed by now). 
+- Sunyshore's (D4) Super Event space is now behind a 3-Item Passage.
+
+[GENERAL]
+- Added Inactive Pokémon from the 7th and 8th Gens (8th Gen still has no 3D Models available).
+
+[GYMS]
+- Added 3D Models for the Pokémon used by the Gym Leaders (just place the Leader Card on the Stadium).
+
+[EVENTS]
+- Added "Blocked Route".
+- Removed 1 "Pokedex" (2 -> 1).
+
+[SUPER EVENTS]
+- Added "Arceus' Wish" (it's like the "Jirachi's Wish" Event, but for Super Events).
+- Nerfed "Mr. Briney's Boat" (now you can only affect the movement of players on the same Hexagon as you).
+- Nerfed "Oak's Research" (now works like a regular "Kimono Sisters", but you also get an Item Card).
+
+[ITEMS]
+- Added 1 Poké-Flute (1 -> 2).
+- Removed 1 Bycicle (4 -> 3).r
+- Tweaked Bycicle (you can no longer stack multiple Bikes on the same turn)
+
+[TRAINERS]
+- Added Hau.
+
+[POKÉMON]
+- Added Meditite/Medicham (3/7, Green/Blue, Fighting/Psychic).
+- Added Phanpy/Donphan (2/7, Pink/Blue, Ground).
+- Added Rhyperior (7, Red, Ground/Rock).
+- Added Slowking (7, Red, Water/Psychic).
+- Added Wooper/Quagsire (2/7, Pink/Blue, Ground/Water).
+
+- Removed Baltoy/Claydol.
+- Removed Doduo/Dodrio.
+- Removed Timburr/Gurdurr/Conkeldurr.
+- Removed Turtonator.
+- Removed Vaporeon
+
+- Swapped Cyndaquil/Quilava/Typhlosion for Torchic/Combusken/Blaziken.
+- Swapped Geodude/Graveler/Golem for the Alolan Forms (Rock/Ground -> Rock/Electric).
+- Swapped Teddiursa/Ursaring for Meowth/Persian.
+
+- Buffed Absol (7 -> 8)
+
+- Nerfed Druddigon (7/Blue -> 6/Green).
+- Nerfed Machamp (8 -> 7).
+- Nerfed Rhydon (7 -> 6).
+
+- Changed color for Talonflame, Lapras, Aerodactyl and Pinsir (Red -> Blue).
+- Changed color for Clefable, Crobat and Dusknoir (Blue -> Red).
+
+- Changed type for Spheal/Sealeo/Walrein (Water/Ice -> Ice).

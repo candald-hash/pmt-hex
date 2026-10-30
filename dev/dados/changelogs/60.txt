@@ -1,0 +1,75 @@
+v 6.0 CHANGELOG
+
+[GENERAL]
+- Added Optional Content: "Achievement Mode".
+- Changed the art for the +1 Token.
+- Inactive Pokémon were reorganized to occupy less space.
+- Some parts of the rulebook were rewritten or revisited for clarification, thanks to your feedback.
+- You can travel from city to city directly now if you have already visited it (more on the rulebook).
+- You can now use up to two Battle Items when battling Dual Gym Leaders.
+- Victories in the Pokémon League now award 3 Item Cards (instead of 2).
+- Now when stopping on the "Enter Pokémon League" space before taking one full lap on the hexagon you draw 1 Item Card (instead of losing your turn).
+
+[HEXAGONS]
+- Added B9 (Virbank, Leader Roxie). Tier 1.
+- Added C11 (Driftveil, Leader Clay). Tier 2.
+- Added D10 (Carnavale, Leader Byron). Tier 3.
+
+[LEADERS]
+- Added Roxie (B9, Poison, 8).
+- Added Clay (C11, Ground, 17 Dual).
+- Added Byron (D10, Steel, 14).
+
+[OPTIONAL CONTENT]
+- Added "Achievement Mode" (in this optional mode there are goals you can achieve and get different rewards - more info on the rulebook).
+- Added 28 achievement cards for Achievement Mode.
+
+[EVENTS]
+- Removed "Extra Badge".
+
+[ITEMS]
+- Tweaked "Fly": No longer used to travel to cities. Using this Item must be your only action in your turn.
+- Fixed "Rocket Attack" being tagged as a Quick Item instead of a Common Item.
+
+[TRAINERS]
+- Swapped Victor for Kahili (same bonuses: +1 to Flying Pokémon).
+- Removed Brendan.
+
+[POKEMON]
+- Added Deino/Zweilous/Hydreigon (2/4/6, Pink/Green/Blue, Dragon/Dark).
+- Added Espeon (7, Blue, Psychic).
+- Added Golett/Golurk (3/8, Pink/Red, Ghost/Ground).
+- Added Helioptile/Heliolisk (2/7, Pink/Blue, Electric/Normal).
+- Added Kangaskhan (8, Blue, Normal).
+- Added Mankey/Primeape (3/5, Pink/Green, Fighting).
+- Added Shuppet/Banette (2/6, Pink/Blue, Ghost).
+- Added Snover/Abomasnow (3/7, Green/Red, Grass/Ice).
+- Added Togepi/Togetic/Togekiss (2/5/6, Pink/Green/Blue, Flying/Fairy).
+- Added Venonat/Venomoth (2/5, Pink/Green, Poison/Bug).
+
+- Removed Cubchoo/Beartic.
+- Removed Ekans/Arbok.
+- Removed Gligar/Gliscor.
+- Removed Joltik/Galvantula.
+- Removed Meditite/Medicham.
+- Removed Meowth/Persian.
+- Removed Murkrow/Honchkrow.
+- Removed Rattata/Raticate.
+- Removed Shroomish/Breloom.
+- Removed Skorupi/Drapion.
+- Removed Sylveon.
+
+- Swapped Moltres for Entei.
+- Swapped Zapdos for Raikou.
+- Swapped Kyogre for Suicune.
+- Swapped Registeel for Regigigas.
+
+- Changed color for Donphan (Blue -> Red).
+- Swapped types for Gyarados (Water/Dark -> Water/Flying).
+- Fixed the types for Gastly and Haunter (Ghost -> Ghost/Poison).
+
+[INACTIVE POKÉMON]
+- As stated above, in order to occupy less space, the inactive roster is now divided on two piles per generation: one for the starters and their evolutions and one for the rest.
+- Added a Green version for every starter.
+- Fixed Ditto, Mr. Mime, Unown, Alolan Rattata/Raticate, Alolan Vulpix/Ninetales and Alolan Marowak not being available.
+- Fixed Panpour's type.

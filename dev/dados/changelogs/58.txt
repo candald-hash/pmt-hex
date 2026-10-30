@@ -1,0 +1,84 @@
+v 5.8 CHANGELOG
+
+[EVENTS]
+- Added "S.S. Anne" ("Trade a Pokémon with another player of your choosing. Both Pokémon must be of the same color. After that, the targeted opponent draws 2 Item Cards.")
+- Removed "Radio Quiz".
+- Minor change to "Pokémon Day-Care".
+
+[SUPER EVENTS]
+- Tweaked "Galactic Operation" (no longer sends an opponent away from your Hexagon, now you can cause up to two players skip their next turns).
+
+[ITEMS]
+- Added "Metal Coat" (+4 battle item for Steel/Normal types).
+- Tweaked "Focus Band" (+4 type bonus changed from Fighting/Normal to Fighting/Rock).
+- Removed "Fishing Rod" (1 -> 0).
+- Removed "Hard Stone" (1 -> 0).
+
+[TRAINERS]
+- Nerfed Silver: (now draws 1 Item Card instead of 2 when triggered).
+- Tweaked Bruno: type bonus changed from Fighting/Normal to Fighting/Rock.
+- Tweaked Steven Stone: type bonus changed from Steel/Rock to Steel/Normal.
+- Tweaked Lyra (now with the old Steven Stone bonus: you can skip your turn and draw 2 Item Cards).
+- Removed Brock (replaced by the new Steven Stone).
+- Removed Lucas.
+- Tweaked May's secondary effect (instead of recycling as a Poké-Doll you can now recycle as a Exp. Share).
+- Nerfed Green (now rolls 2 dices instead of 3).
+
+[GYMS]
+- Changed the image for some of the badges.
+
+[POKÉMON]
+- Added Cubchoo/Beartic (3/7, Ice, Pink/Red).
+- Added Cubone/Marowak (3/6, Ground, Green/Blue).
+- Added Gible/Gabite/Garchomp (2/5/8, Ground/Dragon, Pink/Green/Red).
+- Added Gligar/Gliscor (5/8, Flying/Ground, Green/Red).
+- Added Honedge/Doublade/Aegislash (2/4/6, Steel/Ghost, Pink/Green/Blue).
+- Added Joltik/Galvantula (1/7, Bug/Electric, Pink/Blue).
+- Added Kabuto/Kabutops (4/8, Water/Rock, Green/Red).
+- Added Larvesta/Volcarona (2/8, Fire/Bug, Pink/Red).
+- Added Numel/Camerupt (3/6, Fire/Ground, Pink/Blue).
+- Added Pinsir (8, Bug, Red).
+- Added Rattata/Raticate (2/5, Normal, Pink/Green).
+- Added Regirock (11, Rock, Yellow).
+- Added Shroomish/Breloom (2/6, Grass/Fighting, Pink/Blue).
+- Added Skorupi/Drapion (3/6, Dark/Poison, Pink/Blue).
+- Added Skrelp/Dragalge (3/8, Poison/Dragon, Green/Red).
+- Added Spheal/Sealeo/Walrein (3/5/7, Water/Ice, Pink/Blue/Red).
+- Added Teddiursa/Ursaring (3/7, Normal, Pink/Blue).
+- Added Vaporeon (7, Water, Blue).
+
+- Removed Girafarig.
+- Removed Helioptile/Heliolisk.
+- Removed Heracross.
+- Removed Hoppip/Skiploom/Jumpluff.
+- Removed Lotad/Lombre/Ludicolo.
+- Removed Nidoran/Nidorina/Nidoqueen.
+- Removed Regigigas.
+- Removed Riolu/Lucario.
+- Removed Seel/Dewgong.
+- Removed Slowking.
+- Removed Slugma/Magcargo.
+- Removed Snorunt/Froslass.
+- Removed Tentacool/Tentacruel.
+- Removed Trapinch/Vibrava/Flygon.
+- Removed Wynaut/Wobbuffet.
+	
+- Buffed Beedrill (5 -> 6).
+- Buffed Krookodile (6 -> 7).
+- Buffed Magnezone (7 -> 8).
+- Buffed Mamoswine (7 -> 8).
+- Buffed Slowbro (5 -> 6).
+
+- Nerfed Ampharos (8 -> 7).
+- Nerfed Arbok (6/Blue -> 5/Green).
+- Nerfed Drowzee/Hypno (4/6, Green/Blue -> 3,5, Pink/Green).
+- Nerfed Golem (8 -> 7).
+- Nerfed Larvitar/Pupitar (Pink/Green -> Green/Blue).
+- Nerfed Muk (8/Red -> 7/Blue).
+- Nerfed Nidoking (7 -> 6).
+
+- Swapped Alolan Exeggutor (Grass/Dragon) for Exeggutor (Grass/Psychic).
+- Swapped Hitmonlee for Hitmonchan.
+- Swapped Sandshrew/Sandslash (Ground) for Alolan Sandshrew/Alolan Sandslash (Ice/Steel).
+
+- Tweaked Charizard type advantages (Steel -> Fighting).

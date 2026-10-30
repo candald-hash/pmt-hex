@@ -1,0 +1,57 @@
+(v 5.6)
+
+This is an update focused on small balance tweaks on the Pokémon and rotating some of the roster available. You can check the full balance table I use for the game here: https://i.imgur.com/3ZFmOjD.jpg - keep sending requests for your favorite Pokémon not in the game, I've been able to add most of them to the game.
+
+There are also some new Super Events, something that is often requested. Got questions, any feedback or requests? Message me on Steam or tweet @dcandal. Thanks for playing.
+
+-----------
+v 5.6 CHANGELOG
+
+[SUPER EVENTS]
+- Added "Mr. Briney's Boat".
+- Added "Oak's Research".
+- Added "Pokémon Breeders".
+- Added "Sabrina's Prediction".
+- Buffed "Boosted PokéNav".
+
+[TRAINERS]
+- Tweaked Silver (triggers when you roll a 1 instead of a 6)
+
+[POKEMON]
+- Added Ekans/Arbok (3/6, Pink/Blue, Poison)
+- Added Shinx/Luxio/Luxray (1/4/7, Pink/Green/Red, Electric)
+- Added Tyrunt/Tyrantrum (3/8, Pink/Red, Rock/Dragon)
+- Added Sandile/Krokorok/Krookodile (2/4/7, Pink/Green/Red, Ground/Dark)
+- Added Litwick/Lampent/Chandelure (1/3/6, Pink/Green/Blue, Ghost/Fire)
+- Added Registeel (11, Yellow, Steel)
+
+- Removed Nidoran/Nidorina/Nidoqueen
+- Removed Ponyta/Rapidash
+- Removed Honedge/Doublade/Aegislash
+- Removed Deino/Zweilous/Hydreigon
+
+- Buffed Clefable: 6/Blue -> 7/Blue
+- Buffed Muk: 6/Blue -> 8/Red
+- Buffed Ampharos: 7/Red -> 8/Redz
+- Buffed Mamoswine: 7/Red -> 8/Red
+- Buffed Dusknoir: 6/Blue -> 7/Blue
+
+- Nerfed Poliwrath: 7/Blue -> 6/Blue
+- Nerfed Nidoking: 8/Red -> 7/Blue
+- Nerfed Piloswine: 5/Blue -> 5/Green
+
+- Tweaked Golem type advantages (Bug -> Flying).
+
+- Swapped Rattata/Raticate for Mankey/Primeape.
+- Swapped Krabby/Kingler for Psyduck/Golduck.
+- Swapped Shellder/Cloyster for Seel/Dewgong.
+- Swapped Hitmonchan for Hitmonlee.
+- Swapped Hoothoot/Noctowl for Doduo/Dodrio.
+- Swapped Articuno for Regice.
+- Swapped Mewtwo for Lugia.
+- Swapped Entei for Ho-oh.
+- Swapped Raikou for Zapdos.
+- Swapped Suicune for Kyogre.
+- Swapped Celebi for Genesect.
+- Swapped Latias for Rayquaza.
+- Swapped Darkrai for Giratina.

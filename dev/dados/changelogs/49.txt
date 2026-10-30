@@ -1,0 +1,57 @@
+v 4.9
+
+[GAMEPLAY]
+- Added an optional mechanic - Weakened Wild Pokémon (thanks user Diego Cruz/LeiGai for that suggestion): whenever someone fails to capture a wild pokémon, place a weakened token on it. When trying to capture weakened Pokémon you can add or subtract 1 to the dice roll (stackable with Poké-Ball Items). Pokémon can't have more than 1 weakened token on them. Legendary Pokémon do not get weakened.
+
+[HEXAGONS]
+- Added B5 (Green, Eterna City, Leader Gardenia).
+- Added C5 (Blue, Fuschia City, Leader Janine).
+- Added D5 (Red, Spikemuth Town, Leader Piers).
+
+[LEADERS]
+- Increased the image quality of Gym Leader Cards.
+- Added Gardenia (B5/Eterna, Grass type, 8 Power, 1-2 Badge).
+- Added Janine (C5/Fuchsia, Poison type, 10 Power, 3-4 Badge).
+- Added Piers (D5/Spikemuth, Dark type, 13 Power, 5-6 Badge).
+
+[EVENTS]
+- Added "Regional Map".
+- Tweaked "Pokémon Tower".
+
+[POKEMON CHANGES]
+- Increased the image quality of Pokémon Tokens.
+- Every Pokémon Token now has an indicator of the colors of their evolutionary family (thanks user Graymare for that suggestion).
+
+- Removed Ekans/Arbok
+- Removed Igglybuff/Jigglypuff/Wigglytuff
+- Removed Misdreavous/Mismagius
+- Removed Natu/Xatu
+- Removed Phanpy/Donphan
+- Removed Skarmory
+- Removed Spearow/Fearow
+- Removed Spinarak/Ariados
+- Removed Tauros
+
+- Added Aerodactyl (8, Red, Flying/Rock)
+- Added Duskull/Dusclops (3/6, Green/Blue, Ghost)
+- Added Honedge/Doublade/Aegislash (2/5/7, Pink/Blue/Red, Ghost/Steel)
+- Added Hoothoot/Noctowl (2/6, Pink/Blue, Flying)
+- Added Riolu/Lucario (4/8, Green/Red, Fighting/Steel)
+- Added Snubbull/Granbull (3/6 , Pink/Blue, Fairy)
+- Added Togepi/Togetic/Togekiss (1/5/6, Pink/Green/Blue, Fairy/Flying)
+- Added Venipede/Whirlipede/Scolipede (2/4 Pink/Green/Blue, Bug)
+
+- Tweaked Celebi: Grass/Psychic -> Grass 
+- Tweaked Kadabra: 5/Green -> 6/Blue
+- Tweaked Scyther: 5/Green -> 6/Blue
+- Tweaked Starmie: 7/Red -> 7/Blue 
+
+(BUFFS)
+- Bellsprout, Horsea, Munchlax, Ralts: 1 -> 2
+- Exeggcute, Mareep, Slugma: 2 -> 3
+- Blitzle, Clefairy: 3 -> 4
+- Gloom, Ponyta: 4 -> 5
+- Scizor: 7 -> 8
+
+(NERFS)
+- Slaking: 8 -> 7

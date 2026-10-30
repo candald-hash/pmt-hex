@@ -1,0 +1,27 @@
+v 5.6b CHANGELOG
+
+[HEXAGONS]
+- Improved the effects for the first visits on Ecruteak and Blackthorn.
+- Improved the effects for the pioneer on Azalea.
+
+[EVENTS]
+- Added Zinnia.
+- Removed Conversion.
+- Buffed Traveling Merchant.
+
+[TRAINERS]
+- Buffed Lucas (now rolling a 3 will also successfully repel).
+
+[POKEMON]
+- Added Budew/Roselia (1/6, Pink/Blue, Grass/Poison)
+- Added Litleo/Pyroar (3/7, Green/Red, Normal/Fire)
+- Added Phantump/Trevenant (2/7, Pink/Blue, Ghost/Grass)
+
+- Removed Venonat/Venomoth
+- Removed Tangela/Tangrowth
+- Removed Kangaskhan
+- Removed Sneasel/Weavile
+
+- Nerfed Graveler: 5/Blue -> 5/Green
+
+- Swapped Vulpix/Ninetales for Alolan Vulpix/Alolan Ninetales

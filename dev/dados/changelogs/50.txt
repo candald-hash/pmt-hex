@@ -1,0 +1,42 @@
+v 5.0
+
+[HEXAGONS]
+- Added D6 (Red, Mossdeep City, Leaders Tate & Lisa)
+
+[GYM LEADERS]
+- Tweaked [3-4] Leaders' power: 10 -> 11
+- Added Tate & Lisa  (D6/Mossdeep, Psychic type, 13 Power, 5-6 Badge)
+
+[TRAINER]
+- Tweaked Wally ("Pink Pokémon get +1 Power" -> "Pink Pokémon get +2 Power")
+
+[EVENTS]
+- "Gym Challenger" replaced with "Extra Badge".
+
+[SUPER EVENTS]
+- Added "Rocket Operation".
+
+[ITEMS]
+- Added 1 "Quick Trade".
+
+[POKEMON]
+- Removed Totodile/Croconaw/Feraligatr
+- Removed Bellsprout/Weepinbell/Victreebel
+- Removed Onix/Steelix
+- Removed Riolu/Lucario
+- Removed Zapdos
+- Removed Moltres
+
+- Added Mudkip/Marshtomp/Swampert (4/6/8, Starter/Blue/Red, Water/Ground)
+- Added Drowzee/Hypno (4/6, Green/Blue, Psychic)
+- Added Heracross (8, Red, Bug/Fighting)
+- Added Beldum/Metang/Metagross (3/5/8, Green/Blue/Red, Steel/Psychic)
+- Added Leafeon (7, Blue, Grass)
+- Added Fletchling/Fletchinder/Talonflame (2/4/7, Pink/Green/Red, Fire/Flying)
+- Added Croagunk/Toxicroak (3/7, Pink/Blue, Poison/Fighting)
+- Added Raikou (10, Yellow, Electric)
+- Added Entei (10, Yellow, Fire)
+
+- Tweaked Nidoking: 7/Blue -> 8/Red
+- Tweaked Vileplume: 6/Blue -> 7/Blue
+- Tweaked Rhydon: 8/Red -> 7/Blue

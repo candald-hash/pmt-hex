@@ -1,0 +1,12 @@
+v 5.7c CHANGELOG
+
+[EVENTS]
+- Every Event that can be blocked by a Poké Doll now has this information on the card.
+
+[ITEMS]
+- Every Item that can be blocked by a Poké Doll now has this information on the card.
+- Buffed Honey.
+- Buffed Escape Rope.
+
+[FIXES]
+- Fixed Pidgey, Pidgeotto, Pidgeot, Ho-Oh and Turtonator models.

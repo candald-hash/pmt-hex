@@ -1,0 +1,49 @@
+v 5.2
+
+[HEXAGONS]
+- Added B6 (Green, Hulbury City, Leader Nessa).
+- Added C6 (Blue, Laverre City, Leader Valerie).
+- Minor updates to E2 (Indigo Plateau).
+
+[GYM LEADERS]
+- Added a new type of Gym battle: Dual Battle (check the rulebook for more info).
+- Changed Chuck, Flannery, Janine, Jasmine and Morty's Power: 11 -> 17 Dual.
+- Changed Clair, Piers, Pryce, Volkner and Wallace's Power: 13 -> 14.
+- Changed Tate&Lisa's Power: 13 -> 22 Dual.
+- Added Nessa (B6/Hulbury, Water type, 8 Power, 1-2 Badge).
+- Added Valerie  (C6/Laverre, Fairy type, 17 Dual Power, 3-4 Badge).
+
+[ITEMS]
+- Removed 1 "Fishing Rod" (2 -> 1).
+
+[TRAINERS]
+- Added Lyra ("Non-yellow Pokémon without evolutions get +2 power.")
+
+[POKÉMON]
+- Added Onix/Steelix (5, 7, Green/Red, Ground/Steel)
+- Added Mr. Mime (7, Blue, Psychic/Fairy)
+- Added Pinsir (8, Red, Bug)
+- Added Lapras (8, Red, Ice)
+- Added Skarmory (7, Blue, Steel/Flying)
+- Added Numel/Camerupt (3/5, Pink/Green, Fire/Ground)
+- Added Druddigon (7, Blue, Dragon)
+- Added Helioptile/Heliolisk (2/7, Pink/Blue, Normal/Electric)
+
+- Removed Hitmonlee.
+- Removed Heracross.
+- Removed Snubull/Granbull.
+- Removed Slugma/Magcargo
+
+- Changed Slowpoke: 3/Pink -> 4/Green
+- Changed Marowak to Alolan Form: Ground -> Fire/Ghost
+
+- Buffed Sandshrew/Sandslash: 3/Pink, 5/Green -> 4/Green, 6/Blue 
+- Buffed Electrode: 5/Green -> 6/Blue
+- Buffed Xatu: 5/Green -> 6/Blue
+- Buffed Gardevoir: 7/Red -> 8/Red
+
+- Nerfed Nidoqueen: 7/Blue -> 6/Blue
+- Nerfed Kingler: 6/Blue -> 5/Green
+- Nerfed Flygon: 8/Red -> 7/Red
+- Nerfed Electrike/Manectric: 4/Green, 7/Blue -> 3/Pink, 5/Green
+- Nerfed Metagross: 8/Red -> 7/Red

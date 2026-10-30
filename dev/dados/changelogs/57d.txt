@@ -1,0 +1,18 @@
+v 5.7d CHANGELOG
+
+[GYMS]
+- Added custom art for the Badges.
+
+[EVENTS]
+- Added "Jirachi's Wish".
+- Added "Professor Juniper".
+- Tweaked "Team Rocket Strikes".
+- Removed "Conversion".
+- Removed 1 "Pokémon Egg". (4 -> 3)
+- Minor changes to artwork and color schemes of some Event Cards.
+
+[SUPER EVENTS]
+- Increased the image quality for Super Events.
+- Added "Galactic Operation".
+- Added "Missingno".
+- Minor changes to artwork and color schemes of some Event Cards.

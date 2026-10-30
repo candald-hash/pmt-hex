@@ -1,0 +1,33 @@
+(v 5.5)
+
+This update is focused on another script addition: the Stadium 3D Models, a very fine work from our friend MaxBeoulve. Now whenever you place a Pokémon Card on the Stadium area you will see its' 3d Model.
+
+Also, this update brings alternative Starter Pokémon available for use (thanks Brigadier231 for the idea).
+
+Other than that there were some minor changes and fixes that you can check on the changelog below. Got questions, any feedback or requests? Message me on Steam or tweet @dcandal. Thanks for playing.
+
+-----------
+v 5.5 CHANGELOG
+
+[GENERAL]
+- Added a Stadium 3D Model Script, courtesy of MaxBeoulve: now every Pokémon Card placed on the Stadium area will have its' 3d model automatically placed.
+- Added alternative starters up to Generation VII (Totodile, Treecko, Torchic, Turtwig, Chimchar, Piplup, Snivy, Tepig, Oshawott, Chespin, Fennekin, Froakie, Rowlet, Litten and Popplio)
+- Added some references on the board to relevant pages on the rulebook.
+
+[EVENTS]
+- "Rocket Bribe" now won't cause a turn skip if you couldn't copy any Event for yourself.
+
+[ITEMS]
+- Repel can now be blocked by a Poké-Doll.
+
+[TRAINERS]
+- Buffed May ("Green Pokémon get +2 power." -> "Green Pokémon get +2 power. You can recycle this Trainer to block any effect that could be blocked by a Poké-Doll.")
+
+[POKEMON]
+- Added Goomy/Sliggoo/Goodra (1,4,6, Pink/Green/Blue, Dragon).
+
+[BUG FIXES]
+- Fixed a bug that would sometimes place wrong Gym Leaders on the Hexagons when using the scripted setup.
+- Fixed Yellow/Legendary Pokémon card quality.
+- Fixed Mewtwo power (12 -> 11).
+- Fixed Snubull/Granbull still being present on the game despite being officially removed on v5.2.
