@@ -24,9 +24,9 @@ input,select{font:inherit;color:var(--txt);background:var(--bg2);border:1px soli
 .tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);color:var(--mut)}
 
 /* ---------- abertura ---------- */
-#setup{display:flex;align-items:center;justify-content:center;overflow:auto;padding:24px;
+#setup{display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:calc(24px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom));
   background:linear-gradient(rgba(0,0,0,.5),rgba(0,0,0,.5)),url(../img/ui/bghex.webp) center/cover no-repeat,var(--bg)}
-.setupCard{width:min(760px,100%);background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:28px;box-shadow:var(--shadow)}
+.setupCard{margin:auto;width:min(760px,100%);background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:28px;box-shadow:var(--shadow)}
 .logo{display:flex;align-items:center;gap:12px;margin-bottom:4px;flex-wrap:wrap}
 .logo h1{margin:0;font-size:30px}
 .logo h1 b{color:var(--acc)}
@@ -456,3 +456,18 @@ button.celebi:hover:not(:disabled){background:rgba(244,114,182,.15);border-color
 .linksIni{display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:13.5px}
 .linksIni a{color:var(--mut);text-decoration:none}.linksIni a:hover{color:var(--acc)}
 .linksIni #temaS{margin-left:auto}
+
+.addJog{margin-top:10px}
+.opcoesIni{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px}
+.opcoesIni label{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--mut);min-width:0}
+.opcoesIni select,.opcoesIni input{width:100%}
+.acoesIni{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;flex-wrap:wrap}
+.acoesIni button{padding:11px 20px}
+@media (max-width:560px){
+  .setupCard{padding:20px 16px}
+  .opcoesIni{grid-template-columns:1fr 1fr}
+  .opcoesIni label:first-child{grid-column:1 / -1}
+  .acoesIni{flex-direction:column-reverse}
+  .acoesIni button{width:100%}
+  .linksIni{gap:12px}
+}

@@ -54,15 +54,14 @@
         ${salvo && salvo.online && salvo.vencedor == null ? `<div class="result" style="margin:10px 0">Há uma partida on-line salva (sala <b>${esc(salvo.online.codigo)}</b>). <button class="sm pri" id="retomar">🌐 Retomar a sala</button></div>` : ''}
         <h3 style="margin-top:18px">Jogadores</h3>
         <div id="pls"></div>
-        <div class="row" style="margin-top:10px">
-          <button id="addP" ${jog.length >= 6 ? 'disabled' : ''}>+ Jogador</button>
-          <span class="mut" style="flex:1"></span>
-          ${salvo ? '<button id="cont">Continuar partida salva</button>' : ''}
-          <label class="row" style="gap:6px"><span class="mut">IA</span><select id="velIA">${Object.keys(VEL).map(v => `<option value="${v}" ${prefs.velIA === v ? 'selected' : ''}>${{ lenta: 'lenta', normal: 'normal', rapida: 'rápida' }[v]}</option>`).join('')}</select></label>
-          <label class="row" style="gap:6px"><span class="mut">Semente</span><input id="seed" placeholder="aleatória" style="width:110px"></label>
-          <button class="pri" id="go">${modo === 'online' ? '🌐 Criar sala' : 'Começar partida'}</button>
+        <button class="sm addJog" id="addP" ${jog.length >= 6 ? 'disabled' : ''}>+ Adicionar jogador</button>
+        <h3 style="margin-top:20px">Opções</h3>
+        <div class="opcoesIni">
+          <label><span>Elenco de Pokémons</span>${selElenco(prefs.elenco)}</label>
+          <label><span>Velocidade da IA</span><select id="velIA">${Object.keys(VEL).map(v => `<option value="${v}" ${prefs.velIA === v ? 'selected' : ''}>${{ lenta: 'Lenta', normal: 'Normal', rapida: 'Rápida' }[v]}</option>`).join('')}</select></label>
+          <label><span>Semente <span class="mut">(opcional)</span></span><input id="seed" placeholder="aleatória"></label>
         </div>
-        <div class="row" style="margin-top:14px;gap:8px"><span>Elenco de Pokémons:</span>${selElenco(prefs.elenco)}</div>
+        <div class="acoesIni">${salvo ? '<button id="cont">↺ Continuar partida salva</button>' : ''}<button class="pri" id="go">${modo === 'online' ? '🌐 Criar sala' : '▶ Começar partida'}</button></div>
         <div class="linksIni"><a href="changelog.html" target="_blank" rel="noopener">📜 Changelog</a><a href="elenco.html" target="_blank" rel="noopener">📇 Elencos de Pokémons</a><button class="sm" id="temaS" title="Alternar tema">${prefs.tema === 'claro' ? '🌙 Tema Escuro' : '☀️ Tema Claro'}</button></div>
       </div>`;
       const pls = $('#pls');
