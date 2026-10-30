@@ -47,8 +47,8 @@
     const draw = () => {
       if (modo === 'online') jog.forEach((j, i) => { j.tipo = i === 0 ? 'eu' : (j.ia ? 'ia' : 'remoto'); });
       box.innerHTML = `<div class="setupCard">
-        <div class="logo"><h1>Pokémon Master Trainer: <b>HEX</b></h1><span class="tag">versão web · protótipo</span></div>
-        <div class="row modoTabs"><button class="${modo === 'local' ? 'pri' : ''}" data-modo="local">🏠 Local (mesmo navegador)</button><button class="${modo === 'online' ? 'pri' : ''}" data-modo="online">🌐 On-line (cada um no seu)</button></div>
+        <div class="logo"><img class="logoJogo" src="img/ui/logo.webp" alt=""><h1>Pokémon Master Trainer: <b>HEX</b></h1><span class="tag">versão web</span></div>
+        <div class="row modoTabs"><button class="${modo === 'local' ? 'pri' : ''}" data-modo="local">🏠 Local</button><button class="${modo === 'online' ? 'pri' : ''}" data-modo="online">🌐 On-line</button></div>
         <p class="mut">${modo === 'local' ? 'Modo local: todos jogam neste navegador, passando a vez. De 2 a 6 jogadores — humanos ou controlados pelo computador (🤖).' : 'Modo on-line: você cria a sala e manda o link para os amigos. O primeiro lugar é o seu; os outros podem ser 🌐 jogadores on-line ou 🤖 IA (que roda no seu navegador).'}</p>
         ${salvo && salvo.online && salvo.vencedor == null ? `<div class="result" style="margin:10px 0">Há uma partida on-line salva (sala <b>${esc(salvo.online.codigo)}</b>). <button class="sm pri" id="retomar">🌐 Retomar a sala</button></div>` : ''}
         <h3 style="margin-top:18px">Jogadores</h3>
@@ -63,7 +63,6 @@
           <button class="pri" id="go">${modo === 'online' ? '🌐 Criar sala' : 'Começar partida'}</button>
         </div>
         <div class="row" style="margin-top:14px;gap:8px"><span>Elenco de Pokémons:</span>${selElenco(prefs.elenco)}</div>
-        <p class="mut" style="margin-top:8px;font-size:12px">Liga: formato Mata-Mata. Avatares dos personagens chegam depois — por enquanto o peão é a cor.</p>
       </div>`;
       const pls = $('#pls');
       jog.forEach((j, i) => {
@@ -721,7 +720,7 @@
       const dU = pd.duelos[nD - 1], reac = animando ? '' : humanos.map(l => {
         const q = E.J(st, pd[l]), o = l === 'a' ? 'b' : 'a', bts = [];
         if (E.celebiDe(q)) bts.push(`<button class="sm celebi" data-lcq="${l}" data-lcl="${l}">🌸 Refazer meu dado (${l === 'a' ? r.da : r.db})</button><button class="sm celebi" data-lcq="${l}" data-lcl="${o}">🌸 Refazer o dado de ${esc(E.J(st, pd[o]).nome)} (${o === 'a' ? r.da : r.db})</button>`);
-        if (dU && dU.venc !== l && q.itens.some(i => i.startsWith('potion#'))) bts.push(`<button class="sm" data-lrm="${l}">💊 Remédio: reviver ${esc(E.P(l === 'a' ? dU.pa : dU.pb).nome)} e refazer o duelo</button>`);
+        if (dU && dU.venc !== l && q.itens.some(i => i.startsWith('potion#'))) bts.push(`<button class="sm" data-lrm="${l}"><img class="potIco" src="img/fx/potion.png"> Remédio: reviver ${esc(E.P(l === 'a' ? dU.pa : dU.pb).nome)} e refazer o duelo</button>`);
         return bts.length ? `<div class="row celebiRow"><span class="mut">${esc(q.nome)}:</span>${bts.join('')}</div>` : '';
       }).join('');
       corpo = `${arenaDuelo(pd, r, animando)}${reac}${msg ? `<div class="result surge ${pd.vencLado ? 'ok' : ''}"><b class="big">${pd.vencLado ? '🏆 ' : ''}${msg}</b>${pd.extra && !pd.vencLado ? '<div class="mut">Duelo extra: os Pokémons dos dois lados caíram juntos.</div>' : ''}</div>` : ''}
@@ -752,7 +751,7 @@
       }
       corpo = `<div style="margin:10px 0">${linhas}</div>${area}`;
     }
-    abrirModal(`<h2>🏆 ${esc(pd.titulo)}</h2><p class="mut">3 contra 3, um de cada vez. O vencedor do duelo continua em campo; no empate, os dois desmaiam. Cada lado pode usar 1 Item de batalha por duelo.</p>
+    abrirModal(`${pd.forcado && pd.pocao && !r ? `<div class="cartaAviso"><img src="${E.P(pd.pocao.pk).img}"><img src="img/fx/potion.png" class="pix"><span><b>${esc(E.J(st, pd.pocao.j).nome)}</b> usou Remédio: <b>${esc(E.P(pd.pocao.pk).nome)}</b> volta e o duelo é refeito.</span></div>` : ''}<h2>🏆 ${esc(pd.titulo)}</h2><p class="mut">3 contra 3, um de cada vez. O vencedor do duelo continua em campo; no empate, os dois desmaiam. Cada lado pode usar 1 Item de batalha por duelo.</p>
       <div class="lgPlacar">${placarLiga(pd, 'a')}<div class="vs">VS</div>${placarLiga(pd, 'b')}</div>${histLiga(r && animando ? pd.duelos.slice(0, -1) : pd.duelos)}${corpo}`);
     const M = $('#modalCard');
     const sg = $('#lgSeg'); if (sg) sg.onclick = () => agir('ligaSeguir');
@@ -864,7 +863,9 @@
     if (fxVisto === null) { fxVisto = f ? f.seq : 0; return; } // ao abrir/recarregar não repete o último efeito
     if (!f || f.seq === fxVisto) return; fxVisto = f.seq;
     if (f.tipo === 'bike') fxBike(E.J(st, f.j)); else if (f.tipo === 'roubo') fxRoubo(f);
+    else if (f.tipo === 'pocao') fxTexto(`<img class="potFx" src="img/fx/potion.png"><b>${esc(E.J(st, f.j).nome)}</b> usou Remédio${f.pk ? `: ${esc(E.P(f.pk).nome)} volta e o duelo é refeito` : ' e recomeça a batalha'}`, 'pocao');
   }
+  function camadaTopo() { let c = $('#fxTopo'); if (!c) { c = h('<div id="fxTopo"></div>'); document.body.appendChild(c); } return c; }
   function camadaFx() { let c = $('#fxLayer'); if (!c) { c = h('<div id="fxLayer"></div>'); $('#boardWrap').appendChild(c); } return c; }
   const ciclistaSVG = cor => `<svg viewBox="0 -4 140 104" width="172" height="128"><g class="rastro" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".7"><line x1="128" y1="40" x2="139" y2="40"/><line x1="122" y1="56" x2="139" y2="56"/><line x1="126" y1="72" x2="139" y2="72"/></g>
     <g class="roda"><circle cx="30" cy="74" r="20" fill="none" stroke="#111" stroke-width="5"/><g stroke="#666" stroke-width="2"><line x1="30" y1="54" x2="30" y2="94"/><line x1="10" y1="74" x2="50" y2="74"/><line x1="16" y1="60" x2="44" y2="88"/><line x1="44" y1="60" x2="16" y2="88"/></g></g>
@@ -878,7 +879,7 @@
     const el = h(`<div class="fxBand bike" style="--cor:${cor}"><div class="fxTxt">🚲 TURNO EXTRA <span>·</span> <b>${esc(q.nome)}</b> usou a Bicicleta</div><div class="fxBici"><div class="bikeSpr" style="background-image:url(img/fx/bike_${q.cor}.webp)"></div></div></div>`);
     c.appendChild(el); setTimeout(() => el.remove(), 3000);
   }
-  function fxTexto(html, cls) { const c = camadaFx(), el = h(`<div class="fxBand ${cls || ''}"><div class="fxTxt">${html}</div></div>`); c.appendChild(el); setTimeout(() => el.remove(), 3000); }
+  function fxTexto(html, cls) { const c = cls === 'pocao' ? camadaTopo() : camadaFx(), el = h(`<div class="fxBand ${cls || ''}"><div class="fxTxt">${html}</div></div>`); c.appendChild(el); setTimeout(() => el.remove(), 3000); }
   function centroPeao(j) {
     const g = document.querySelector(`#lPawns .pawn[data-j="${j}"]`), W = $('#boardWrap').getBoundingClientRect();
     if (!g) return { x: W.left + W.width / 2, y: W.top + W.height / 2 };
@@ -1283,7 +1284,7 @@
       abrirModal(`<h2>⚔ ${esc(pd.titulo)}</h2><p class="mut">Tipo ${E.TIPOS_NOME[L.tipo]} · em caso de empate, o jogador vence.</p>
         <div class="arena">${ladoJog}<div class="vs">VS</div>${ladoLid}</div>
         ${animando ? '' : `<div class="result surge ${r.ok ? 'ok' : 'no'}"><b class="big">${r.ok ? `🏅 Vitória! ${r.total === r.lider ? '(empate conta a seu favor) ' : ''}` : 'Derrota'}</b>${r.ok ? 'Você ganhou a insígnia e compra uma Carta Item.' : 'Você pode tentar de novo em outro turno.'}</div>`}
-        <div class="mfoot">${animando ? '' : `${!r.ok && E.celebiDe(p) && !p.ia ? '<button class="celebi" id="celL">🌸 Pedido a Celebi: refazer o dado</button>' : ''}${!r.ok && remedios.length ? `<button id="rem">Usar Remédio (recomeçar)</button>` : ''}<button class="pri" id="ok">Continuar</button>`}</div>`);
+        <div class="mfoot">${animando ? '' : `${!r.ok && E.celebiDe(p) && !p.ia ? '<button class="celebi" id="celL">🌸 Pedido a Celebi: refazer o dado</button>' : ''}${!r.ok && remedios.length ? `<button id="rem"><img class="potIco" src="img/fx/potion.png"> Usar Remédio (recomeçar)</button>` : ''}<button class="pri" id="ok">Continuar</button>`}</div>`);
     } else
     abrirModal(`<div class="mgrid"><img src="${L.img}"><div>
       <h2>${esc(pd.titulo)}</h2><div class="mut">Tipo ${E.TIPOS_NOME[L.tipo]} · força fixa ${L.forca}${L.dual ? ' · <b>DUAL</b>: envie 2 Pokémons, 1 dado, até 2 itens' : ''} · vantagem contra ${L.vantagens.map(t => E.TIPOS_NOME[t]).join(', ') || '—'}</div>
@@ -1296,7 +1297,7 @@
         ${r.ok ? '<p>Você ganhou a insígnia e compra uma Carta Item.</p>' : ''}</div>` : ''}
       <div class="mfoot">
         ${!r ? `<button data-x2>Desistir</button><button class="pri" id="bat" ${S.pk.length === n ? '' : 'disabled'}>⚔ Batalhar</button>` : ''}
-        ${r && !r.ok && remedios.length ? `<button id="rem">Usar Remédio (recomeçar)</button>` : ''}
+        ${r && !r.ok && remedios.length ? `<button id="rem"><img class="potIco" src="img/fx/potion.png"> Usar Remédio (recomeçar)</button>` : ''}
         ${r ? `<button class="pri" id="ok">Continuar</button>` : ''}
       </div></div></div>`);
     $('#modalCard').querySelectorAll('.pc').forEach(c => c.onclick = () => { const id = c.dataset.id, k = S.pk.indexOf(id); if (k >= 0) { S.pk.splice(k, 1); delete S.it[id]; } else if (S.pk.length < n) S.pk.push(id); else { delete S.it[S.pk.shift()]; S.pk.push(id); } render(); });

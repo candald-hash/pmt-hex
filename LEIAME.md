@@ -10,6 +10,8 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- Nova tela inicial: fundo com o tabuleiro (escurecido/clareado conforme o tema), logo do jogo ao lado do título, textos enxutos e layout melhor no celular.
+- Remédio: sprite da poção nos botões; ao usar (Ginásio ou Liga) aparece uma faixa verde para todos e, na Liga, um aviso na tela da batalha.
 - Faixas de aviso (Truque Rocket, Bicicleta, Voar) crescem quando o texto quebra em duas linhas.
 - Duelos e Festival de Praça: na escolha do oponente, o ícone 🔍 mostra os Pokémons de cada adversário (passe o mouse ou toque).
 - Correção: travar um Pokémon sem evolução (ex.: Lendários, Lapras, Absol) agora dá o +1 e protege de trocas, como nas famílias.

@@ -25,9 +25,9 @@ input,select{font:inherit;color:var(--txt);background:var(--bg2);border:1px soli
 
 /* ---------- abertura ---------- */
 #setup{display:flex;align-items:center;justify-content:center;overflow:auto;padding:24px;
-  background:radial-gradient(1200px 600px at 20% 0%,#2a2210 0%,transparent 60%),radial-gradient(900px 600px at 100% 100%,#0f2340 0%,transparent 60%),var(--bg)}
+  background:linear-gradient(rgba(0,0,0,.5),rgba(0,0,0,.5)),url(../img/ui/bghex.webp) center/cover no-repeat,var(--bg)}
 .setupCard{width:min(760px,100%);background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:28px;box-shadow:var(--shadow)}
-.logo{display:flex;align-items:baseline;gap:12px;margin-bottom:4px}
+.logo{display:flex;align-items:center;gap:12px;margin-bottom:4px;flex-wrap:wrap}
 .logo h1{margin:0;font-size:30px}
 .logo h1 b{color:var(--acc)}
 .pl{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line)}
@@ -149,7 +149,7 @@ svg text.lbl{font:700 34px Inter;fill:#fff;paint-order:stroke;stroke:#000;stroke
   --acc:#f5b800; --acc-ink:#1a1400; --ok:#059669; --bad:#dc2626; --info:#3b82f6; --shadow:0 10px 30px rgba(20,30,50,.18);
 }
 :root[data-theme="light"] #boardWrap{background:radial-gradient(900px 700px at 50% 40%,#dbe7f5 0%,#c2d2e6 70%)}
-:root[data-theme="light"] #setup{background:radial-gradient(1200px 600px at 20% 0%,#fff1c2 0%,transparent 60%),radial-gradient(900px 600px at 100% 100%,#d6e6ff 0%,transparent 60%),var(--bg)}
+:root[data-theme="light"] #setup{background:linear-gradient(rgba(255,255,255,.5),rgba(255,255,255,.5)),url(../img/ui/bghex.webp) center/cover no-repeat,var(--bg)}
 :root[data-theme="light"] button:hover:not(:disabled){background:#e6e9ef;border-color:#b8c0cc}
 :root[data-theme="light"] button.pri:hover:not(:disabled){background:#ffc928}
 :root[data-theme="light"] #modal{background:rgba(30,40,60,.45)}
@@ -437,3 +437,19 @@ button.celebi:hover:not(:disabled){background:rgba(244,114,182,.15);border-color
 #tip.timeTip{display:block;max-width:440px;z-index:60}
 #tip.timeTip .team2{margin:6px 0}
 #tip.timeTip .pc img{width:100%}
+
+.logo .logoJogo{height:44px;width:44px;border-radius:9px;flex:none;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.potIco{width:20px;height:20px;image-rendering:pixelated;vertical-align:middle;margin:-4px 2px 0 0}
+.fxTxt .potFx{width:44px;height:44px;image-rendering:pixelated;vertical-align:middle;margin-right:10px}
+.cartaAviso img.pix{width:36px;image-rendering:pixelated}
+.fxBand.pocao{background:linear-gradient(90deg,rgba(10,40,25,.88),rgba(20,90,55,.92),rgba(10,40,25,.88));border-top:4px solid #4ade80;border-bottom:4px solid #4ade80}
+#fxTopo{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:45}
+#fxTopo .fxBand{top:6%}
+@media (max-width:560px){
+  .logo{flex-wrap:nowrap;align-items:center}
+  .logo h1{font-size:22px}
+  .logo .logoJogo{height:38px;width:38px}
+  .logo .tag{display:none}
+  .pl{grid-template-columns:28px 1fr}
+  .pl>.row:last-child{grid-column:1 / -1}
+}

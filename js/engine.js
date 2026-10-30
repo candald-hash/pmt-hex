@@ -760,7 +760,7 @@
   }
   function remedio(st, inst) {
     const pd = st.pend; if (!pd || pd.tipo !== 'lider' || !pd.resultado || pd.resultado.ok) return; const p = J(st);
-    descartarItem(st, p, inst); pd.resultado = null; st.turno.batalhouLider = false; log(st, `${p.nome} usou Remédio e recomeça a batalha.`);
+    descartarItem(st, p, inst); pd.resultado = null; st.turno.batalhouLider = false; log(st, `${p.nome} usou Remédio e recomeça a batalha.`); fx(st, { tipo: 'pocao', j: p.id });
   }
   function slotInsignia(p, faixa) { const base = { '1-2': 0, '3-4': 2, '5-6': 4 }[faixa]; if (base == null) return -1; if (!p.insignias[base]) return base; if (!p.insignias[base + 1]) return base + 1; return -1; }
   function podeEnfrentar(p, L) { return !p.lideresVencidos.includes(L.id) && slotInsignia(p, L.insignias) >= 0; }
@@ -980,6 +980,7 @@
     const S = pd.snap; pd.ativo = Object.assign({}, S.ativo); pd.mortos = { a: S.mortos.a.slice(), b: S.mortos.b.slice() }; pd.extra = S.extra;
     pd.duelos.pop(); pd.resultado = null; pd.vencLado = null; pd.esc = { a: null, b: null }; pd.forcado = { a: d.pa, b: d.pb };
     log(st, `${q.nome} usou Remédio: ${P(lado === 'a' ? d.pa : d.pb).nome} volta e o duelo é refeito (${P(d.pa).nome} × ${P(d.pb).nome}).`, 'destaque', [['it', 'potion']]);
+    pd.pocao = { j: q.id, pk: lado === 'a' ? d.pa : d.pb }; fx(st, { tipo: 'pocao', j: q.id, pk: pd.pocao.pk });
   }
   // depois de ver o resultado de um duelo
   function ligaSeguir(st) {
