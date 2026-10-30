@@ -339,7 +339,7 @@
     if (p.ia) acoes = `<span class="mut">🤖 ${esc(p.nome)} está jogando…</span>${souAnfitriao() ? `<button class="sm" id="pausa">${pausado ? '▶ Retomar IA' : '⏸ Pausar IA'}</button>` : ''}`;
     else if (online() && p.id !== NET.eu) acoes = `<span class="mut">⏳ Vez de ${esc(p.nome)}…</span>`;
     tb.innerHTML = `<div class="turnHead"><span class="dot" style="background:${COR_HEX[p.cor]}"></span><h2>${esc(p.nome)}${p.ia ? ' <span class="tag">🤖 IA</span>' : ''}</h2><span class="tag">Rodada ${st.rodada}</span><button class="gear" id="btnCfg" title="Configurações">⚙</button></div>
-      <div class="mut" style="margin-bottom:6px">📍 ${esc(E.nomeEspaco(st, p.pos))}${p.pular ? ` · perde ${p.pular} turno(s)` : ''}</div>
+      ${p.pular ? `<div class="mut" style="margin-bottom:6px">perde ${p.pular} turno(s)</div>` : ''}
       ${L ? `<div class="ldline" data-ld="${p.pos}"><img src="${L.img}"><div><b>${esc(L.nome)}</b> · força ${L.forca}${L.dual ? ' · DUAL' : ''}<br><span class="mut">${E.TIPOS_NOME[L.tipo]} · insígnia ${L.insignias}${p.lideresVencidos.includes(L.id) ? ' · <b style="color:var(--ok)">vencido</b>' : ''}</span></div></div>` : ''}
       ${t.dados ? `<div class="dice">${(() => { let usado = false; return t.dados.map(d => { const esc0 = t.dados.length > 1 && t.rolagem == null; const este = t.dados.length > 1 && t.rolagem != null && !usado && (d === t.rolagem || d === t.escolhido); if (este) usado = true; return `<div class="die ${esc0 ? 'escolher' : ''} ${t.dados.length > 1 && t.rolagem != null ? (este ? 'usado' : 'off') : ''}" data-d="${d}">${d}</div>`; }).join(''); })()}${t.rolagem != null && !t.dados.includes(t.rolagem) || (t.rolagem != null && t.dados.length === 1 && t.rolagem !== t.dados[0]) ? `<span class="mut">→ ${t.rolagem}</span>` : ''}</div>` : ''}
       ${(st.efeitos || []).length ? `<div class="efeitos">${st.efeitos.map(e => `<span class="tag" title="Ativado por ${esc(E.J(st, e.dono).nome)}">⏳ ${esc(e.nome)} · ${esc(E.J(st, e.dono).nome)} · ${e.rest} rodada${e.rest > 1 ? 's' : ''}${e.tipo === 'parque' ? ' · ' + st.jogadores.filter(q => (e.ganhos[q.id] || []).length).map(q => esc(q.nome) + ' ' + e.ganhos[q.id].length).join(', ') : ''}</span>`).join(' ')}</div>` : ''}
@@ -845,7 +845,7 @@
   }
   function mProposta(pd) {
     const a = E.J(st, pd.de), b = E.J(st, pd.para), sou = !online() || NET.eu === b.id;
-    if (!sou) return abrirModal(`<h2>🤝 ${esc(pd.titulo)}</h2><p class="mut">⏳ ${esc(b.nome)} está avaliando uma proposta de troca${online() && NET.eu === a.id ? ' sua' : ' de ' + esc(a.nome)}…</p>${online() && NET.eu === a.id ? blocoTroca(a, b, pd.meus, pd.deles, NET.eu) : ''}`);
+    if (!sou) { abrirModal(`<h2>🤝 ${esc(pd.titulo)}</h2><p class="mut">⏳ ${esc(b.nome)} está avaliando uma proposta de troca${online() && NET.eu === a.id ? ' sua' : ' de ' + esc(a.nome)}…</p>${blocoTroca(a, b, pd.meus, pd.deles, NET.eu)}`); $('#modalCard').querySelectorAll('.pc').forEach(c => c.onclick = () => zoom(E.P(c.dataset.id).img)); return; }
     abrirModal(`<h2>🤝 ${esc(a.nome)} propõe uma troca</h2>${!online() ? `<p class="mut">Passe o dispositivo para ${esc(b.nome)}.</p>` : ''}${blocoTroca(a, b, pd.meus, pd.deles, b.id)}
       <div class="mfoot"><button id="recProp">✖ Recusar</button><button class="pri" id="aceProp">✔ Aceitar troca</button></div>`);
     $('#modalCard').querySelectorAll('.pc').forEach(c => c.onclick = () => zoom(E.P(c.dataset.id).img));

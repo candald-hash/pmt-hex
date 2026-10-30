@@ -148,7 +148,7 @@
     return est.size >= 3 ? 4 : est.size === 2 ? 2 : 0;
   }
   function maisEvoluido(p, fam) { const l = p.pokemon.map(P).filter(x => (x.familia || x.id) === fam); if (!l.length) return null; return l.reduce((a, b) => b.estagio > a.estagio ? b : a).id; }
-  function bonusTravada(p, id) { const c = P(id), f = c.familia || c.id; let b = p.mais1[id] || 0; if (p.travadas.includes(f) && maisEvoluido(p, f) === id) b += 1; return b; }
+  function bonusTravada(p, id) { const c = P(id), f = c.familia || c.id; let b = p.mais1[id] || 0; if (p.travadas.includes(f) && maisEvoluido(p, f) === id) b += p.travadas.filter(x => x === f).length; return b; }
   function bonusTreinador(p, id) {
     const t = p.treinador && idx().tr[p.treinador]; if (!t) return 0; const c = P(id);
     if (t.especialista && c.tipos.some(x => t.especialista.includes(x))) return 1;
@@ -1533,7 +1533,11 @@
     const c = Object.values(g.nodes).find(n => n.pos === hexEu && n.kind === 'cidade');
     if (c) { eu.pos = c.key; addU(eu.passou, c.key); log(st, `${eu.nome} voltou para ${nomeEspaco(st, c.key)}.`); }
   }
-  function gsBall(st) { const p = J(st), c = tirar(st, 'rosa'); if (!c) return; ganharPokemon(st, p, c, 'Bola GS'); p.mais1[c] = (p.mais1[c] || 0) + 1; log(st, `${P(c).nome} recebe um marcador +1 permanente (não protegido contra trocas).`); }
+  function gsBall(st) {
+    const p = J(st), c = tirar(st, 'rosa'); if (!c) return; ganharPokemon(st, p, c, 'Bola GS');
+    const f = P(c).familia || c; p.travadas.push(f); // trava a família: +1 no mais evoluído e proteção contra trocas
+    log(st, `Bola GS: a família de ${P(c).nome} fica travada (+1 no Pokémon mais evoluído dela e protegida contra trocas).`);
+  }
   // Ginásio Alternativo
   function pedirLiderFora(st) {
     const p = J(st), ops = st.lideresFora.filter(id => podeEnfrentar(p, idx().ld[id]));
@@ -1811,7 +1815,6 @@
       if (pd.tipo === 'repel') { pd.opcoes = pd.opcoes.filter(x => x === j); const r = {}; if (pd.resp[j] != null) r[j] = pd.resp[j]; pd.resp = r; }
       if (PEND_PRIVADO.has(pd.tipo) && !quemDecide(st).includes(j)) { if (pd.itens) pd.itens = []; if (pd.cartas) pd.cartas = []; if (pd.pool) pd.pool = []; pd.privado = true; }
       if (pd.depois && pd.depois.tipo === 'captura') { /* captura pública */ }
-      if (pd.tipo === 'proposta' && pd.de !== j && pd.para !== j) { pd.meus = []; pd.deles = []; pd.privado = true; }
     }
     if (v.propostas) v.propostas = v.propostas.filter(pr => pr.de === j || pr.para === j);
     if (v.fx && v.fx.tipo === 'roubo' && v.fx.de !== j && v.fx.para !== j) v.fx.itens = v.fx.itens.map(() => 'oculto');
