@@ -10,6 +10,7 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- Minimizar janela: o botão ▾ no canto de qualquer janela de decisão a transforma numa pílula no topo do tabuleiro ("⏳ Beto · Batalha de Ginásio · Abrir"), liberando tabuleiro e painel. Abre sozinha quando a decisão passa a ser sua; some quando a ação termina.
 - Versão do jogo (v7.3) ao lado de "versão web"; links para a nova página de Changelog (changelog.html) e para a de Elencos na tela inicial.
 - Nova tela inicial: fundo com o tabuleiro (escurecido/clareado conforme o tema), logo do jogo ao lado do título, textos enxutos e layout melhor no celular.
 - Remédio: sprite da poção nos botões; ao usar (Ginásio ou Liga) aparece uma faixa verde para todos e, na Liga, um aviso na tela da batalha.

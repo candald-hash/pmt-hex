@@ -1793,6 +1793,7 @@
   // executa uma ação em nome de um jogador (j = id) ou do anfitrião (j = 'host', usado no modo local)
   function acao(st, j, nome, ...args) {
     const fn = API[nome]; if (typeof fn !== 'function' || !podeAgir(st, j, nome, args)) return false;
+    if (st.pend && ['rolarMovimento', 'escolherDado', 'hiker', 'lyra', 'trem', 'mover', 'encerrarTurno', 'abrirLider', 'celebiMovimento', 'proporTroca'].includes(nome)) return false; // há uma decisão em andamento
     fn(st, ...args); posAcao(st); return true;
   }
   // desistir de tentar a captura (antes de rolar): a carta comprada da pilha volta para ela

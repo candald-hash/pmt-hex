@@ -322,9 +322,9 @@
     const L = st.lideres[p.pos] && E.idx().ld[st.lideres[p.pos]];
     const noCidade = E.grafo(st).nodes[p.pos].kind === 'cidade' || E.grafo(st).nodes[p.pos].especial === 'planalto';
     const cordas = p.itens.filter(i => ['corda', 'escaperope'].includes(i.split('#')[0]));
-    let acoes = '';
+    let acoes = ''; const bloq = !!st.pend;
     // botões fixos, sempre no mesmo lugar: Rolar dado · Encerrar turno (Propor troca fica no perfil de cada jogador)
-    const fixos = `<div class="acoesFixas"><button class="${st.fase === 'inicio' ? 'pri' : ''}" data-a="rolar" ${st.fase === 'inicio' ? '' : 'disabled'}>🎲 Rolar dado</button><button data-a="fim" ${st.fase !== 'mover' && E.podeEncerrar(st) ? '' : 'disabled'}>Encerrar turno ▸</button></div>`;
+    const fixos = `<div class="acoesFixas"><button class="${st.fase === 'inicio' && !bloq ? 'pri' : ''}" data-a="rolar" ${st.fase === 'inicio' && !bloq ? '' : 'disabled'}>🎲 Rolar dado</button><button data-a="fim" ${st.fase !== 'mover' && E.podeEncerrar(st) ? '' : 'disabled'}>Encerrar turno ▸</button></div>`;
     if (st.fase === 'inicio') {
       if (tr && tr.efeito === 'hiker') acoes += `<button data-a="hiker">Hiker: andar até 2</button>`;
       if (noCidade && p.passou.length > 1) acoes += `<button data-a="trem">🚆 Trem</button>`;
@@ -334,6 +334,7 @@
     if (st.fase === 'mover' && t.dados && E.celebiDe(p) && !p.ia) acoes += t.dados.length > 1 ? t.dados.map((d, k) => `<button class="sm celebi" data-celebi="${k}">🌸 Celebi: refazer ${k + 1}º (${d})</button>`).join('') : `<button class="sm celebi" data-celebi="0">🌸 Celebi: refazer o dado</button>`;
     if (st.fase === 'mover' && t.rolagem != null) cordas.forEach(i => { const it = E.ITEM(i), m = it.id === 'corda' ? 1 : 2; for (let d = -m; d <= m; d++) if (d) acoes += `<button class="sm" data-corda="${i}" data-d="${d}">Corda ${d > 0 ? '+' : ''}${d}</button>`; });
     if (L && !t.batalhouLider && st.fase !== 'mover' && E.podeEnfrentar(p, L)) acoes += `<button data-a="lider">⚔ Enfrentar ${esc(L.nome)}</button>`;
+    if (bloq) acoes = acoes.replace(/<button /g, '<button disabled ');
     acoes = fixos + (acoes ? `<div class="actions">${acoes}</div>` : '');
     if (p.ia) acoes = `<span class="mut">🤖 ${esc(p.nome)} está jogando…</span>${souAnfitriao() ? `<button class="sm" id="pausa">${pausado ? '▶ Retomar IA' : '⏸ Pausar IA'}</button>` : ''}`;
     else if (online() && p.id !== NET.eu) acoes = `<span class="mut">⏳ Vez de ${esc(p.nome)}…</span>`;
@@ -380,7 +381,8 @@
     ligarRefs(lg);
     // --- pendências (esperam o peão terminar de andar) ---
     if (anim) return;
-    renderPend();
+    if (!(minKey && modalInfo && !$('#modal').hidden)) { emPend = true; try { renderPend(); } finally { emPend = false; } }
+    aplicarMin();
     avisarVez();
     verRolagem();
     verParque();
@@ -445,8 +447,23 @@
     avisoAnt = { vez, dec };
   }
   // ---------- modais ----------
-  function abrirModal(html) { $('#tip').hidden = true; $('#tip').className = ''; const mc = $('#modalCard'); mc.classList.remove('ia', 'leitura'); if (!st || !st.pend) delete mc.dataset.pend; mc.innerHTML = html; $('#modal').hidden = false; $('#modalCard').querySelectorAll('[data-x]').forEach(b => b.onclick = fecharModal); }
-  function fecharModal() { const mc = $('#modalCard'); $('#modal').hidden = true; mc.innerHTML = ''; mc.classList.remove('ia'); delete mc.dataset.pend; if (st) setTimeout(agendarIA, 0); }
+  function abrirModal(html) { modalInfo = !emPend; $('#tip').hidden = true; $('#tip').className = ''; const mc = $('#modalCard'); mc.classList.remove('ia', 'leitura'); if (!st || !st.pend) delete mc.dataset.pend; mc.innerHTML = html; $('#modal').hidden = false; $('#modalCard').querySelectorAll('[data-x]').forEach(b => b.onclick = fecharModal);
+    if (emPend && st && st.pend) { const b = h('<button class="btnMin" title="Minimizar: ver o tabuleiro e o painel (a janela vira uma pílula no topo)">▾</button>'); b.onclick = () => { minKey = chaveMin(); aplicarMin(); }; mc.appendChild(b); } }
+  // ---------- minimizar a janela da decisão em andamento ----------
+  let minKey = null, emPend = false, modalInfo = false;
+  function chaveMin() { const pd = st && st.pend; if (!pd) return null; const eu = !online() || E.quemDecide(st).includes(NET.eu); return pd.tipo + '|' + (pd.titulo || '') + '|' + (pd.uid || '') + '|' + eu; }
+  function aplicarMin() {
+    let pl = $('#pilulaMin');
+    if (!minKey || !st || !st.pend || chaveMin() !== minKey) { minKey = null; if (pl) pl.remove(); return; }
+    if (!modalInfo && $('#modalCard').dataset.pend) $('#modal').hidden = true;
+    if (!pl) { pl = h('<div id="pilulaMin"></div>'); $('#boardWrap').appendChild(pl); }
+    const pd = st.pend, dec = E.quemDecide(st), meu = !online() || dec.includes(NET.eu);
+    const quem = meu ? 'Sua decisão' : dec.map(j => esc(E.J(st, j).nome)).join(' e ');
+    pl.innerHTML = `<span>${meu ? '⚠' : '⏳'} <b>${quem}</b> · ${esc(pd.titulo || 'Decisão em andamento')}</span><button>Abrir</button>`;
+    pl.classList.toggle('meu', meu);
+    $('button', pl).onclick = () => { minKey = null; pl.remove(); modalInfo = false; render(); };
+  }
+  function fecharModal() { const eraInfo = modalInfo; modalInfo = false; if (eraInfo && minKey) setTimeout(render, 0); const mc = $('#modalCard'); $('#modal').hidden = true; mc.innerHTML = ''; mc.classList.remove('ia'); delete mc.dataset.pend; if (st) setTimeout(agendarIA, 0); }
   // janelas informativas (sem decisão pendente) fecham com Esc ou clicando fora
   $('#modal').addEventListener('click', e => { if (e.target.id === 'modal' && !$('#modalCard').dataset.pend) fecharModal(); });
   function zoom(src) { const z = $('#zoomCard'); z.innerHTML = `<img src="${src}">`; z.hidden = false; z.onclick = () => z.hidden = true; }
