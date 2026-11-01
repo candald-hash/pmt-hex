@@ -481,3 +481,4 @@ button.celebi:hover:not(:disabled){background:rgba(244,114,182,.15);border-color
 @keyframes pilIn{from{opacity:0;transform:translate(-50%,-10px)}}
 @media (max-width:760px){#pilulaMin{top:10px;left:12px;transform:none;max-width:calc(100% - 80px);font-size:13px}@keyframes pilIn{from{opacity:0}}}
 #modalCard>.iaBanner:first-child,#modalCard>.cartaAviso:first-child,#modalCard>h2:first-child{margin-right:40px}
+.celIco{width:22px;height:22px;image-rendering:pixelated;vertical-align:middle;margin:-5px 1px -3px -2px}

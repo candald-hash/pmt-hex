@@ -331,7 +331,7 @@
       if (tr && tr.efeito === 'lyra') acoes += `<button data-a="lyra">Lyra: pular e comprar 2 Itens</button>`;
     }
     if (st.fase === 'mover' && t.dados && t.dados.length > 1 && t.rolagem == null) acoes += `<span class="mut">Green: escolha um dos dados acima.</span>`;
-    if (st.fase === 'mover' && t.dados && E.celebiDe(p) && !p.ia) acoes += t.dados.length > 1 ? t.dados.map((d, k) => `<button class="sm celebi" data-celebi="${k}">🌸 Celebi: refazer ${k + 1}º (${d})</button>`).join('') : `<button class="sm celebi" data-celebi="0">🌸 Celebi: refazer o dado</button>`;
+    if (st.fase === 'mover' && t.dados && E.celebiDe(p) && !p.ia) acoes += t.dados.length > 1 ? t.dados.map((d, k) => `<button class="sm celebi" data-celebi="${k}"><img class="celIco" src="img/fx/celebi.png" alt=""> Celebi: refazer ${k + 1}º (${d})</button>`).join('') : `<button class="sm celebi" data-celebi="0"><img class="celIco" src="img/fx/celebi.png" alt=""> Celebi: refazer o dado</button>`;
     if (st.fase === 'mover' && t.rolagem != null) cordas.forEach(i => { const it = E.ITEM(i), m = it.id === 'corda' ? 1 : 2; for (let d = -m; d <= m; d++) if (d) acoes += `<button class="sm" data-corda="${i}" data-d="${d}">Corda ${d > 0 ? '+' : ''}${d}</button>`; });
     if (L && !t.batalhouLider && st.fase !== 'mover' && E.podeEnfrentar(p, L)) acoes += `<button data-a="lider">⚔ Enfrentar ${esc(L.nome)}</button>`;
     if (bloq) acoes = acoes.replace(/<button /g, '<button disabled ');
@@ -502,7 +502,7 @@
       if (p.ia) return abrirModal(`<h2>${esc(pd.titulo)}</h2><p class="mut">🤖 ${esc(p.nome)} está decidindo…</p>`);
       abrirModal(`<h2>🎲 ${esc(pd.titulo)}</h2><div class="rolling final"><div class="die3d parou ${pd.ok ? 'ok' : 'no'}"><span>${pd.valor}</span></div><div class="result ${pd.ok ? 'ok' : 'no'}" style="margin:0;flex:1"><b class="big">${pd.valor}</b>${esc(pd.texto)}</div></div>
         <p class="mut">Você tem um Pedido a Celebi: pode descartá-lo para rolar de novo.</p>
-        <div class="mfoot"><button class="celebi" id="tcel">🌸 Pedido a Celebi: rolar de novo</button><button class="pri" id="tok">Aceitar resultado</button></div>`);
+        <div class="mfoot"><button class="celebi" id="tcel"><img class="celIco" src="img/fx/celebi.png" alt=""> Pedido a Celebi: rolar de novo</button><button class="pri" id="tok">Aceitar resultado</button></div>`);
       $('#tcel').onclick = () => agir('celebiTabela'); $('#tok').onclick = () => agir('aceitarTabela'); return;
     }
     if (pd.tipo === 'festival') {
@@ -671,7 +671,7 @@
       corpo = `<div style="margin:10px 0">${linhas}</div>${area}`;
     }
     const pz = E.J(st);
-    const cel = r && !animando && !pz.ia && [pd.a, pd.b].includes(pz.id) && E.celebiDe(pz) ? `<div class="row celebiRow"><span class="mut">🌸 ${esc(pz.nome)}, usar Pedido a Celebi?</span><button class="celebi" data-pcd="a">Refazer o dado de ${esc(A.nome)} (${r.da})</button><button class="celebi" data-pcd="b">Refazer o dado de ${esc(B.nome)} (${r.db})</button></div>` : '';
+    const cel = r && !animando && !pz.ia && [pd.a, pd.b].includes(pz.id) && E.celebiDe(pz) ? `<div class="row celebiRow"><span class="mut"><img class="celIco" src="img/fx/celebi.png" alt=""> ${esc(pz.nome)}, usar Pedido a Celebi?</span><button class="celebi" data-pcd="a">Refazer o dado de ${esc(A.nome)} (${r.da})</button><button class="celebi" data-pcd="b">Refazer o dado de ${esc(B.nome)} (${r.db})</button></div>` : '';
     abrirModal(`<h2>🎪 ${esc(pd.titulo)}</h2><p class="mut">Dupla contra dupla, só Pokémons Rosas, Verdes e Iniciais (Azuis ou mais fortes não contam nem para o bônus de evolução). Cada dupla soma as forças e rola um dado. As duplas são escolhidas ao mesmo tempo, em segredo.</p>${corpo.replace('<div class="mfoot"><button class="pri" id="prOk">', cel + '<div class="mfoot"><button class="pri" id="prOk">')}`);
     const M = $('#modalCard');
     const ok = $('#prOk'); if (ok) ok.onclick = () => agir('fecharPraca');
@@ -736,7 +736,7 @@
       const msg = animando ? '' : r.venc == null ? 'Empate — os dois Pokémons desmaiam.' : `${esc(E.J(st, r.venc).nome)} vence o duelo${pd.vencLado ? ' e a batalha!' : ' — o Pokémon vencedor continua em campo.'}`;
       const dU = pd.duelos[nD - 1], reac = animando ? '' : humanos.map(l => {
         const q = E.J(st, pd[l]), o = l === 'a' ? 'b' : 'a', bts = [];
-        if (E.celebiDe(q)) bts.push(`<button class="sm celebi" data-lcq="${l}" data-lcl="${l}">🌸 Refazer meu dado (${l === 'a' ? r.da : r.db})</button><button class="sm celebi" data-lcq="${l}" data-lcl="${o}">🌸 Refazer o dado de ${esc(E.J(st, pd[o]).nome)} (${o === 'a' ? r.da : r.db})</button>`);
+        if (E.celebiDe(q)) bts.push(`<button class="sm celebi" data-lcq="${l}" data-lcl="${l}"><img class="celIco" src="img/fx/celebi.png" alt=""> Refazer meu dado (${l === 'a' ? r.da : r.db})</button><button class="sm celebi" data-lcq="${l}" data-lcl="${o}"><img class="celIco" src="img/fx/celebi.png" alt=""> Refazer o dado de ${esc(E.J(st, pd[o]).nome)} (${o === 'a' ? r.da : r.db})</button>`);
         if (dU && dU.venc !== l && q.itens.some(i => i.startsWith('potion#'))) bts.push(`<button class="sm" data-lrm="${l}"><img class="potIco" src="img/fx/potion.png"> Remédio: reviver ${esc(E.P(l === 'a' ? dU.pa : dU.pb).nome)} e refazer o duelo</button>`);
         return bts.length ? `<div class="row celebiRow"><span class="mut">${esc(q.nome)}:</span>${bts.join('')}</div>` : '';
       }).join('');
@@ -1003,7 +1003,7 @@
         <div class="hand">${bolas.map(i => `<div class="ic bolaCh ${i === escolhida ? 'sel' : ''}" data-b="${i}" title="${esc(E.ITEM(i).nome)}${chance(i) != null ? ' — chance ' + pct(chance(i)) : ''}"><img src="${E.ITEM(i).img}">${chance(i) != null ? `<span class="bch">${pct(chance(i))}</span>` : ''}</div>`).join('') || '<span class="mut">Você não tem Bolas.</span>'}</div>` : `<p class="mut" style="margin:12px 0 4px">${esc(p.nome)} decide se usa uma Bola antes de rolar.</p>`)
         + `<p class="mut">Ajuste permitido no dado: <b>±${faixa}</b>${tr && tr.efeito === 'red' ? ' · Red: rola 2 dados' : ''}</p>` : ''}
       ${r ? `<div class="rolling final">${r.dados.map(d => `<div class="die3d parou ${r.ok ? 'ok' : 'no'}"><span>${d}</span></div>`).join('')}</div><div class="result surge ${r.ok ? 'ok' : 'no'}"><b class="big">${r.ok ? 'Capturado!' : 'Escapou…'}</b>${r.bola ? `${esc(E.ITEM(r.bola).nome)} · ` : ''}Dado${r.dados.length > 1 ? 's' : ''}: ${r.dados.join(' e ')}${r.faixa ? ` · ajuste ±${r.faixa}` : ''}${!r.ok && pd.slot && c.cor !== 'amarelo' ? '<br>O Pokémon fica revelado e enfraquecido.' : ''}</div>` : ''}
-      <div class="mfoot">${animando ? '' : !r ? `<button data-desist>Não tentar</button><button class="pri" id="rol" ${c.captura.length ? '' : 'disabled'}>🎲 Rolar captura</button>` : `${!r.ok && E.celebiDe(p) && !p.ia ? '<button class="celebi" id="celC">🌸 Pedido a Celebi: refazer</button>' : ''}<button class="pri" id="ok">Continuar</button>`}</div>
+      <div class="mfoot">${animando ? '' : !r ? `<button data-desist>Não tentar</button><button class="pri" id="rol" ${c.captura.length ? '' : 'disabled'}>🎲 Rolar captura</button>` : `${!r.ok && E.celebiDe(p) && !p.ia ? '<button class="celebi" id="celC"><img class="celIco" src="img/fx/celebi.png" alt=""> Pedido a Celebi: refazer</button>' : ''}<button class="pri" id="ok">Continuar</button>`}</div>
     </div></div>`);
     const cc = $('#celC'); if (cc) cc.onclick = () => agir('celebiCaptura');
     $('#modalCard').querySelectorAll('[data-b]').forEach(b => b.onclick = () => { sel.bola = sel.bola === b.dataset.b ? null : b.dataset.b; render(); });
@@ -1247,7 +1247,7 @@
       ${r && r.det ? arenaDuelo(pd, r, animando) : ''}
       ${msg ? `<div class="result surge ${r.venc != null ? 'ok' : ''}"><b class="big">${msg}</b></div>` : ''}
       ${!fim && !animando ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:10px">${lado('a')}${lado('b')}</div>` : ''}
-      ${r && r.det && !animando && !E.J(st, pd.a).ia && E.celebiDe(E.J(st, pd.a)) ? `<div class="row celebiRow"><span class="mut">🌸 ${esc(E.J(st, pd.a).nome)}, usar Pedido a Celebi?</span><button class="celebi" data-cd="a">Refazer meu dado (${r.da})</button><button class="celebi" data-cd="b">Refazer o dado de ${esc(E.J(st, pd.b).nome)} (${r.db})</button></div>` : ''}
+      ${r && r.det && !animando && !E.J(st, pd.a).ia && E.celebiDe(E.J(st, pd.a)) ? `<div class="row celebiRow"><span class="mut"><img class="celIco" src="img/fx/celebi.png" alt=""> ${esc(E.J(st, pd.a).nome)}, usar Pedido a Celebi?</span><button class="celebi" data-cd="a">Refazer meu dado (${r.da})</button><button class="celebi" data-cd="b">Refazer o dado de ${esc(E.J(st, pd.b).nome)} (${r.db})</button></div>` : ''}
       <div class="mfoot">${animando ? '' : fim ? '<button class="pri" id="dc">Continuar</button>' : (meuLadoFeito ? '<span class="mut">⏳ Aguardando o adversário…</span>' : `<button class="pri" id="dg" ${ladoPronto('a') && ladoPronto('b') ? '' : 'disabled'}>${online() ? '✔ Confirmar minha escolha' : '🎲 Batalhar'}</button>`)}</div>`);
     $('#modalCard').querySelectorAll('[data-l]').forEach(c => c.onclick = () => { S[c.dataset.l].pokemon = c.dataset.id; render(); });
     $('#modalCard').querySelectorAll('[data-i]').forEach(x => x.onchange = () => { S[x.dataset.i].item = x.value || null; });
@@ -1301,7 +1301,7 @@
       abrirModal(`<h2>⚔ ${esc(pd.titulo)}</h2><p class="mut">Tipo ${E.TIPOS_NOME[L.tipo]} · em caso de empate, o jogador vence.</p>
         <div class="arena">${ladoJog}<div class="vs">VS</div>${ladoLid}</div>
         ${animando ? '' : `<div class="result surge ${r.ok ? 'ok' : 'no'}"><b class="big">${r.ok ? `🏅 Vitória! ${r.total === r.lider ? '(empate conta a seu favor) ' : ''}` : 'Derrota'}</b>${r.ok ? 'Você ganhou a insígnia e compra uma Carta Item.' : 'Você pode tentar de novo em outro turno.'}</div>`}
-        <div class="mfoot">${animando ? '' : `${!r.ok && E.celebiDe(p) && !p.ia ? '<button class="celebi" id="celL">🌸 Pedido a Celebi: refazer o dado</button>' : ''}${!r.ok && remedios.length ? `<button id="rem"><img class="potIco" src="img/fx/potion.png"> Usar Remédio (recomeçar)</button>` : ''}<button class="pri" id="ok">Continuar</button>`}</div>`);
+        <div class="mfoot">${animando ? '' : `${!r.ok && E.celebiDe(p) && !p.ia ? '<button class="celebi" id="celL"><img class="celIco" src="img/fx/celebi.png" alt=""> Pedido a Celebi: refazer o dado</button>' : ''}${!r.ok && remedios.length ? `<button id="rem"><img class="potIco" src="img/fx/potion.png"> Usar Remédio (recomeçar)</button>` : ''}<button class="pri" id="ok">Continuar</button>`}</div>`);
     } else
     abrirModal(`<div class="mgrid"><img src="${L.img}"><div>
       <h2>${esc(pd.titulo)}</h2><div class="mut">Tipo ${E.TIPOS_NOME[L.tipo]} · força fixa ${L.forca}${L.dual ? ' · <b>DUAL</b>: envie 2 Pokémons, 1 dado, até 2 itens' : ''} · vantagem contra ${L.vantagens.map(t => E.TIPOS_NOME[t]).join(', ') || '—'}</div>
@@ -1331,7 +1331,7 @@
     abrirModal(`<div class="mgrid"><img src="${it.img}"><div><h2>${esc(it.nome)}</h2>
       <span class="tag">${{ comum: 'Comum — só no seu turno', rapido: 'Rápido — a qualquer momento', batalha: 'Batalha — só em batalhas' }[it.uso]}</span>
       <p style="font-size:15px">${esc(it.texto)}</p>
-      <p class="mut">${it.bola ? 'Bolas são usadas na janela de captura.' : it.uso === 'batalha' ? 'Itens de batalha são escolhidos na janela de batalha.' : ['corda', 'escaperope'].includes(it.id) ? 'Use depois de rolar o dado, pelos botões no painel do turno.' : it.id === 'pedidocelebi' ? 'Use pelos botões 🌸 que aparecem depois das rolagens: movimento, captura, batalha de Ginásio, Duelos e Eventos de dado.' : automatico ? '' : 'Ao usar, o item é descartado; aplique o efeito com a caixa de ferramentas.'}</p>
+      <p class="mut">${it.bola ? 'Bolas são usadas na janela de captura.' : it.uso === 'batalha' ? 'Itens de batalha são escolhidos na janela de batalha.' : ['corda', 'escaperope'].includes(it.id) ? 'Use depois de rolar o dado, pelos botões no painel do turno.' : it.id === 'pedidocelebi' ? 'Use pelos botões <img class="celIco" src="img/fx/celebi.png" alt=""> que aparecem depois das rolagens: movimento, captura, batalha de Ginásio, Duelos e Eventos de dado.' : automatico ? '' : 'Ao usar, o item é descartado; aplique o efeito com a caixa de ferramentas.'}</p>
       <div class="mfoot"><button data-x>Fechar</button>${!it.bola && it.uso !== 'batalha' && !['corda', 'escaperope', 'pedidocelebi'].includes(it.id) ? `<button class="pri" id="usar">Usar ${esc(it.nome)}</button>` : ''}</div></div></div>`);
     const u = $('#usar'); if (u) u.onclick = () => { fecharModal(); agir('usarItem', inst); if (!automatico) caixaFerramentas(); };
   }
