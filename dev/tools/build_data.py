@@ -21,6 +21,9 @@ porId = {c['id']: c for c in poke}
 for c in J(D + '/pokemon_alt.json')['cartas']:
     if c.get('repetido'): porId[c['id']]['elencos'].append('alt'); continue
     c = dict(c); c['img'] = 'img/pokemon/' + c['id'] + '.webp'; c['elencos'] = ['alt']; poke.append(c)
+for c in poke:
+    f = 'img/mini/' + c['id'].replace(' ', '_') + '.png'
+    if os.path.exists(P + '/web/' + f): c['mini'] = f
 ids = [c['id'] for c in poke]; assert len(ids) == len(set(ids))
 # Efeitos automáticos (o resto fica com a caixa de ferramentas manual)
 # passos: itens n | treinador n | ganhar cor n | capturar cor | pular n | tabela [[faces],[passos]] | seTipo tipo [passos] | seCor cor [passos]

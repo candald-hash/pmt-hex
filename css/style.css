@@ -482,3 +482,23 @@ button.celebi:hover:not(:disabled){background:rgba(244,114,182,.15);border-color
 @media (max-width:760px){#pilulaMin{top:10px;left:12px;transform:none;max-width:calc(100% - 80px);font-size:13px}@keyframes pilIn{from{opacity:0}}}
 #modalCard>.iaBanner:first-child,#modalCard>.cartaAviso:first-child,#modalCard>h2:first-child{margin-right:40px}
 .celIco{width:22px;height:22px;image-rendering:pixelated;vertical-align:middle;margin:-5px 1px -3px -2px}
+.secHead .vistaTime{margin-left:auto;margin-right:6px;padding:2px 8px;font-size:11.5px;text-transform:none;letter-spacing:0}
+.pc.mini{background:var(--bg2);border:1px solid var(--line);border-radius:8px;overflow:visible;aspect-ratio:1}
+.pc.mini img{width:100%;height:100%;object-fit:contain;image-rendering:pixelated;display:block}
+.pc.mini .f{position:absolute;right:-4px;bottom:-4px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;font-size:11px;line-height:18px}
+.pc.mini.off{opacity:.45}
+.pc.mini.cor-rosa{border-color:#ec6fab}.pc.mini.cor-verde{border-color:#16a34a}.pc.mini.cor-azul{border-color:#2f7fd6}.pc.mini.cor-vermelho{border-color:#e3202b}.pc.mini.cor-amarelo{border-color:#f7c814}
+.miniTrav{position:absolute;left:-4px;top:-5px;font-size:11px}
+.fxVez{position:absolute;left:0;right:0;top:0;height:58px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 140px 0 18px;
+  background:linear-gradient(90deg,var(--cor) 0%,color-mix(in srgb,var(--cor) 75%,#000) 70%,color-mix(in srgb,var(--cor) 40%,#000) 100%);color:#fff;box-shadow:0 6px 18px rgba(0,0,0,.45);
+  animation:vezIn 2.6s ease-in-out forwards;border-bottom:3px solid rgba(255,255,255,.35)}
+.fxVez.claro{color:#111;border-bottom-color:rgba(0,0,0,.25)}
+.fxVezNome{display:flex;align-items:center;gap:10px;font:700 20px Inter,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.vzDot{width:16px;height:16px;border-radius:50%;background:var(--cor);border:3px solid currentColor;flex:none}
+.fxVezTop{display:flex;gap:8px;flex:none}
+.vzPk{position:relative;width:44px;height:44px;border-radius:10px;background:rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center}
+.fxVez.claro .vzPk{background:rgba(255,255,255,.45)}
+.vzPk img{width:40px;height:40px;image-rendering:pixelated;object-fit:contain}
+.vzPk b{position:absolute;right:-5px;bottom:-5px;background:#111;color:#fff;font-size:11px;border-radius:9px;padding:0 5px;line-height:17px;border:1px solid rgba(255,255,255,.4)}
+@keyframes vezIn{0%{transform:translateY(-110%)}12%{transform:translateY(0)}85%{transform:translateY(0);opacity:1}100%{transform:translateY(-110%);opacity:0}}
+@media (max-width:760px){.fxVez{height:50px;padding:0 64px 0 12px}.fxVezNome{font-size:15px}.vzPk{width:36px;height:36px}.vzPk img{width:32px;height:32px}}

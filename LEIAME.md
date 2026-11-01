@@ -10,6 +10,8 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- Miniaturas: no painel, o Time pode ser visto como miniaturas (com a força) ou cartas — botão ao lado do título "Time".
+- Faixa de início de turno: no topo do tabuleiro, na cor do jogador, "Vez de Fulano" e as miniaturas dos 3 Pokémons mais fortes dele.
 - Pedido a Celebi: novo ícone (sprite do Celebi) no lugar da flor em todos os botões e avisos.
 - Minimizar janela: o botão ▾ no canto de qualquer janela de decisão a transforma numa pílula no topo do tabuleiro ("⏳ Beto · Batalha de Ginásio · Abrir"), liberando tabuleiro e painel. Abre sozinha quando a decisão passa a ser sua; some quando a ação termina.
 - Versão do jogo (v7.3) ao lado de "versão web"; links para a nova página de Changelog (changelog.html) e para a de Elencos na tela inicial.

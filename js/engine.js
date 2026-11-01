@@ -202,6 +202,7 @@
     st.fase = 'inicio'; st.turno = { rolagem: null, dados: null, destinos: null, batalhouLider: false, moveu: false, bicicleta: st.turno && st.turno.bicicletaUsada ? true : false };
     if (p.pular > 0) { p.pular--; log(st, `${p.nome} perde a vez.`); proximo(st); return; }
     log(st, `Vez de ${p.nome}.`, 'vez');
+    if (!extra) fx(st, { tipo: 'vez', j: p.id });
     if (!extra && preso(st, p.id)) return punirPreso(st, p);
     const L = st.liga;
     if (!extra && L && L.etapa === 'final' && L.finalTurnos && !L.finalMarcada && Object.values(L.finalTurnos).every(n => n <= 0)) {

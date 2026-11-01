@@ -291,6 +291,12 @@
     return `<div class="pc ${ob ? '' : 'off'} ${p.mais1 && p.mais1[id] ? 'gs' : ''} ${extra || ''}" data-id="${id}" title="${esc(c.nome)} — força ${f}${ob ? '' : ' (ainda não obedece)'}${p.mais1 && p.mais1[id] ? ' · marcador +1 da Bola GS' : ''}">
       <img src="${c.img}" loading="lazy">${E.familiaTravada(p, id) ? '<img class="lock" src="img/ui/plus1.webp">' : ''}${p.mais1 && p.mais1[id] ? `<span class="gsTag" title="Marcador +1 permanente (Bola GS)">GS +${p.mais1[id]}</span>` : ''}<span class="f">${f}</span></div>`;
   }
+  // miniatura do Pokémon (com a força, como na carta)
+  const imgMini = id => E.P(id).mini || E.P(id).img;
+  function cartaMini(p, id, extra) {
+    const c = E.P(id), f = E.forcaBase(p, id) + E.bonusTreinador(p, id), ob = E.obedece(p, c.cor);
+    return `<div class="pc mini ${ob ? '' : 'off'} cor-${c.cor} ${extra || ''}" data-id="${id}" title="${esc(c.nome)} — força ${f}${ob ? '' : ' (ainda não obedece)'}"><img src="${imgMini(id)}" loading="lazy">${E.familiaTravada(p, id) ? '<span class="miniTrav">🔒</span>' : ''}<span class="f">${f}</span></div>`;
+  }
   // Time agrupado por linha evolutiva: famílias com 2+ Pokémons ganham uma moldura compartilhada
   // opts.ids: só estes Pokémons (o bônus continua calculado com o time todo); opts.carta: como desenhar cada carta
   function timeAgrupado(p, larg, opts) {
@@ -363,10 +369,11 @@
     const mb = $('#meBox');
     const pm = online() ? (NET.eu != null && NET.eu >= 0 ? E.J(st, NET.eu) : null) : p, trm = pm && pm.treinador && E.idx().tr[pm.treinador];
     mb.innerHTML = !pm ? '<h3>Assistindo</h3><p class="mut">👀 Você está assistindo a esta partida.</p>' : `${online() ? `<h3>Você: <span class="dot" style="display:inline-block;vertical-align:middle;background:${COR_HEX[pm.cor]}"></span> ${esc(pm.nome)}</h3>` : ''}
-      ${secao('time', `Time (${pm.pokemon.length})`, timeAgrupado(pm))}
+      ${secao('time', `Time (${pm.pokemon.length})<button class="sm vistaTime" title="Alternar entre miniaturas e cartas">${prefs.timeMini ? '🃏 Cartas' : '🔹 Miniaturas'}</button>`, prefs.timeMini ? timeAgrupado(pm, 44, { carta: id => cartaMini(pm, id) }) : timeAgrupado(pm))}
       ${propostasFicha(pm)}${secao('itens', `Itens (${pm.itens.length}/${E.limiteItens(pm)})`, `<div class="hand">${pm.itens.map(i => `<div class="ic" data-i="${i}" title="${esc(E.ITEM(i).nome)}"><img src="${E.ITEM(i).img}"></div>`).join('') || '<span class="mut">Nenhum</span>'}</div>`)}
       ${secao('treinador', `Treinador${trm ? ': ' + esc(trm.nome) : ''}`, trm ? `<div class="trainer"><img src="${trm.img}" data-z="${trm.img}"><div><b>${esc(trm.nome)}</b><p>${esc(trm.texto)}</p></div></div>` : '<span class="mut">—</span>')}`;
     mb.querySelectorAll('.pc').forEach(c => c.onclick = () => zoom(E.P(c.dataset.id).img));
+    const vt = $('.vistaTime', mb); if (vt) vt.onclick = ev => { ev.stopPropagation(); prefs.timeMini = !prefs.timeMini; salvarPrefs(); render(); };
     mb.querySelectorAll('[data-z]').forEach(c => c.onclick = () => zoom(c.dataset.z));
     mb.querySelectorAll('[data-cprop]').forEach(b => b.onclick = () => agir('cancelarProposta', +b.dataset.quem, +b.dataset.cprop));
     mb.querySelectorAll('[data-vprop]').forEach(b => b.onclick = () => verProposta(+b.dataset.vprop));
@@ -879,6 +886,7 @@
     const f = st && st.fx;
     if (fxVisto === null) { fxVisto = f ? f.seq : 0; return; } // ao abrir/recarregar não repete o último efeito
     if (!f || f.seq === fxVisto) return; fxVisto = f.seq;
+    if (f.tipo === 'vez') return fxVez(E.J(st, f.j));
     if (f.tipo === 'bike') fxBike(E.J(st, f.j)); else if (f.tipo === 'roubo') fxRoubo(f);
     else if (f.tipo === 'pocao') fxTexto(`<img class="potFx" src="img/fx/potion.png"><b>${esc(E.J(st, f.j).nome)}</b> usou Remédio${f.pk ? `: ${esc(E.P(f.pk).nome)} volta e o duelo é refeito` : ' e recomeça a batalha'}`, 'pocao');
   }
@@ -895,6 +903,15 @@
     const c = camadaFx(), cor = COR_HEX[q.cor] || '#ffd23f';
     const el = h(`<div class="fxBand bike" style="--cor:${cor}"><div class="fxTxt">🚲 TURNO EXTRA <span>·</span> <b>${esc(q.nome)}</b> usou a Bicicleta</div><div class="fxBici"><div class="bikeSpr" style="background-image:url(img/fx/bike_${q.cor}.webp)"></div></div></div>`);
     c.appendChild(el); setTimeout(() => el.remove(), 3000);
+  }
+  function top3(q) { return q.pokemon.slice().sort((a, b) => (E.forcaBase(q, b) + E.bonusTreinador(q, b)) - (E.forcaBase(q, a) + E.bonusTreinador(q, a))).slice(0, 3); }
+  function fxVez(q) {
+    const c = camadaFx(); c.querySelectorAll('.fxVez').forEach(x => x.remove());
+    const cor = COR_HEX[q.cor] || '#888', claro = ['branco', 'amarelo'].includes(q.cor);
+    const eu = online() && q.id === NET.eu;
+    const el = h(`<div class="fxVez ${claro ? 'claro' : ''}" style="--cor:${cor}"><div class="fxVezNome"><span>${eu ? 'Sua vez' : 'Vez de <b>' + esc(q.nome) + '</b>'}${q.ia ? ' 🤖' : ''}</span></div>
+      <div class="fxVezTop">${top3(q).map(id => `<span class="vzPk" title="${esc(E.P(id).nome)}"><img src="${imgMini(id)}"><b>${E.forcaBase(q, id) + E.bonusTreinador(q, id)}</b></span>`).join('')}</div></div>`);
+    c.appendChild(el); setTimeout(() => el.remove(), 2600);
   }
   function fxTexto(html, cls) { const c = cls === 'pocao' ? camadaTopo() : camadaFx(), el = h(`<div class="fxBand ${cls || ''}"><div class="fxTxt">${html}</div></div>`); c.appendChild(el); setTimeout(() => el.remove(), 3000); }
   function centroPeao(j) {
