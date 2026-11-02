@@ -10,6 +10,7 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- Duelos e Festival de Praça: a escolha do oponente mostra o time de cada adversário direto na lista (miniaturas com força), legível também no celular.
 - Miniaturas: no painel, o Time pode ser visto como miniaturas (com a força) ou cartas — botão ao lado do título "Time".
 - Faixa de início de turno: no topo do tabuleiro, na cor do jogador, "Vez de Fulano" e as miniaturas dos 3 Pokémons mais fortes dele.
 - Pedido a Celebi: novo ícone (sprite do Celebi) no lugar da flor em todos os botões e avisos.

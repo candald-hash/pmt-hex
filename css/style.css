@@ -502,3 +502,9 @@ button.celebi:hover:not(:disabled){background:rgba(244,114,182,.15);border-color
 .vzPk b{position:absolute;right:-5px;bottom:-5px;background:#111;color:#fff;font-size:11px;border-radius:9px;padding:0 5px;line-height:17px;border:1px solid rgba(255,255,255,.4)}
 @keyframes vezIn{0%{transform:translateY(-110%)}12%{transform:translateY(0)}85%{transform:translateY(0);opacity:1}100%{transform:translateY(-110%);opacity:0}}
 @media (max-width:760px){.fxVez{height:50px;padding:0 64px 0 12px}.fxVezNome{font-size:15px}.vzPk{width:36px;height:36px}.vzPk img{width:32px;height:32px}}
+.pj.pjTime{flex-wrap:wrap}
+.pjTimeLista{flex-basis:100%;margin-top:6px;cursor:pointer}
+.pjTimeLista .team2{margin-bottom:2px;gap:6px 4px}
+.pjTimeLista .famG:not(.solo){padding:10px 3px 3px}
+.pjTimeLista .pc.mini{cursor:pointer}
+@media (max-width:560px){.pj.pjTime .badges{display:none}}

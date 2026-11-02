@@ -1177,7 +1177,12 @@
   function mAlvo(pd, p) {
     abrirModal(`<h2>${esc(pd.titulo)}</h2>${pd.bloqueavel ? '<p class="mut">Este efeito pode ser bloqueado por Poké-Boneca.</p>' : ''}
       ${['troca', 'ssanne'].includes(pd.acao) ? '<p class="mut ajudaT" title="Até 3 Pokémons do oponente que você pode receber: primeiro os da mesma linha evolutiva de algum seu (🔗), depois os mais fortes (💪).">❔ Ao lado de cada oponente há sugestões de troca.</p>' : ''}
-      <div style="display:grid;gap:8px">${pd.opcoes.map(i => { const q = E.J(st, i); const t = q.treinador && E.idx().tr[q.treinador]; return linhaJogador(q, `${q.id === p.id ? '<span class="tag">você</span>' : ''}${['troca', 'ssanne'].includes(pd.acao) ? sugestoesTroca(p, q, pd.cores) : `<span class="mut">${t ? esc(t.nome) : ''}</span>${insignias(q, true)}`}${['duelo', 'praca'].includes(pd.acao) ? `<span class="verTime" data-vt="${q.id}" title="Ver os Pokémons de ${esc(q.nome)}">🔍</span>` : ''}`); }).join('')}</div>`);
+      <div style="display:grid;gap:8px">${pd.opcoes.map(i => { const q = E.J(st, i); const t = q.treinador && E.idx().tr[q.treinador]; return linhaJogador(q, `${q.id === p.id ? '<span class="tag">você</span>' : ''}${['troca', 'ssanne'].includes(pd.acao) ? sugestoesTroca(p, q, pd.cores) : `<span class="mut">${t ? esc(t.nome) : ''}</span>${insignias(q, true)}`}`); }).join('')}</div>`);
+    if (['duelo', 'praca'].includes(pd.acao)) $('#modalCard').querySelectorAll('.pj').forEach(row => {
+      const q = E.J(st, +row.dataset.p);
+      row.classList.add('pjTime');
+      row.insertAdjacentHTML('beforeend', `<div class="pjTimeLista">${timeAgrupado(q, 34, { carta: id => cartaMini(q, id) })}<span class="mut" style="font-size:11.5px">${q.pokemon.some(id => !E.obedece(q, E.P(id).cor)) ? 'Apagados: ainda não obedecem a ' + esc(q.nome) + '.' : ''}</span></div>`);
+    });
     $('#modalCard').querySelectorAll('.pj').forEach(c => c.onclick = () => agir('escolherAlvo', +c.dataset.p));
     $('#modalCard').querySelectorAll('.sugT img').forEach(i => i.onclick = ev => { ev.stopPropagation(); zoom(i.dataset.z); });
     $('#modalCard').querySelectorAll('.verTime').forEach(v => {
