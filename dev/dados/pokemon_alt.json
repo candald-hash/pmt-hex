@@ -1008,8 +1008,8 @@
 "img": "1 - rosa_alt/spoink.png"
 },
 {
-"id": "starly",
-"nome": "Starly",
+"id": "pidove",
+"nome": "Pidove",
 "cor": "rosa",
 "forca": 2,
 "tipos": [
@@ -1026,9 +1026,9 @@
 4,
 5
 ],
-"familia": "starly",
+"familia": "pidove",
 "estagio": 0,
-"img": "1 - rosa_alt/starly.png"
+"img": "1 - rosa_alt/pidove.png"
 },
 {
 "id": "timburr",
@@ -2056,8 +2056,8 @@
 "img": "2 - verde_alt/skrelp.png"
 },
 {
-"id": "staravia",
-"nome": "Staravia",
+"id": "tranquill",
+"nome": "Tranquill",
 "cor": "verde",
 "forca": 4,
 "tipos": [
@@ -2073,9 +2073,9 @@
 4,
 5
 ],
-"familia": "starly",
+"familia": "pidove",
 "estagio": 1,
-"img": "2 - verde_alt/staravia.png"
+"img": "2 - verde_alt/tranquill.png"
 },
 {
 "id": "staryu",
@@ -3243,8 +3243,8 @@
 "img": "3 - azul_alt/skarmory.png"
 },
 {
-"id": "staraptor",
-"nome": "Staraptor",
+"id": "unfezant",
+"nome": "Unfezant",
 "cor": "azul",
 "forca": 6,
 "tipos": [
@@ -3259,9 +3259,9 @@
 4,
 5
 ],
-"familia": "starly",
+"familia": "pidove",
 "estagio": 2,
-"img": "3 - azul_alt/staraptor.png"
+"img": "3 - azul_alt/unfezant.png"
 },
 {
 "id": "starmie",
