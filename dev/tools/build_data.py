@@ -150,7 +150,7 @@ CID_PIO = {
  'Vermilion': [['alvo', 'troca', {'bloqueavel': True, 'cores': ['rosa']}], ['pular', 1]],
  'Viridian': [['alvo', 'troca', {'bloqueavel': True, 'cores': ['rosa', 'verde']}]],
  'Mahogany': [SSc(hex=True, marcar='maho', excluirMarca='maho', acao='capturar', titulo=f'Mahogany (Pioneiro): tente capturar um Pokémon deste hexágono ({i}/2)') for i in (1, 2)],
- 'Sunyshore': [['espaco', {'ativar': False, 'ficar': True, 'titulo': 'Sunyshore (Pioneiro): mova seu peão para qualquer espaço deste hexágono (ou fique)'}]],
+ 'Sunyshore': [['espaco', {'ativar': True, 'ficar': True, 'titulo': 'Sunyshore (Pioneiro): mova seu peão para qualquer espaço deste hexágono e ative-o (ou fique)'}]],
 }
 CID_PRI = {
  'Olivine': [['opcao', [{'nome': 'Descartar 1 Item e comprar um Evento', 'passos': [['pagar', 1, [['evento']], 'Olivine: descarte 1 Item']]}, {'nome': 'Não', 'passos': []}], 'Olivine (Primeira visita)']],

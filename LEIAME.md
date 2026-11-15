@@ -10,6 +10,7 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- Correção: o Pioneiro de Sunyshore agora ativa o espaço escolhido (antes só movia o peão).
 - Elenco alternativo: família Starly/Staravia/Staraptor substituída por Pidove/Tranquill/Unfezant (cartas e miniaturas).
 - Duelos e Festival de Praça: a escolha do oponente mostra o time de cada adversário direto na lista (miniaturas com força), legível também no celular.
 - Miniaturas: no painel, o Time pode ser visto como miniaturas (com a força) ou cartas — botão ao lado do título "Time".
