@@ -458,7 +458,7 @@ button.celebi:hover:not(:disabled){background:rgba(244,114,182,.15);border-color
 .linksIni #temaS{margin-left:auto}
 
 .addJog{margin-top:10px}
-.opcoesIni{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px}
+.opcoesIni{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:8px}
 .opcoesIni label{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--mut);min-width:0}
 .opcoesIni select,.opcoesIni input{width:100%}
 .acoesIni{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;flex-wrap:wrap}
@@ -508,3 +508,19 @@ button.celebi:hover:not(:disabled){background:rgba(244,114,182,.15);border-color
 .pjTimeLista .famG:not(.solo){padding:10px 3px 3px}
 .pjTimeLista .pc.mini{cursor:pointer}
 @media (max-width:560px){.pj.pjTime .badges{display:none}}
+#btnConq{position:relative}
+#btnConq::after{content:attr(data-n);position:absolute;right:-6px;bottom:-6px;font-size:9.5px;font-weight:700;background:var(--acc);color:var(--acc-ink);border-radius:8px;padding:0 4px;line-height:14px}
+.cqGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin-top:8px}
+.cqCard{display:flex;gap:10px;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:8px}
+.cqCard.feita{opacity:.8;border-color:var(--acc)}
+.cqCard img{width:84px;border-radius:6px;flex:none;cursor:zoom-in;align-self:flex-start}
+.cqInfo{min-width:0;font-size:13px;display:flex;flex-direction:column;gap:3px}
+.cqPremio{font-size:12.5px}
+.cqProg{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:12px;margin-top:2px}
+.cqProg>span,.cqDono{display:inline-flex;align-items:center;gap:4px}
+.cqProg .dot,.cqDono .dot{display:inline-block;width:10px;height:10px}
+.cqPop{position:absolute;left:50%;top:14%;transform:translateX(-50%);display:flex;gap:14px;align-items:center;width:min(460px,calc(100% - 24px));background:var(--panel);border:3px solid var(--cor);border-radius:16px;padding:12px;box-shadow:0 18px 50px rgba(0,0,0,.6);animation:cqIn .45s cubic-bezier(.2,1.4,.4,1);transition:opacity .5s,transform .5s;cursor:pointer;font-size:14px}
+.cqPop.fora{opacity:0;transform:translate(-50%,-20px)}
+.cqPop img{width:110px;border-radius:8px;flex:none}
+.cqPopT{font:800 18px Inter,sans-serif;color:var(--acc)}
+@keyframes cqIn{from{opacity:0;transform:translate(-50%,-30px) scale(.9)}}

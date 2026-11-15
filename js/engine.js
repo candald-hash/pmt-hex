@@ -87,6 +87,7 @@
     const g = grafo(st), d = D();
     // baralhos de Pokémon por cor
     st.elenco = cfg.elenco && d.elencos && d.elencos[cfg.elenco] ? cfg.elenco : 'padrao';
+    if (cfg.conquistas) st.conq = { on: true, donos: {}, seq: 0 };
     CORES.forEach(c => st.decks[c] = embaralhar(st, d.pokemon.filter(p => p.cor === c && (p.elencos || ['padrao']).includes(st.elenco)).map(p => p.id)));
     st.decks.item = embaralhar(st, d.itens.flatMap(c => Array.from({ length: c.copias || 1 }, (_, i) => c.id + '#' + i)));
     st.decks.evento = embaralhar(st, d.eventos.map(c => c.id));
@@ -201,7 +202,7 @@
     if (st.repelPausa && st.repelPausa[p.id]) delete st.repelPausa[p.id];
     st.fase = 'inicio'; st.turno = { rolagem: null, dados: null, destinos: null, batalhouLider: false, moveu: false, bicicleta: st.turno && st.turno.bicicletaUsada ? true : false };
     if (p.pular > 0) { p.pular--; log(st, `${p.nome} perde a vez.`); proximo(st); return; }
-    log(st, `Vez de ${p.nome}.`, 'vez');
+    log(st, `Vez de ${p.nome}.`, 'vez'); st.turno.jogou = true; if (!extra) ach(p).turnoN = (ach(p).turnoN || 0) + 1;
     if (!extra) fx(st, { tipo: 'vez', j: p.id });
     if (!extra && preso(st, p.id)) return punirPreso(st, p);
     const L = st.liga;
@@ -231,6 +232,7 @@
   function confirmarPreso(st) { const pd = st.pend; if (!pd || pd.tipo !== 'preso') return; st.pend = null; proximo(st); }
   function proximo(st) {
     const L = st.liga;
+    if (st.turno && st.turno.jogou) { const pv = J(st, st.vez), a = ach(pv); a.monge = !pv.itens.length && !st.turno.comprouItem ? (a.monge || 0) + 1 : 0; }
     if (L && L.etapa === 'final' && L.finalTurnos && L.finalTurnos[st.vez] > 0) { L.finalTurnos[st.vez]--; log(st, `Final da Liga: ${J(st, st.vez).nome} tem mais ${L.finalTurnos[st.vez]} turno(s) antes da final.`); }
     const vivos = st.jogadores.some(q => !q.eliminado);
     do { st.vez = (st.vez + 1) % st.jogadores.length; if (st.vez === 0) st.rodada++; } while (vivos && st.jogadores[st.vez].eliminado);
@@ -270,7 +272,8 @@
     log(st, `${p.nome} usou ${ITEM(inst).nome}: movimento agora é ${v}.`, '', [['it', inst.split('#')[0]]]);
   }
   function calcDestinos(st) { st.turno.destinos = destinos(st, st.vez, st.turno.rolagem); if (!Object.keys(st.turno.destinos).length) log(st, 'Nenhum destino possível com esse valor.'); }
-  function silver(st, p, ds) { const t = p.treinador && idx().tr[p.treinador]; if (t && t.efeito === 'silver') ds.filter(x => x === 1).forEach(() => { comprarItem(st, p, 1); log(st, `Silver: ${p.nome} tirou 1 e compra um Item.`); }); }
+  function silver(st, p, ds) {
+    const a = ach(p); ds.filter(x => x != null).forEach(d => { if (d === 1 && a.ultDado === 1) a.apostador = true; a.ultDado = d; }); const t = p.treinador && idx().tr[p.treinador]; if (t && t.efeito === 'silver') ds.filter(x => x === 1).forEach(() => { comprarItem(st, p, 1); log(st, `Silver: ${p.nome} tirou 1 e compra um Item.`); }); }
 
   function mover(st, destino, pagar) {
     const p = J(st), info = st.turno && st.turno.destinos && st.turno.destinos[destino]; if (!info) return;
@@ -286,7 +289,7 @@
   function trem(st, cidade) {
     const p = J(st); if (st.fase !== 'inicio' || !p.passou.includes(cidade) || cidade === p.pos) return;
     st.mov = { j: p.id, cam: [p.pos, cidade], seq: ((st.mov && st.mov.seq) || 0) + 1, trem: true };
-    p.pos = cidade; st.fase = 'acao'; st.turno.moveu = true; log(st, `${p.nome} pegou o Trem para ${nomeEspaco(st, cidade)}.`);
+    p.pos = cidade; st.fase = 'acao'; st.turno.moveu = true; ach(p).trem = true; log(st, `${p.nome} pegou o Trem para ${nomeEspaco(st, cidade)}.`);
     chegar(st, cidade, { trem: true });
   }
   function nomeEspaco(st, k) {
@@ -364,6 +367,7 @@
   function comprarItem(st, p, n, silencioso) {
     const got = [];
     for (let i = 0; i < n; i++) { reporBaralho(st, 'item'); const c = st.decks.item.shift(); if (c) { p.itens.push(c); got.push(c); } }
+    if (got.length && st.turno && p.id === st.vez) st.turno.comprouItem = true;
     if (!silencioso && got.length) log(st, `${p.nome} comprou ${got.length} Item(ns).`);
     return got;
   }
@@ -390,7 +394,7 @@
     log(st, `${p.nome} fica com o Treinador ${idx().tr[id].nome}.`, '', [['tr', id]]); st.pend = null; continuar(st);
   }
   function ganharPokemon(st, p, id, origem) {
-    p.pokemon.push(id); p.capturas++;
+    p.pokemon.push(id); p.capturas++; ach(p).ganhos.push(id);
     if (st.ganhosCarta) st.ganhosCarta.push([p.id, id]);
     (st.efeitos || []).filter(e => e.tipo === 'parque').forEach(e => (e.ganhos[p.id] = e.ganhos[p.id] || []).push(id));
     log(st, `${p.nome} ganhou ${P(id).nome}${origem ? ' (' + origem + ')' : ''}.`, 'destaque', [['pk', id]]);
@@ -582,6 +586,7 @@
       else if (op === 'turnoExtra') { st.turno.turnoExtra = true; log(st, `${p.nome} terá um turno extra.`); }
       else if (op === 'comoJogador') { st.fila = b.concat([['fimAtor', st.ator == null ? null : st.ator]], st.fila); st.ator = a; }
       else if (op === 'fimAtor') { st.ator = a; }
+      else if (op === 'trConq') trConq(st, p, a);
       else if (op === 'cartaCopia') { const c = (b.baralho === 'evento' ? idx().ev : idx().sev)[b.carta]; st.pend = { tipo: 'carta', baralho: b.baralho, carta: b.carta, ativado: false, reacao: 'ok', titulo: c.nome, copia: { j: a, fonte: b.fonte, atorAntes: st.ator } }; st.ator = a; }
       else if (op === 'slotSel') slotSel(st, Object.assign({}, a, a.coresDelibird ? { cores: noPlanalto(st) ? ESCALA : [corEspaco(st)] } : {}));
       else if (op === 'rota') rotaBloqueada(st);
@@ -717,7 +722,7 @@
     pd.resultado = Object.assign({}, r, { dado: nd, total, ok, seq: st.log.length, celebi: (r.celebi || 0) + 1 });
     if (ok) vencerLider(st, p, L, pd.cidade);
   }
-  function fecharPend(st) { const pd = st.pend; if (!pd) return; if (pd.tipo === 'lider' && pd.resultado && pd.resultado.ok != null) contaBatalha(st, 'lider', [atv(st)], pd.resultado.ok ? atv(st) : null); if (pd.tipo === 'captura' && pd.resultado && !pd.resultado.ok && cynthia(st, pd)) return; if (pd.tipo === 'carta') return concluirCarta(st); if (pd.tipo === 'liga') { st.pend = null; iniciarLiga(st, atv(st)); if (!st.pend) continuar(st); return; } st.pend = null; continuar(st); }
+  function fecharPend(st) { const pd = st.pend; if (!pd) return; if (pd.tipo === 'lider' && pd.resultado && pd.resultado.ok != null) { contaBatalha(st, 'lider', [atv(st)], pd.resultado.ok ? atv(st) : null); if (!pd.resultado.ok) { const a = ach(J(st)); if (a.perdaLider != null && a.perdaLider === (a.turnoN || 0) - 1) a.saco = true; a.perdaLider = a.turnoN || 0; } } if (pd.tipo === 'captura' && pd.resultado && !pd.resultado.ok && cynthia(st, pd)) return; if (pd.tipo === 'carta') return concluirCarta(st); if (pd.tipo === 'liga') { st.pend = null; iniciarLiga(st, atv(st)); if (!st.pend) continuar(st); return; } st.pend = null; continuar(st); }
   function escolherCaptura(st, id) {
     const pd = st.pend; if (!pd || pd.tipo !== 'escolherCaptura' || !pd.cartas.includes(id)) return;
     pd.cartas.filter(c => c !== id).forEach(c => devolver(st, P(c).cor, c)); st.pend = null; iniciarCaptura(st, { carta: id, cor: P(id).cor });
@@ -1044,7 +1049,7 @@
     }
     if (it.id === 'truquerocket') {
       if (st.pend || !alvosValidos(st, 'roubar1', {}).length) { log(st, 'Truque Rocket: nenhum oponente tem Itens.'); return; }
-      descartarItem(st, p, inst); log(st, `${p.nome} usou Truque Rocket.`, '', [['it', it.id]]); st.truqueRocket = true; pedirAlvo(st, 'roubar1', { bloqueavel: true }); return;
+      descartarItem(st, p, inst); log(st, `${p.nome} usou Truque Rocket.`, '', [['it', it.id]]); st.truqueRocket = true; st.turno.truques = (st.turno.truques || 0) + 1; if (st.turno.truques >= 2) ach(p).rocket = true; pedirAlvo(st, 'roubar1', { bloqueavel: true }); return;
     }
     if (it.id === 'vara') {
       if (!turnoLivre) { log(st, 'A Vara de Pesca só pode ser usada antes de se deslocar.'); return; }
@@ -1705,6 +1710,75 @@
   }
 
 
+  // ---------- Conquistas (modo opcional) ----------
+  function ach(p) { return p.ach || (p.ach = { ganhos: [] }); }
+  const TODOS_TIPOS = Object.keys(TIPOS_NOME);
+  const ganhosDe = p => ach(p).ganhos.filter(id => P(id));
+  const famTipo = (p, tipos) => new Set(ganhosDe(p).filter(id => P(id).tipos.some(t => tipos.includes(t))).map(id => P(id).familia || id)).size;
+  const corN = (p, cor) => ganhosDe(p).filter(id => P(id).cor === cor).length;
+  const famBonus = (p, min) => new Set(p.pokemon.filter(id => bonusEvolucao(p, id) >= min).map(id => P(id).familia || id)).size;
+  const vitJog = p => { const b = est(p).bat || {}; return ['duelo', 'praca', 'liga'].reduce((s, k) => s + ((b[k] || [0])[0] || 0), 0); };
+  const cidadesTab = st => Object.values(grafo(st).nodes).filter(n => n.kind === 'cidade').map(n => n.key);
+  const ITENS3 = [['itens', 3]];
+  const tipoConq = (tipos, tr) => ({ prog: (st, p) => [famTipo(p, tipos), 4], premio: [['trConq', tr]].concat(ITENS3), premioTxt: `Treinador ${tr} (se estiver livre) + 3 Itens` });
+  const CONQ = [
+    { id: 'ace', nome: 'Ace Trainer', req: 'Capture 5 Pokémons Azuis.', prog: (st, p) => [corN(p, 'azul'), 5], premio: [['ganhar', 'vermelho', 1]], premioTxt: '1 Pokémon Vermelho' },
+    Object.assign({ id: 'alpinista', nome: 'Alpinista', req: 'Capture 4 Pokémons de Pedra de diferentes famílias.' }, tipoConq(['pedra'], 'brock')),
+    { id: 'apostador', nome: 'Apostador', req: 'Tire 1 em dois dados seguidos.', prog: (st, p) => [ach(p).apostador ? 1 : 0, 1], premio: [['trConq', 'silvernerf'], ['itens', 1]], premioTxt: 'Treinador Silver (se estiver livre) + 1 Item' },
+    Object.assign({ id: 'arqueologo', nome: 'Arqueólogo', req: 'Capture 4 Pokémons de Terra de diferentes famílias.' }, tipoConq(['terra'], 'giovanni')),
+    { id: 'colecionador', nome: 'Colecionador', req: 'Capture 20 Pokémons.', prog: (st, p) => [ganhosDe(p).length, 20], premio: [['especialE', 'compre_2_eventos']], premioTxt: 'Compre 2 Eventos e ative 1' },
+    { id: 'criador', nome: 'Criador Pokémon', req: 'Tenha Pokémons evoluídos de 3 famílias diferentes.', prog: (st, p) => [famBonus(p, 1), 3], premio: [['evento'], ['itens', 1]], premioTxt: '1 Evento + 1 Item' },
+    { id: 'desafiador', nome: 'Desafiador', req: 'Vença 2 batalhas contra outros jogadores.', prog: (st, p) => [vitJog(p), 2], premio: ITENS3, premioTxt: '3 Itens' },
+    Object.assign({ id: 'domador', nome: 'Domador de Dragão', req: 'Capture 4 Pokémons Dragões de diferentes famílias.' }, tipoConq(['dragao'], 'lancee')),
+    { id: 'elite', nome: 'Elite', req: 'Tenha Pokémons de todos os tipos.', prog: (st, p) => [new Set(p.pokemon.flatMap(id => P(id).tipos)).size, TODOS_TIPOS.length], premio: [['superevento']], premioTxt: '1 Super Evento' },
+    Object.assign({ id: 'eng', nome: 'Engenheiro', req: 'Capture 4 Pokémons Elétricos de diferentes famílias.' }, tipoConq(['eletrico'], 'surge')),
+    { id: 'escoteiro', nome: 'Escoteiro', req: 'Capture 5 Pokémons Verdes.', prog: (st, p) => [corN(p, 'verde'), 5], premio: [['ganhar', 'azul', 1], ['itens', 1]], premioTxt: '1 Pokémon Azul + 1 Item' },
+    Object.assign({ id: 'exorcista', nome: 'Exorcista', req: 'Capture 4 Pokémons Noturnos ou Fantasmas de diferentes famílias.' }, tipoConq(['sombrio', 'fantasma'], 'agatha')),
+    Object.assign({ id: 'faixapreta', nome: 'Faixa Preta', req: 'Capture 4 Pokémons Lutadores de diferentes famílias.' }, tipoConq(['lutador'], 'bruno')),
+    Object.assign({ id: 'gentleman', nome: 'Gentleman', req: 'Capture 4 Pokémons Normais ou de Fada de diferentes famílias.' }, tipoConq(['normal', 'fada'], 'cheren')),
+    Object.assign({ id: 'incendiario', nome: 'Incendiário', req: 'Capture 4 Pokémons de Fogo de diferentes famílias.' }, tipoConq(['fogo'], 'blain')),
+    { id: 'jovem', nome: 'Jovem', req: 'Capture 5 Pokémons Rosas.', prog: (st, p) => [corN(p, 'rosa'), 5], premio: [['ganhar', 'verde', 1], ['itens', 2]], premioTxt: '1 Pokémon Verde + 2 Itens' },
+    Object.assign({ id: 'marinheiro', nome: 'Marinheiro', req: 'Capture 4 Pokémons de Água de diferentes famílias.' }, tipoConq(['agua'], 'mistyp')),
+    { id: 'monge', nome: 'Monge', req: 'Passe 3 turnos completos sem Itens em mãos e sem comprar Itens.', prog: (st, p) => [Math.min(3, ach(p).monge || 0), 3], premio: [['itens', 2]], premioTxt: '2 Itens' },
+    Object.assign({ id: 'ninja', nome: 'Ninja', req: 'Capture 4 Pokémons Venenosos de diferentes famílias.' }, tipoConq(['veneno'], 'koga2')),
+    Object.assign({ id: 'ornitologo', nome: 'Ornitólogo', req: 'Capture 4 Pokémons Voadores de diferentes famílias.' }, tipoConq(['voador'], 'kahili')),
+    { id: 'passageiro', nome: 'Passageiro', req: 'Use o Trem.', prog: (st, p) => [ach(p).trem ? 1 : 0, 1], premio: [['itens', 1], ['treinador', 1]], premioTxt: '1 Item + 1 carta de Treinador' },
+    { id: 'pokemaniaco', nome: 'Pokémaníaco', req: 'Capture 10 Pokémons.', prog: (st, p) => [ganhosDe(p).length, 10], premio: [['evento'], ['treinador', 1]], premioTxt: '1 Evento + 1 carta de Treinador' },
+    Object.assign({ id: 'ranger', nome: 'Ranger Pokémon', req: 'Capture 4 Pokémons Insetos ou de Grama de diferentes famílias.' }, tipoConq(['inseto', 'grama'], 'erica')),
+    { id: 'rocket', nome: 'Membro Rocket', req: 'Use 2 Truques Rocket no mesmo turno.', prog: (st, p) => [ach(p).rocket ? 1 : 0, 1], premio: [['ganhar', 'verde', 1]], premioTxt: '1 Pokémon Verde' },
+    { id: 'sacodepancada', nome: 'Saco de Pancada', req: 'Perca para um Líder de Ginásio em 2 turnos seguidos.', prog: (st, p) => [ach(p).saco ? 1 : 0, 1], premio: [['itens', 1]], premioTxt: '1 Item' },
+    Object.assign({ id: 'snowboarder', nome: 'Snowboarder', req: 'Capture 4 Pokémons de Gelo ou Metal de diferentes famílias.' }, tipoConq(['gelo', 'metal'], 'lorelei2')),
+    { id: 'veterano', nome: 'Veterano', req: 'Complete 2 linhagens de "famílias de três" Pokémons.', prog: (st, p) => [famBonus(p, 4), 2], premio: [['evento']], premioTxt: '1 Evento' },
+    { id: 'viajante', nome: 'Viajante', req: 'Visite todas as cidades (exceto o Planalto Índigo).', prog: (st, p) => { const cs = cidadesTab(st); return [cs.filter(k => p.passou.includes(k)).length, cs.length]; }, premio: [['ganhar', 'rosa', 1], ['trConq', 'hiker']], premioTxt: '1 Pokémon Rosa + Treinador Hiker (se estiver livre)' },
+    Object.assign({ id: 'vidente', nome: 'Vidente', req: 'Capture 4 Pokémons Psíquicos de diferentes famílias.' }, tipoConq(['psiquico'], 'sabrina')),
+  ];
+  CONQ.forEach(c => { c.img = 'img/conquistas/' + c.id + '.webp'; if (c.premio.some(x => x[0] === 'trConq')) { const t = c.premio.find(x => x[0] === 'trConq')[1]; if (idx().tr[t]) c.premioTxt = c.premioTxt.replace(/Treinador \S+/, 'Treinador ' + idx().tr[t].nome); } });
+  function progConq(st, c, p) { const [v, m] = c.prog(st, p); return [Math.min(v, m), m]; }
+  function checarConquistas(st) {
+    const C = st.conq; if (!C || !C.on || st.vencedor != null) return;
+    const N = st.jogadores.length, ordem = st.jogadores.map((_, k) => (st.vez + k) % N).filter(j => !J(st, j).eliminado), novas = [];
+    CONQ.forEach(c => {
+      if (C.donos[c.id] != null) return;
+      const j = ordem.find(j => { const [v, m] = progConq(st, c, J(st, j)); return v >= m; });
+      if (j == null) return;
+      C.donos[c.id] = j; novas.push({ j, id: c.id });
+      log(st, `🏆 ${J(st, j).nome} conquistou "${c.nome}"! Recompensa: ${c.premioTxt}.`, 'destaque');
+      st.fila = (st.fila || []).concat([['comoJogador', j, c.premio]]);
+    });
+    if (novas.length) { C.seq = (C.seq || 0) + 1; C.aviso = { seq: C.seq, itens: novas }; if (!st.pend) continuar(st); }
+  }
+  // recompensa: um Treinador específico, só se ninguém for dono dele
+  function trConq(st, p, t) {
+    const T = idx().tr[t]; if (!T) return;
+    const dono = st.jogadores.find(q => q.treinador === t || q.treinadoresExtra.includes(t));
+    if (dono) { log(st, `${T.nome} já pertence a ${dono.nome}: ${p.nome} não recebe o Treinador.`); return; }
+    let i = st.decks.treinador.indexOf(t), de = st.decks.treinador; if (i < 0) { de = st.descartes.treinador; i = de.indexOf(t); }
+    if (i < 0) { log(st, `${T.nome} não está disponível nesta partida.`); return; }
+    de.splice(i, 1); p.treinadoresExtra.push(t);
+    log(st, `${p.nome} recebe o Treinador ${T.nome}.`, '', [['tr', t]]);
+    st.pend = { tipo: 'treinador', jogador: p.id, titulo: 'Escolha seu Treinador ativo' };
+  }
+
   // ---------- Propostas de troca entre jogadores humanos ----------
   // no seu turno, o jogador propõe trocar até 3 Pokémon seus por até 3 do alvo; o alvo responde no início do turno dele
   const MAX_PROPOSTA = 3;
@@ -1825,11 +1899,11 @@
     return v;
   }
   // ajustes automáticos depois de qualquer ação (no anfitrião)
-  function posAcao(st) { const pd = st.pend; if (pd && pd.tipo === 'carta' && !pd.ativado && pd.reacao == null) iniciarReacoes(st); }
+  function posAcao(st) { checarConquistas(st); const pd = st.pend; if (pd && pd.tipo === 'carta' && !pd.ativado && pd.reacao == null) iniciarReacoes(st); }
   const API = G.Engine = {
     novoJogo, grafo, destinos, rolarMovimento, escolherDado, hiker, ajustarRolagem, mover, trem, encerrarTurno, podeEncerrar, descartarExcesso,
     ativarCarta, concluirCarta, fecharPend, rolarCaptura, escolherCaptura, escolherEvento, escolherTreinador, travar, abrirLider, lutarLider, remedio,
     podeEnfrentar, usarItem, lyra, ferramenta, duelo, forcaBase, forcaEmBatalha, bonusEvolucao, bonusTreinador, obedece, nInsignias, limiteItens, faixaCaptura,
-    nomeEspaco, familiaTravada, posXY, autoTexto, escolherAlvo, responderBoneca, iniciarReacoes, reacaoAberta, reagir, encerrarReacoes, celebiMovimento, celebiCaptura, celebiLider, celebiDuelo, aceitarTabela, celebiTabela, celebiDe, escolherLura, resolverFestival, resolverJuniper, resolverAzalea, distribuirEvento, comprarAqua, resolverMagma, est, desistirCaptura, vistaDe, PEND_PRIVADO, escolherDuelo, confirmarPreso, preso, noHexFinal, proporTroca, cancelarProposta, responderProposta, podeProporTroca, alvosProposta, trocavel, MAX_PROPOSTA, quemDecide, podeAgir, acao, posAcao, celebiPraca, reagirRepel, encerrarRepel, temRepel, ligaCelebi, ligaRemedio, responderCynthia, temCynthia, escolherDuplaPraca, fecharPraca, resolverPracaPremio, pracaAptosDe, pracaForca, PREMIOS_PRACA, iniciarLiga, ligaGatilho, resolverLigaOponente, ligaEscolher, ligaSeguir, ligaAptos, porCapturas, FASE_LIGA, resolverWally, wallyOk, resolverCriadores, opcoesCriadores, linhasCriadores, foraDeJogoCriadores, resolverFuchsia, resolverBriney, encrencado, escolherSlot, resolverTipoCor, pegarDeLista, escolherEspaco, escolherLiderFora, pagarItens, resolverNegociador, pegarItem, filtrarSlots, escolherDesempate, descartarDe, resolverTroca, resolverDividir, escolherOpcao, lutarDuelo, fecharDuelo, aptosDuelo, paresTroca, temBoneca, slotInsignia, vantagem, bonusItemBatalha, idx, P, ITEM, J, HW, HH, CORES_PEAO, TIPOS_NOME, ORDEM_FORCA
+    nomeEspaco, familiaTravada, posXY, autoTexto, escolherAlvo, responderBoneca, iniciarReacoes, reacaoAberta, reagir, encerrarReacoes, celebiMovimento, celebiCaptura, celebiLider, celebiDuelo, aceitarTabela, celebiTabela, celebiDe, escolherLura, resolverFestival, resolverJuniper, resolverAzalea, distribuirEvento, comprarAqua, resolverMagma, est, desistirCaptura, vistaDe, PEND_PRIVADO, escolherDuelo, CONQ, progConq, checarConquistas, confirmarPreso, preso, noHexFinal, proporTroca, cancelarProposta, responderProposta, podeProporTroca, alvosProposta, trocavel, MAX_PROPOSTA, quemDecide, podeAgir, acao, posAcao, celebiPraca, reagirRepel, encerrarRepel, temRepel, ligaCelebi, ligaRemedio, responderCynthia, temCynthia, escolherDuplaPraca, fecharPraca, resolverPracaPremio, pracaAptosDe, pracaForca, PREMIOS_PRACA, iniciarLiga, ligaGatilho, resolverLigaOponente, ligaEscolher, ligaSeguir, ligaAptos, porCapturas, FASE_LIGA, resolverWally, wallyOk, resolverCriadores, opcoesCriadores, linhasCriadores, foraDeJogoCriadores, resolverFuchsia, resolverBriney, encrencado, escolherSlot, resolverTipoCor, pegarDeLista, escolherEspaco, escolherLiderFora, pagarItens, resolverNegociador, pegarItem, filtrarSlots, escolherDesempate, descartarDe, resolverTroca, resolverDividir, escolherOpcao, lutarDuelo, fecharDuelo, aptosDuelo, paresTroca, temBoneca, slotInsignia, vantagem, bonusItemBatalha, idx, P, ITEM, J, HW, HH, CORES_PEAO, TIPOS_NOME, ORDEM_FORCA
   };
 })(window);
