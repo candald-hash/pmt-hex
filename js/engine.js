@@ -832,7 +832,6 @@
     while (r.sa + r.da === r.sb + r.db) { r.da = dado(st); r.db = dado(st); r.empates++; log(st, 'Festival de Praça: empate — os dois rolam de novo.'); }
     r.fa = r.sa + r.da; r.fb = r.sb + r.db; r.venc = r.fa > r.fb ? pd.a : pd.b; r.celebi = (r.celebi || 0) + 1; r.seq = st.log.length + 1000 * r.celebi;
     log(st, `Dado refeito (${antes} → ${nd}): ${J(st, pd.a).nome} ${r.fa} × ${r.fb} ${J(st, pd.b).nome} — ${J(st, r.venc).nome} vence.`, 'destaque');
-    log(st, `Festival de Praça: ${J(st, pd.a).nome} ${sa + da} × ${sb + db} ${J(st, pd.b).nome} — ${J(st, venc).nome} vence.`, 'destaque');
   }
   function fecharPraca(st) {
     const pd = st.pend; if (!pd || pd.tipo !== 'praca' || !pd.resultado) return;

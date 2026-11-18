@@ -10,6 +10,7 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- Correção: Pedido a Celebi no Festival de Praça travava a batalha (erro ao refazer o dado).
 - Modo opcional Conquistas (29 cartas): ative em Opções ao criar a partida (ou na sala on-line). Cada conquista é de quem cumprir primeiro e dá a recompensa da carta (Treinadores só se estiverem sem dono). Botão 🏆 no canto do tabuleiro mostra todas as conquistas, quem já ganhou e o progresso de cada jogador; aviso na tela a cada conquista.
 - Correção: o Pioneiro de Sunyshore agora ativa o espaço escolhido (antes só movia o peão).
 - Elenco alternativo: família Starly/Staravia/Staraptor substituída por Pidove/Tranquill/Unfezant (cartas e miniaturas).
