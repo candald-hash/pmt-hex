@@ -1392,7 +1392,7 @@
       <p style="font-size:15px">${esc(it.texto)}</p>
       <p class="mut">${it.bola ? 'Bolas são usadas na janela de captura.' : it.uso === 'batalha' ? 'Itens de batalha são escolhidos na janela de batalha.' : ['corda', 'escaperope'].includes(it.id) ? 'Use depois de rolar o dado, pelos botões no painel do turno.' : it.id === 'pedidocelebi' ? 'Use pelos botões <img class="celIco" src="img/fx/celebi.png" alt=""> que aparecem depois das rolagens: movimento, captura, batalha de Ginásio, Duelos e Eventos de dado.' : automatico ? '' : 'Ao usar, o item é descartado; aplique o efeito com a caixa de ferramentas.'}</p>
       <div class="mfoot"><button data-x>Fechar</button>${!it.bola && it.uso !== 'batalha' && !['corda', 'escaperope', 'pedidocelebi'].includes(it.id) ? `<button class="pri" id="usar">Usar ${esc(it.nome)}</button>` : ''}</div></div></div>`);
-    const u = $('#usar'); if (u) u.onclick = () => { fecharModal(); agir('usarItem', inst); if (!automatico) caixaFerramentas(); };
+    const u = $('#usar'); if (u) u.onclick = () => { fecharModal(); if (it.id === 'bike1' && st.turno && (st.turno.bicicletaAtiva || st.turno.bicicletaUsada)) { toast(st.turno.bicicletaAtiva ? '🚲 Você já usou uma Bicicleta neste turno.' : '🚲 Não dá para usar duas Bicicletas em sequência.'); return; } agir('usarItem', inst); if (!automatico) caixaFerramentas(); };
   }
   function modalJogador(i) {
     const q = E.J(st, i), tr = q.treinador && E.idx().tr[q.treinador];

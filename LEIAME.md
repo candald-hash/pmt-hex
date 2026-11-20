@@ -10,6 +10,7 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- Correção: usar uma segunda Bicicleta no mesmo turno gastava o Item sem dar outro turno extra; agora o uso é recusado e a Bicicleta fica na mão.
 - Correção: Pedido a Celebi no Festival de Praça travava a batalha (erro ao refazer o dado).
 - Modo opcional Conquistas (29 cartas): ative em Opções ao criar a partida (ou na sala on-line). Cada conquista é de quem cumprir primeiro e dá a recompensa da carta (Treinadores só se estiverem sem dono). Botão 🏆 no canto do tabuleiro mostra todas as conquistas, quem já ganhou e o progresso de cada jogador; aviso na tela a cada conquista.
 - Correção: o Pioneiro de Sunyshore agora ativa o espaço escolhido (antes só movia o peão).

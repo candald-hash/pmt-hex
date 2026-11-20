@@ -1033,7 +1033,7 @@
   function usarItem(st, inst) {
     // usos genéricos fora de captura/batalha
     const p = J(st), it = ITEM(inst); if (!it) return;
-    if (it.id === 'bike1') { if (st.turno.bicicletaUsada) { log(st, 'Não é possível usar duas Bicicletas em sequência.'); return; } st.turno.bicicletaAtiva = true; descartarItem(st, p, inst); log(st, `${p.nome} usou Bicicleta: terá um turno extra.`, '', [['it', it.id]]); return; }
+    if (it.id === 'bike1') { if (st.turno.bicicletaUsada || st.turno.bicicletaAtiva) { log(st, st.turno.bicicletaAtiva ? 'Você já usou uma Bicicleta neste turno: só é possível ganhar um turno extra por vez.' : 'Não é possível usar duas Bicicletas em sequência.'); return; } st.turno.bicicletaAtiva = true; descartarItem(st, p, inst); log(st, `${p.nome} usou Bicicleta: terá um turno extra.`, '', [['it', it.id]]); return; }
     if (it.id === 'corda' || it.id === 'escaperope') return; // tratado no movimento
     const turnoLivre = st.fase === 'inicio' && !st.pend;
     if (it.id === 'doceraro') {
