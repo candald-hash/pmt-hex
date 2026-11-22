@@ -1583,7 +1583,12 @@
   const PREFIXO = 'pmthex-', ALFA = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   const novoCodigo = () => Array.from({ length: 5 }, () => ALFA[Math.floor(Math.random() * ALFA.length)]).join('');
   function tokenLocal() { let t = null; try { t = localStorage.getItem('pmthex-token'); } catch (e) {} if (!t) { t = Math.random().toString(36).slice(2) + Date.now().toString(36); try { localStorage.setItem('pmthex-token', t); } catch (e) {} } return t; }
-  function opcoesPeer() { const q = new URLSearchParams(location.search).get('peer'); if (!q) return { debug: 1 }; const [host, port] = q.split(':'); return { host, port: +port || 9000, path: '/', secure: false, debug: 1 }; }
+  // STUN (descobre o endereço público) + TURN (retransmite quando a conexão direta é bloqueada: 4G/CGNAT, redes corporativas, VPN)
+  const ICE = { iceServers: [
+    { urls: ['stun:stun.l.google.com:19302', 'stun:global.stun.twilio.com:3478'] },
+    { urls: ['turn:free.expressturn.com:3478', 'turn:free.expressturn.com:3478?transport=tcp'], username: '000000002110823127', credential: 'rhsNpUQSRp67g8NYSc5B7Z9eJ0g=' }
+  ] };
+  function opcoesPeer() { const q = new URLSearchParams(location.search).get('peer'); if (!q) return { debug: 1, config: ICE }; const [host, port] = q.split(':'); return { host, port: +port || 9000, path: '/', secure: false, debug: 1, config: ICE }; }
   function linkSala(c) { const u = new URL(location.href); u.search = ''; u.hash = ''; u.searchParams.set('sala', c); const pq = new URLSearchParams(location.search).get('peer'); if (pq) u.searchParams.set('peer', pq); return u.toString(); }
   function avisoRede(msg) { let b = $('#netBar'); if (!b) { b = h('<div id="netBar"></div>'); document.body.appendChild(b); } b.textContent = msg || ''; b.hidden = !msg; }
   function toast(msg) { const t = h(`<div class="toast">${msg}</div>`); document.body.appendChild(t); setTimeout(() => t.classList.add('fora'), 2200); setTimeout(() => t.remove(), 2800); }
