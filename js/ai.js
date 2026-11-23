@@ -376,6 +376,9 @@
       if (mel && !st.turno.melTentado) { st.turno.melTentado = true; const ok = E.filtrarSlots(st, { hex: true, aberta: true }).some(k => pCaptura(st, p, st.slots[k].carta, null, k) * valorSlot(st, p, k) >= 3); if (ok) { E.usarItem(st, mel); return true; } }
       const nav = p.itens.find(i => i.startsWith('pokenavplus#'));
       if (nav && !st.turno.navUsado) { const fraco = valorTreinador(p, p.treinador) < 2.5; const forte = st.jogadores.some(q => q.id !== p.id && valorTreinador(q, q.treinador) >= 5 && !E.temBoneca(q)); if (fraco || forte) { st.turno.navUsado = true; E.usarItem(st, nav); return true; } }
+      // Bicicleta: usa sempre que puder (turno extra), como os jogadores fazem
+      const bike = p.itens.find(i => i.startsWith('bike1#'));
+      if (bike && !st.turno.bicicletaUsada && !st.turno.bicicletaAtiva) { E.usarItem(st, bike); if (st.turno.bicicletaAtiva) return true; }
       E.rolarMovimento(st); return true;
     }
     if (st.fase === 'mover') {
@@ -387,6 +390,18 @@
       }
       const ds = t.destinos || {}; const ks = Object.keys(ds);
       if (E.celebiDe(p) && !t.celebi && t.dados && t.dados.length === 1 && !t.encrenca) { const best = ks.length ? Math.max(...ks.map(k => pontuarDestino(st, p, k, ds[k]))) : -99; if (best < 6) { E.celebiMovimento(st, 0); return true; } }
+      // Corda de Fuga: ajusta o dado (±1 / ±2) quando leva a um destino bem melhor
+      if (t.rolagem != null && !t.encrenca && !t.cordaVista) {
+        t.cordaVista = true;
+        const cordas = p.itens.filter(i => ['corda', 'escaperope'].includes(i.split('#')[0]));
+        if (cordas.length) {
+          const melhor = d => { const x = d === t.rolagem ? ds : E.destinos(st, st.vez, d); const v = Object.keys(x).map(k => pontuarDestino(st, p, k, x[k])); return v.length ? Math.max(...v) : -99; };
+          const agora = melhor(t.rolagem); let esc = null;
+          cordas.sort((a, b) => valorItem(a) - valorItem(b)).forEach(inst => { const m = inst.startsWith('corda#') ? 1 : 2;
+            for (let d = -m; d <= m; d++) { const v = Math.max(1, t.rolagem + d); if (!d || v === t.rolagem) continue; const b = melhor(v); if (b >= agora + 5 && (!esc || b > esc.b)) esc = { inst, d, b }; } });
+          if (esc) { E.ajustarRolagem(st, esc.d, esc.inst); return true; }
+        }
+      }
       if (!ks.length) { st.fase = 'acao'; return true; }
       const alvo = ks.map(k => ({ k, v: pontuarDestino(st, p, k, ds[k]) })).sort((a, b) => b.v - a.v)[0].k;
       const info = ds[alvo]; E.mover(st, alvo, info.custo ? p.itens.slice().sort((a, b) => valorItem(a) - valorItem(b)).slice(0, info.custo) : []); return true;

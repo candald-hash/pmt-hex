@@ -10,6 +10,7 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- IA: passa a usar Bicicleta (sempre que pode, antes de rolar) e Corda de Fuga (ajusta o dado quando chega a um destino bem melhor).
 - Correção: travar uma família ramificada (Eevee, Slowpoke) dá o +1 a cada evolução que o jogador tiver (ex.: Jolteon e Vaporeon), e toda a família fica protegida de trocas.
 - Hexágono final: nos espaços com multiplicador (Vermelho ×2, Azul ×3, Verde ×4), o jogador escolhe a cor do espaço ou uma mais fraca antes de comprar.
 - On-line: servidor de retransmissão (TURN, ExpressTURN) para redes que bloqueiam a conexão direta (4G/CGNAT, redes corporativas, VPN). Página de diagnóstico: teste-conexao.html.
