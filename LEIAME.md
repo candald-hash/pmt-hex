@@ -10,6 +10,7 @@ Abra `web/index.html` no Chrome ou no Edge, com dois cliques. Não precisa de se
 
 ## Novidades desta versão
 
+- Trocas com CPUs: humanos podem propor trocas às CPUs (que aceitam ou recusam no início da vez delas, conforme o perfil), e as CPUs às vezes propõem trocas aos humanos. Não há trocas entre CPUs.
 - Perfis de IA: ao marcar um lugar como 🤖 IA, escolha Padrão, Rush, Colecionador, Equipe Rocket, Apostador ou Aleatório (também na sala on-line). O perfil aparece ao lado do nome do jogador.
 - IA: passa a usar Bicicleta (sempre que pode, antes de rolar) e Corda de Fuga (ajusta o dado quando chega a um destino bem melhor).
 - Correção: travar uma família ramificada (Eevee, Slowpoke) dá o +1 a cada evolução que o jogador tiver (ex.: Jolteon e Vaporeon), e toda a família fica protegida de trocas.

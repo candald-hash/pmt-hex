@@ -1804,10 +1804,12 @@
   function trocavel(p, id) { return p.pokemon.includes(id) && !familiaTravada(p, id); }
   function propostaValida(st, pr) {
     const a = J(st, pr.de), b = J(st, pr.para);
-    return !!a && !!b && !a.eliminado && !b.eliminado && !b.ia && pr.meus.every(id => trocavel(a, id)) && pr.deles.every(id => trocavel(b, id));
+    return !!a && !!b && !a.eliminado && !b.eliminado && !(cpu(a) && cpu(b)) && pr.meus.every(id => trocavel(a, id)) && pr.deles.every(id => trocavel(b, id));
   }
-  function alvosProposta(st) { const p = J(st); return st.jogadores.filter(q => q.id !== p.id && !q.ia && !q.eliminado).map(q => q.id); }
-  function podeProporTroca(st) { const p = J(st); return st.vencedor == null && !st.pend && st.ator == null && !p.ia && !p.eliminado && alvosProposta(st).length > 0; }
+  // humanos propõem para qualquer adversário; CPUs só para humanos (sem trocas entre CPUs)
+  function alvosProposta(st) { const p = J(st); return st.jogadores.filter(q => q.id !== p.id && !q.eliminado && !(cpu(p) && cpu(q))).map(q => q.id); }
+  function cpu(q) { return q.ia && !q.simHumano; } // simHumano: só nos testes automáticos
+  function podeProporTroca(st) { const p = J(st); return st.vencedor == null && !st.pend && st.ator == null && !p.eliminado && alvosProposta(st).length > 0; }
   function proporTroca(st, para, meus, deles) {
     const p = J(st), q = J(st, para); if (!podeProporTroca(st) || !q || !alvosProposta(st).includes(para)) return;
     meus = [...new Set(meus || [])]; deles = [...new Set(deles || [])];

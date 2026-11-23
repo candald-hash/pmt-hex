@@ -15,6 +15,44 @@
     apostador:    { lider: 0.25, liderAcao: 0.15, trem: 0.4, wLider: 1.1, wCap: 1.2, wEv: 1.6, wSuper: 1.7, wDist: 0.9, fam: 3, bolaGanho: 0.3, bolaValor: 8, celebiCap: 3, rocket: 0, risco: 1 },
   };
   const PF = p => PERFIS[(p && p.perfil) || 'padrao'] || PERFIS.padrao;
+  // ---------- trocas entre jogadores ----------
+  const TROCA = { padrao: { margem: 2, chance: 0.15, deles: 0.5 }, rush: { margem: 2, chance: 0.15, deles: 0.5 }, colecionador: { margem: 1.5, chance: 0.3, deles: 0.5 },
+    rocket: { margem: 4, chance: 0.08, deles: -1 }, apostador: { margem: 1, chance: 0.08, deles: -2 } };
+  // valor do time de q se ele tivesse estes Pokémons (o perfil muda o que conta)
+  function valorTime(q, ids, perfil) {
+    const f = Object.assign({}, q, { pokemon: ids }), pf = perfil || 'padrao';
+    const pesos = pf === 'rush' ? [1.4, 1.2, 0.9, 0.4, 0.2] : [1, 1, 1, 0.7, 0.5, 0.3];
+    const vals = ids.map(id => (E.forcaBase(f, id) + E.bonusTreinador(f, id)) * (E.obedece(f, E.P(id).cor) ? 1 : pf === 'rush' ? 0.25 : 0.5)).sort((a, b) => b - a);
+    let v = vals.reduce((s, x, i) => s + x * (pesos[i] != null ? pesos[i] : 0.15), 0);
+    if (pf === 'colecionador') { const fams = new Set(ids.filter(id => E.bonusEvolucao(f, id) > 0).map(id => E.P(id).familia)); v += fams.size * 3 + ids.length * 0.5; }
+    return v;
+  }
+  function ganhoTroca(q, sai, entra, perfil) { const antes = q.pokemon, depois = antes.filter(id => !sai.includes(id)).concat(entra); return valorTime(q, depois, perfil) - valorTime(q, antes, perfil); }
+  // resposta da CPU a uma proposta: aceita só se sair ganhando acima da margem do perfil
+  function avaliarProposta(st, pd) {
+    const q = E.J(st, pd.para), autor = E.J(st, pd.de), pf = q.perfil || 'padrao', T = TROCA[pf] || TROCA.padrao;
+    let margem = T.margem; if (pf === 'rocket' && lider(st, q) && lider(st, q).id === autor.id) margem += 4;
+    const g = ganhoTroca(q, pd.deles, pd.meus, pf) + (pf === 'apostador' ? (Math.random() - 0.5) * 3 : 0);
+    return g >= margem;
+  }
+  // a CPU procura uma troca 1 por 1 boa para ela (e razoável para o humano) e propõe
+  function proporTrocaIA(st, p) {
+    const pf = p.perfil || 'padrao', T = TROCA[pf] || TROCA.padrao;
+    if ((st.propostas || []).some(x => x.de === p.id) || Math.random() >= T.chance) return false;
+    p.iaTrocas = p.iaTrocas || {}; let best = null;
+    E.alvosProposta(st).forEach(j => {
+      const q = E.J(st, j);
+      p.pokemon.filter(id => E.trocavel(p, id)).forEach(a => q.pokemon.filter(id => E.trocavel(q, id)).forEach(b => {
+        const k = j + ':' + a + ':' + b; if (p.iaTrocas[k] != null && st.rodada - p.iaTrocas[k] < 4) return;
+        const gEu = ganhoTroca(p, [a], [b], pf), gEle = ganhoTroca(q, [b], [a], 'padrao');
+        if (gEu < T.margem || gEle < T.deles) return;
+        const nota = pf === 'rocket' ? gEu - gEle * 0.3 : gEu + gEle;
+        if (!best || nota > best.nota) best = { j, a, b, k, nota };
+      }));
+    });
+    if (!best) return false;
+    p.iaTrocas[best.k] = st.rodada; E.proporTroca(st, best.j, [best.a], [best.b]); return true;
+  }
   // líder da partida (alvo preferido da Equipe Rocket)
   const placar = q => E.nInsignias(q) * 10 + q.pokemon.length;
   const lider = (st, eu) => st.jogadores.filter(q => q.id !== eu.id && !q.eliminado).sort((a, b) => placar(b) - placar(a))[0];
@@ -300,7 +338,7 @@
       if (pd.tipo === 'treinador') { if (!E.J(st, pd.jogador).ia) return 'esperar'; const q = E.J(st, pd.jogador); const op = [q.treinador, ...q.treinadoresExtra].filter(Boolean); E.escolherTreinador(st, op.sort((a, b) => valorTreinador(q, b) - valorTreinador(q, a))[0]); return true; }
       if (pd.tipo === 'corMult') { E.escolherCorMult(st, pd.opcoes[0]); return true; }
       if (pd.tipo === 'preso') { E.confirmarPreso(st); return true; }
-      if (pd.tipo === 'proposta') { if (!E.J(st, pd.para).ia) return 'esperar'; E.responderProposta(st, false); return true; }
+      if (pd.tipo === 'proposta') { if (!E.J(st, pd.para).ia) return 'esperar'; E.responderProposta(st, avaliarProposta(st, pd)); return true; }
       if (pd.tipo === 'travar') {
         const q = E.J(st, pd.jogador != null ? pd.jogador : st.vez);
         const fams = {}; q.pokemon.forEach(id => { const f = E.P(id).familia || id; fams[f] = Math.max(fams[f] || 0, E.forcaBase(q, id) + (q.travadas.includes(f) ? -100 : 0)); });
@@ -397,6 +435,7 @@
       if (mel && !st.turno.melTentado) { st.turno.melTentado = true; const ok = E.filtrarSlots(st, { hex: true, aberta: true }).some(k => pCaptura(st, p, st.slots[k].carta, null, k) * valorSlot(st, p, k) >= 3); if (ok) { E.usarItem(st, mel); return true; } }
       const nav = p.itens.find(i => i.startsWith('pokenavplus#'));
       if (nav && !st.turno.navUsado) { const fraco = valorTreinador(p, p.treinador) < 2.5; const forte = st.jogadores.some(q => q.id !== p.id && valorTreinador(q, q.treinador) >= 5 && !E.temBoneca(q)); if (fraco || forte) { st.turno.navUsado = true; E.usarItem(st, nav); return true; } }
+      if (!st.turno.trocaVista) { st.turno.trocaVista = true; if (proporTrocaIA(st, p)) return true; }
       // Bicicleta: usa sempre que puder (turno extra), como os jogadores fazem
       const bike = p.itens.find(i => i.startsWith('bike1#'));
       if (bike && !st.turno.bicicletaUsada && !st.turno.bicicletaAtiva) { E.usarItem(st, bike); if (st.turno.bicicletaAtiva) return true; }
@@ -434,5 +473,5 @@
     }
     return false;
   }
-  G.AI = { PERFIS, decidirRepel, decidirCynthia, reacaoLiga, aplicarReacaoLiga, duplaPraca, premioPraca, escolhaLiga, oponenteLiga, decidirReacao, decidirFestival, decidirJuniper, decidirTreinador: st => { const q = E.J(st, st.pend.jogador); return [q.treinador, ...q.treinadoresExtra].filter(Boolean).sort((a, b) => valorTreinador(q, b) - valorTreinador(q, a))[0]; }, decidirBriney, passo, pCaptura, planoLider, pVitoria, decidirBoneca, escolhaDuelo };
+  G.AI = { PERFIS, avaliarProposta, valorTime, decidirRepel, decidirCynthia, reacaoLiga, aplicarReacaoLiga, duplaPraca, premioPraca, escolhaLiga, oponenteLiga, decidirReacao, decidirFestival, decidirJuniper, decidirTreinador: st => { const q = E.J(st, st.pend.jogador); return [q.treinador, ...q.treinadoresExtra].filter(Boolean).sort((a, b) => valorTreinador(q, b) - valorTreinador(q, a))[0]; }, decidirBriney, passo, pCaptura, planoLider, pVitoria, decidirBoneca, escolhaDuelo };
 })(window);
