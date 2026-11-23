@@ -149,7 +149,14 @@
     return est.size >= 3 ? 4 : est.size === 2 ? 2 : 0;
   }
   function maisEvoluido(p, fam) { const l = p.pokemon.map(P).filter(x => (x.familia || x.id) === fam); if (!l.length) return null; return l.reduce((a, b) => b.estagio > a.estagio ? b : a).id; }
-  function bonusTravada(p, id) { const c = P(id), f = c.familia || c.id; let b = p.mais1[id] || 0; if (p.travadas.includes(f) && maisEvoluido(p, f) === id) b += p.travadas.filter(x => x === f).length; return b; }
+  // quem recebe o +1 da família travada: o mais evoluído; nas famílias ramificadas (Eevee, Slowpoke), cada evolução que o jogador tiver
+  function recebeTrava(p, id) {
+    const c = P(id), f = c.familia || c.id;
+    if (!c.familiaRamificada) return maisEvoluido(p, f) === id;
+    const fam = p.pokemon.map(P).filter(x => (x.familia || x.id) === f), evol = fam.filter(x => x.preEvo && x.preEvo.length);
+    return evol.length ? evol.some(x => x.id === id) : maisEvoluido(p, f) === id;
+  }
+  function bonusTravada(p, id) { const c = P(id), f = c.familia || c.id; let b = p.mais1[id] || 0; if (p.travadas.includes(f) && recebeTrava(p, id)) b += p.travadas.filter(x => x === f).length; return b; }
   function bonusTreinador(p, id) {
     const t = p.treinador && idx().tr[p.treinador]; if (!t) return 0; const c = P(id);
     if (t.especialista && c.tipos.some(x => t.especialista.includes(x))) return 1;
@@ -339,7 +346,12 @@
   function especial(st, s, k) {
     const p = J(st), e = s.especial;
     const m = { compre_2_vermelhos: ['vermelho', 2], compre_3_azuis: ['azul', 3], compre_4_verdes: ['verde', 4] }[e];
+    if (m && !s.corEscolhida) {
+      const escala = ['rosa', 'verde', 'azul', 'vermelho'], ops = escala.slice(0, escala.indexOf(m[0]) + 1).reverse();
+      st.pend = { tipo: 'corMult', especial: e, n: m[1], opcoes: ops, titulo: `${m[0].charAt(0).toUpperCase() + m[0].slice(1)} ×${m[1]}: escolha a cor (a do espaço ou mais fraca)` }; return;
+    }
     if (m) {
+      m[0] = s.corEscolhida;
       const escala = ['rosa', 'verde', 'azul', 'vermelho'], cartas = [], usadas = new Set();
       for (let i = 0; i < m[1]; i++) { let c = null; for (let j = escala.indexOf(m[0]); j >= 0 && !c; j--) { c = tirar(st, escala[j]); if (c && escala[j] !== m[0]) usadas.add(escala[j]); } if (c) cartas.push(c); }
       if (!cartas.length) { log(st, `Não há Pokémons ${m[0]}s (nem mais fracos) nas pilhas.`); return; }
@@ -357,6 +369,12 @@
       log(st, `${p.nome} parou em "Começar a Liga"! A Liga Pokémon começa.`, 'destaque');
       iniciarLiga(st, p.id); return;
     }
+  }
+
+  function escolherCorMult(st, cor) {
+    const pd = st.pend; if (!pd || pd.tipo !== 'corMult' || !pd.opcoes.includes(cor)) return;
+    st.pend = null; log(st, `${J(st).nome} escolheu ${pd.n} Pokémons ${cor}s.`);
+    especial(st, { especial: pd.especial, corEscolhida: cor }, J(st).pos); continuar(st);
   }
 
   // ---------- cartas ----------
@@ -1903,6 +1921,6 @@
     novoJogo, grafo, destinos, rolarMovimento, escolherDado, hiker, ajustarRolagem, mover, trem, encerrarTurno, podeEncerrar, descartarExcesso,
     ativarCarta, concluirCarta, fecharPend, rolarCaptura, escolherCaptura, escolherEvento, escolherTreinador, travar, abrirLider, lutarLider, remedio,
     podeEnfrentar, usarItem, lyra, ferramenta, duelo, forcaBase, forcaEmBatalha, bonusEvolucao, bonusTreinador, obedece, nInsignias, limiteItens, faixaCaptura,
-    nomeEspaco, familiaTravada, posXY, autoTexto, escolherAlvo, responderBoneca, iniciarReacoes, reacaoAberta, reagir, encerrarReacoes, celebiMovimento, celebiCaptura, celebiLider, celebiDuelo, aceitarTabela, celebiTabela, celebiDe, escolherLura, resolverFestival, resolverJuniper, resolverAzalea, distribuirEvento, comprarAqua, resolverMagma, est, desistirCaptura, vistaDe, PEND_PRIVADO, escolherDuelo, CONQ, progConq, checarConquistas, confirmarPreso, preso, noHexFinal, proporTroca, cancelarProposta, responderProposta, podeProporTroca, alvosProposta, trocavel, MAX_PROPOSTA, quemDecide, podeAgir, acao, posAcao, celebiPraca, reagirRepel, encerrarRepel, temRepel, ligaCelebi, ligaRemedio, responderCynthia, temCynthia, escolherDuplaPraca, fecharPraca, resolverPracaPremio, pracaAptosDe, pracaForca, PREMIOS_PRACA, iniciarLiga, ligaGatilho, resolverLigaOponente, ligaEscolher, ligaSeguir, ligaAptos, porCapturas, FASE_LIGA, resolverWally, wallyOk, resolverCriadores, opcoesCriadores, linhasCriadores, foraDeJogoCriadores, resolverFuchsia, resolverBriney, encrencado, escolherSlot, resolverTipoCor, pegarDeLista, escolherEspaco, escolherLiderFora, pagarItens, resolverNegociador, pegarItem, filtrarSlots, escolherDesempate, descartarDe, resolverTroca, resolverDividir, escolherOpcao, lutarDuelo, fecharDuelo, aptosDuelo, paresTroca, temBoneca, slotInsignia, vantagem, bonusItemBatalha, idx, P, ITEM, J, HW, HH, CORES_PEAO, TIPOS_NOME, ORDEM_FORCA
+    nomeEspaco, familiaTravada, posXY, autoTexto, escolherAlvo, responderBoneca, iniciarReacoes, reacaoAberta, reagir, encerrarReacoes, celebiMovimento, celebiCaptura, celebiLider, celebiDuelo, aceitarTabela, celebiTabela, celebiDe, escolherLura, resolverFestival, resolverJuniper, resolverAzalea, distribuirEvento, comprarAqua, resolverMagma, est, desistirCaptura, vistaDe, PEND_PRIVADO, escolherDuelo, escolherCorMult, CONQ, progConq, checarConquistas, confirmarPreso, preso, noHexFinal, proporTroca, cancelarProposta, responderProposta, podeProporTroca, alvosProposta, trocavel, MAX_PROPOSTA, quemDecide, podeAgir, acao, posAcao, celebiPraca, reagirRepel, encerrarRepel, temRepel, ligaCelebi, ligaRemedio, responderCynthia, temCynthia, escolherDuplaPraca, fecharPraca, resolverPracaPremio, pracaAptosDe, pracaForca, PREMIOS_PRACA, iniciarLiga, ligaGatilho, resolverLigaOponente, ligaEscolher, ligaSeguir, ligaAptos, porCapturas, FASE_LIGA, resolverWally, wallyOk, resolverCriadores, opcoesCriadores, linhasCriadores, foraDeJogoCriadores, resolverFuchsia, resolverBriney, encrencado, escolherSlot, resolverTipoCor, pegarDeLista, escolherEspaco, escolherLiderFora, pagarItens, resolverNegociador, pegarItem, filtrarSlots, escolherDesempate, descartarDe, resolverTroca, resolverDividir, escolherOpcao, lutarDuelo, fecharDuelo, aptosDuelo, paresTroca, temBoneca, slotInsignia, vantagem, bonusItemBatalha, idx, P, ITEM, J, HW, HH, CORES_PEAO, TIPOS_NOME, ORDEM_FORCA
   };
 })(window);

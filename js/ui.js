@@ -587,6 +587,12 @@
       if (!slotEnq) { slotEnq = true; enquadrar(); }
       renderBoard(); return;
     }
+    if (pd.tipo === 'corMult') {
+      const nomeC = { vermelho: 'Vermelho', azul: 'Azul', verde: 'Verde', rosa: 'Rosa' };
+      abrirModal(`<h2>${esc(pd.titulo)}</h2><p class="mut">Você compra ${pd.n} Pokémons da cor escolhida e tenta capturar um deles.</p>
+        <div class="row" style="gap:10px;flex-wrap:wrap;margin-top:10px">${pd.opcoes.map(c => `<button class="corMultBt" data-c="${c}"><img src="${D.versos[c]}"><b>${nomeC[c]} ×${pd.n}</b><span class="mut">${(st.decks[c] || []).length} na pilha</span></button>`).join('')}</div>`);
+      $('#modalCard').querySelectorAll('[data-c]').forEach(b => b.onclick = () => agir('escolherCorMult', b.dataset.c)); return;
+    }
     if (pd.tipo === 'slot') return mSlot(pd, p);
     if (pd.tipo === 'lura') {
       // escolha direto no tabuleiro: os dois Pokémons precisam ser da mesma cor (um deles revelado)
