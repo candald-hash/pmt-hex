@@ -5,6 +5,20 @@
   const VAL_COR = { inicial: 4, rosa: 2, verde: 4, azul: 6, vermelho: 8, amarelo: 11 };
   const ORDEM = ['rosa', 'verde', 'azul', 'vermelho', 'amarelo'];
 
+  // ---------- perfis de IA ----------
+  // pesos aplicados às mesmas decisões: o perfil muda prioridades, não as regras
+  const PERFIS = {
+    padrao:       { lider: 0.5, liderAcao: 0.34, trem: 0.67, wLider: 1, wCap: 1, wEv: 1, wSuper: 1, wDist: 1, fam: 3, bolaGanho: 0.17, bolaValor: 4, celebiCap: 6, rocket: 0, risco: 0 },
+    rush:         { lider: 0.4, liderAcao: 0.25, trem: 0.5, wLider: 1.4, wCap: 0.85, wEv: 0.7, wSuper: 0.9, wDist: 1.8, fam: 3, bolaGanho: 0.2, bolaValor: 5, celebiCap: 6, rocket: 0, risco: 0 },
+    colecionador: { lider: 0.67, liderAcao: 0.5, trem: 0.8, wLider: 0.8, wCap: 1.7, wEv: 1.2, wSuper: 1.1, wDist: 0.6, fam: 6, bolaGanho: 0.1, bolaValor: 3, celebiCap: 4, rocket: 0, risco: 0 },
+    rocket:       { lider: 0.5, liderAcao: 0.34, trem: 0.67, wLider: 1, wCap: 1, wEv: 1.1, wSuper: 1.1, wDist: 1, fam: 3, bolaGanho: 0.17, bolaValor: 4, celebiCap: 6, rocket: 1, risco: 0 },
+    apostador:    { lider: 0.25, liderAcao: 0.15, trem: 0.4, wLider: 1.1, wCap: 1.2, wEv: 1.6, wSuper: 1.7, wDist: 0.9, fam: 3, bolaGanho: 0.3, bolaValor: 8, celebiCap: 3, rocket: 0, risco: 1 },
+  };
+  const PF = p => PERFIS[(p && p.perfil) || 'padrao'] || PERFIS.padrao;
+  // líder da partida (alvo preferido da Equipe Rocket)
+  const placar = q => E.nInsignias(q) * 10 + q.pokemon.length;
+  const lider = (st, eu) => st.jogadores.filter(q => q.id !== eu.id && !q.eliminado).sort((a, b) => placar(b) - placar(a))[0];
+
   // ---------- probabilidades ----------
   function pCaptura(st, p, id, bola, slot) {
     const c = E.P(id); if (!c.captura.length) return 0;
@@ -20,7 +34,7 @@
   // valor de um Pokémon para o time: força + sinergia com a família
   function valorPokemon(p, id) {
     const c = E.P(id); let v = c.forca;
-    if (c.familia && p.pokemon.some(x => x !== id && E.P(x).familia === c.familia)) v += 3;
+    if (c.familia && p.pokemon.some(x => x !== id && E.P(x).familia === c.familia)) v += PF(p).fam;
     if (!E.obedece(p, c.cor)) v -= 2;
     return v;
   }
@@ -67,16 +81,17 @@
     return dist;
   }
   function pontuarDestino(st, p, k, info) {
-    const g = E.grafo(st), s = g.nodes[k], tier = G.DATA.hexes[s.hex].tier; let v = 0;
-    if (s.kind === 'cidade') { const u = liderUtil(st, p, k); if (u) v += 20 + 90 * u.pl.p; if (!p.visitou.includes(k)) v += 8; if (s.cidade && s.cidade.pioneiro && st.pioneiros[k] == null) v += 6; }
+    const g = E.grafo(st), s = g.nodes[k], tier = G.DATA.hexes[s.hex].tier, W = PF(p); let v = 0;
+    if (s.kind === 'cidade') { const u = liderUtil(st, p, k); if (u) v += W.wLider * (20 + 90 * (W.risco ? Math.sqrt(u.pl.p) : u.pl.p)); if (!p.visitou.includes(k)) v += 8; if (s.cidade && s.cidade.pioneiro && st.pioneiros[k] == null) v += 6; }
     else if (s.kind === 'pokebola') {
       const slot = Object.values(g.slots).find(x => x.espaco === k), c = slot && st.slots[slot.key];
       if (c && c.carta) {
-        if (c.aberta) { const id = c.carta; v += pCaptura(st, p, id, null, slot.key) * (valorPokemon(p, id) * 4); }
-        else v += pFaces(p, { rosa: [2, 3, 4, 5], verde: [3, 4, 5], azul: [4, 5], vermelho: [5], amarelo: [6] }[slot.cor] || [], 0, 1) * VAL_COR[slot.cor] * 4;
+        const pc = x => W.risco ? Math.sqrt(x) : x;
+        if (c.aberta) { const id = c.carta; v += W.wCap * pc(pCaptura(st, p, id, null, slot.key)) * (valorPokemon(p, id) * 4); }
+        else v += W.wCap * pc(pFaces(p, { rosa: [2, 3, 4, 5], verde: [3, 4, 5], azul: [4, 5], vermelho: [5], amarelo: [6] }[slot.cor] || [], 0, 1)) * VAL_COR[slot.cor] * 4;
       }
     }
-    else if (s.kind === 'evento') v += 12; else if (s.kind === 'superevento') v += 28;
+    else if (s.kind === 'evento') v += 12 * W.wEv; else if (s.kind === 'superevento') v += 28 * W.wSuper;
     else if (s.kind === 'especial') v += ({ planalto: 200, comecar_liga: st.liga ? (['duas', 'tres', 'semisEspera'].includes(st.liga.etapa) && st.liga.ativos.includes(p.id) ? 300 : 4) : g.loopE2.every(x => p.e2.includes(x)) ? 300 : 6, compre_2_eventos: 18 }[s.especial] || 22);
     else if (s.kind === 'passagem') v += 2;
     if (info.custo) v -= info.custo * 6;
@@ -85,7 +100,7 @@
     let melhor = 99;
     Object.keys(st.lideres).forEach(c => { const n = g.nodes[c]; if (!n) return; const t = G.DATA.hexes[n.hex].tier; if ((t === alvo || alvo === 'fim') && liderUtil(st, p, c) && dist[c] != null) melhor = Math.min(melhor, dist[c]); });
     if (alvo === 'fim') Object.values(g.nodes).filter(n => n.especial === 'planalto' || n.especial === 'comecar_liga').forEach(n => { if (dist[n.key] != null) melhor = Math.min(melhor, dist[n.key]); });
-    if (melhor < 99) v -= melhor * 2.5;
+    if (melhor < 99) v -= melhor * 2.5 * W.wDist;
     if (tier === alvo) v += 6;
     return v + Math.random() * 2;
   }
@@ -113,7 +128,10 @@
       }
       return 0;
     };
-    return ops.sort((a, b) => score(b) - score(a) + (Math.random() - 0.5) * 0.01)[0].id;
+    const RUIM = ['roubar1', 'roubar2', 'esconderijo', 'navPlus', 'pular2', 'pular1', 'duelo', 'praca', 'eventoPara', 'eventoCarta', 'copycat2'];
+    const lid = PF(p).rocket && RUIM.includes(pd.acao) ? lider(st, p) : null;
+    const sc2 = q => score(q) + (lid && q.id === lid.id ? 6 : 0);
+    return ops.sort((a, b) => sc2(b) - sc2(a) + (Math.random() - 0.5) * 0.01)[0].id;
   }
   function decidirBoneca(st) {
     const pd = st.pend, resp = E.J(st, pd.respondente);
@@ -210,7 +228,7 @@
       const id = st.slots[k] && st.slots[k].carta; if (!id) continue;
       const cap = dep && dep.tipo === 'captura' && dep.slot === k ? E.J(st) : null;
       if (cap && cap.id === j) { if (valorPokemon(q, id) < 4 || pCaptura(st, q, id, null, k) < 0.2) return k; continue; }
-      if (cap) { if (valorPokemon(cap, id) >= 7 && pCaptura(st, cap, id, null, k) >= 0.3 && Math.random() < 0.6) return k; continue; }
+      if (cap) { const R = PF(q).rocket; if (valorPokemon(cap, id) >= (R ? 5 : 7) && pCaptura(st, cap, id, null, k) >= (R ? 0.2 : 0.3) && Math.random() < (R ? 1 : 0.6)) return k; continue; }
     }
     return 'nao';
   }
@@ -243,7 +261,7 @@
   }
   function decidirReacao(st, j) {
     const pd = st.pend, R = pd.reacao, q = E.J(st, j), card = (pd.baralho === 'evento' ? E.idx().ev : E.idx().sev)[pd.carta], ops = R.opcoes[j], b = bomEvento(card);
-    if (ops.includes('flauta')) { if (R.ativador === j && b < 0) return 'flauta'; if (R.ativador !== j && b >= 3 && E.nInsignias(E.J(st, R.ativador)) >= E.nInsignias(q) && Math.random() < 0.5) return 'flauta'; }
+    if (ops.includes('flauta')) { if (R.ativador === j && b < 0) return 'flauta'; if (R.ativador !== j && b >= 3 && E.nInsignias(E.J(st, R.ativador)) >= E.nInsignias(q) && Math.random() < 0.5) return 'flauta'; if (PF(q).rocket && R.ativador !== j && b >= 2) return 'flauta'; }
     if (ops.includes('exp') && b >= 2) return 'exp';
     if (ops.includes('may') && (b >= 3 || (b >= 2 && valorTreinador(q, q.treinador) < 3))) return 'may';
     return 'nao';
@@ -260,11 +278,12 @@
           const bolas = p.itens.filter(i => E.ITEM(i).bola).sort((a, b) => E.ITEM(a).bola - E.ITEM(b).bola);
           const base = pCaptura(st, p, pd.carta, null, pd.slot), worth = valorPokemon(p, pd.carta);
           let usar = null;
-          if (base < 0.99 && worth >= 4) for (const b of bolas) { if (pCaptura(st, p, pd.carta, b, pd.slot) - base >= 0.17) { usar = b; break; } }
+          const W = PF(p);
+          if (base < 0.99 && worth >= W.bolaValor) for (const b of bolas) { if (pCaptura(st, p, pd.carta, b, pd.slot) - base >= W.bolaGanho) { usar = b; break; } }
           if (!usar && worth >= 9 && bolas.length && base < 0.6) usar = bolas[bolas.length - 1];
           E.rolarCaptura(st, usar); return true;
         }
-        if (!pd.resultado.ok && E.celebiDe(p) && !pd.resultado.celebi && valorPokemon(p, pd.carta) >= 6) { E.celebiCaptura(st); return true; }
+        if (!pd.resultado.ok && E.celebiDe(p) && !pd.resultado.celebi && valorPokemon(p, pd.carta) >= PF(p).celebiCap) { E.celebiCaptura(st); return true; }
         E.fecharPend(st); return true;
       }
       if (pd.tipo === 'tabelaRes') { if (!pd.ok) E.celebiTabela(st); else E.aceitarTabela(st); return true; }
@@ -289,8 +308,9 @@
       }
       if (pd.tipo === 'lider') {
         if (!pd.resultado) { const L = E.idx().ld[pd.lider], pl = planoLider(st, p, L); if (!pl) { E.fecharPend(st); return true; } E.lutarLider(st, pl.pk, pl.it); return true; }
-        if (!pd.resultado.ok && E.celebiDe(p) && !pd.resultado.celebi && pd.resultado.lider - (pd.resultado.total - pd.resultado.dado) <= 5) { E.celebiLider(st); return true; }
-        if (!pd.resultado.ok) { const rem = p.itens.find(i => i.startsWith('potion#')); if (rem && pd.resultado.lider - pd.resultado.total <= 4) { E.remedio(st, rem); return true; } }
+        const ap = PF(p).risco;
+        if (!pd.resultado.ok && E.celebiDe(p) && (!pd.resultado.celebi || ap) && pd.resultado.lider - (pd.resultado.total - pd.resultado.dado) <= (ap ? 6 : 5)) { E.celebiLider(st); return true; }
+        if (!pd.resultado.ok) { const rem = p.itens.find(i => i.startsWith('potion#')); if (rem && pd.resultado.lider - pd.resultado.total <= (ap ? 5 : 4)) { E.remedio(st, rem); return true; } }
         E.fecharPend(st); return true;
       }
       if (pd.tipo === 'alvo') { E.escolherAlvo(st, decidirAlvo(st)); return true; }
@@ -362,16 +382,17 @@
     if (st.fila && st.fila.length) return false;
     if (st.fase === 'inicio') {
       const u = liderUtil(st, p, p.pos);
-      if (u && !st.turno.batalhouLider && u.pl.p >= 0.5) { E.abrirLider(st); return true; }
+      const W = PF(p);
+      if (u && !st.turno.batalhouLider && u.pl.p >= W.lider) { E.abrirLider(st); return true; }
       // Trem para uma cidade já visitada com líder vencível
       const g = E.grafo(st), noCidade = g.nodes[p.pos].kind === 'cidade' || g.nodes[p.pos].especial === 'planalto';
-      if (noCidade) { const alvo = p.passou.filter(k => k !== p.pos && g.nodes[k].kind === 'cidade').map(k => ({ k, u: liderUtil(st, p, k) })).filter(x => x.u && x.u.pl.p >= 0.67).sort((a, b) => b.u.pl.p - a.u.pl.p)[0]; if (alvo) { E.trem(st, alvo.k); return true; } }
+      if (noCidade) { const alvo = p.passou.filter(k => k !== p.pos && g.nodes[k].kind === 'cidade').map(k => ({ k, u: liderUtil(st, p, k) })).filter(x => x.u && x.u.pl.p >= W.trem).sort((a, b) => b.u.pl.p - a.u.pl.p)[0]; if (alvo) { E.trem(st, alvo.k); return true; } }
       const t = p.treinador && E.idx().tr[p.treinador];
       if (t && t.efeito === 'lyra' && p.itens.length <= 1 && Math.random() < 0.25) { E.lyra(st); return true; }
       const doce = p.itens.find(i => i.startsWith('doceraro#'));
       if (doce && !st.turno.doceTentado) { st.turno.doceTentado = true; const antes = p.itens.length; E.usarItem(st, doce); if (p.itens.length < antes) return true; }
       const truque = p.itens.find(i => i.startsWith('truquerocket#'));
-      if (truque && st.jogadores.some(q => q.id !== p.id && q.itens.length >= 2 && !E.temBoneca(q))) { E.usarItem(st, truque); return true; }
+      if (truque && st.jogadores.some(q => q.id !== p.id && q.itens.length >= (W.rocket ? 1 : 2) && !E.temBoneca(q))) { E.usarItem(st, truque); return true; }
       const mel = p.itens.find(i => i.startsWith('potedemel#'));
       if (mel && !st.turno.melTentado) { st.turno.melTentado = true; const ok = E.filtrarSlots(st, { hex: true, aberta: true }).some(k => pCaptura(st, p, st.slots[k].carta, null, k) * valorSlot(st, p, k) >= 3); if (ok) { E.usarItem(st, mel); return true; } }
       const nav = p.itens.find(i => i.startsWith('pokenavplus#'));
@@ -408,10 +429,10 @@
     }
     if (st.fase === 'acao') {
       const u = liderUtil(st, p, p.pos);
-      if (u && !st.turno.batalhouLider && (u.pl.p >= 0.34 || !st.turno.moveu)) { E.abrirLider(st); return true; }
+      if (u && !st.turno.batalhouLider && (u.pl.p >= PF(p).liderAcao || !st.turno.moveu)) { E.abrirLider(st); return true; }
       if (E.podeEncerrar(st)) { E.encerrarTurno(st); return true; }
     }
     return false;
   }
-  G.AI = { decidirRepel, decidirCynthia, reacaoLiga, aplicarReacaoLiga, duplaPraca, premioPraca, escolhaLiga, oponenteLiga, decidirReacao, decidirFestival, decidirJuniper, decidirTreinador: st => { const q = E.J(st, st.pend.jogador); return [q.treinador, ...q.treinadoresExtra].filter(Boolean).sort((a, b) => valorTreinador(q, b) - valorTreinador(q, a))[0]; }, decidirBriney, passo, pCaptura, planoLider, pVitoria, decidirBoneca, escolhaDuelo };
+  G.AI = { PERFIS, decidirRepel, decidirCynthia, reacaoLiga, aplicarReacaoLiga, duplaPraca, premioPraca, escolhaLiga, oponenteLiga, decidirReacao, decidirFestival, decidirJuniper, decidirTreinador: st => { const q = E.J(st, st.pend.jogador); return [q.treinador, ...q.treinadoresExtra].filter(Boolean).sort((a, b) => valorTreinador(q, b) - valorTreinador(q, a))[0]; }, decidirBriney, passo, pCaptura, planoLider, pVitoria, decidirBoneca, escolhaDuelo };
 })(window);

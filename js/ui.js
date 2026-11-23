@@ -31,6 +31,9 @@
   const online = () => NET.modo !== 'local';
   const souEu = id => !online() || id === NET.eu; // este assento é jogado nesta tela?
   const pct = x => Math.round(x * 100) + '%';
+  const PERFIL_DESC = { padrao: 'equilibra capturas, Eventos e Ginásios', rush: 'corre atrás das insígnias e da Liga', colecionador: 'monta o time com calma e completa famílias', rocket: 'atrapalha quem está na frente', apostador: 'arrisca em capturas, batalhas e Eventos' };
+  const selPerfil = (v, attr) => `<select class="perfilSel" ${attr} title="Perfil da IA">${Object.entries(E.PERFIS_IA).map(([k, n]) => `<option value="${k}" ${v === k ? 'selected' : ''} title="${PERFIL_DESC[k]}">${n}</option>`).join('')}<option value="aleatorio" ${v === 'aleatorio' ? 'selected' : ''}>Aleatório</option></select>`;
+  const nomePerfil = q => q.ia && q.perfil ? (E.PERFIS_IA[q.perfil] || '') : '';
   function agir(nome, ...a) {
     if (NET.modo === 'cliente') { if (NET.enviar) NET.enviar(nome, a); return; }
     const j = NET.modo === 'local' ? 'host' : NET.eu;
@@ -69,11 +72,12 @@
       jog.forEach((j, i) => {
         const usadas = jog.filter((x, k) => k !== i).map(x => x.cor);
         const row = h(`<div class="pl"><span class="dot" style="background:${COR_HEX[j.cor]}"></span>
-          <div class="row" style="flex-wrap:nowrap"><input value="${esc(j.nome)}" placeholder="${modo === 'online' ? (i === 0 ? 'Seu nome' : j.ia ? 'CPU ' + (i + 1) : 'nome escolhido por quem entrar') : j.ia ? 'CPU ' + (i + 1) : 'Jogador ' + (i + 1)}" style="flex:1" ${modo === 'online' && i > 0 && !j.ia ? 'disabled' : ''}>${modo === 'online' && i === 0 ? '<span class="tag">você · anfitrião</span>' : `<button class="sm iaTog ${j.ia ? 'on' : ''}" data-ia title="Controlado pelo computador">${j.ia ? '🤖 IA' : modo === 'online' ? '🌐 On-line' : '🙂 Humano'}</button>`}</div>
+          <div class="row" style="flex-wrap:nowrap"><input value="${esc(j.nome)}" placeholder="${modo === 'online' ? (i === 0 ? 'Seu nome' : j.ia ? 'CPU ' + (i + 1) : 'nome escolhido por quem entrar') : j.ia ? 'CPU ' + (i + 1) : 'Jogador ' + (i + 1)}" style="flex:1" ${modo === 'online' && i > 0 && !j.ia ? 'disabled' : ''}>${modo === 'online' && i === 0 ? '<span class="tag">você · anfitrião</span>' : `<button class="sm iaTog ${j.ia ? 'on' : ''}" data-ia title="Controlado pelo computador">${j.ia ? '🤖 IA' : modo === 'online' ? '🌐 On-line' : '🙂 Humano'}</button>${j.ia ? selPerfil(j.perfil || 'padrao', 'data-perfil') : ''}`}</div>
           <div class="row"><div class="swatches">${E.CORES_PEAO.map(c => `<span class="sw ${c === j.cor ? 'on' : ''} ${usadas.includes(c) ? 'taken' : ''}" data-c="${c}" title="${COR_NOME[c]}" style="background:${COR_HEX[c]}"></span>`).join('')}</div>
           ${jog.length > 2 ? `<button class="sm" data-rm>✕</button>` : ''}</div></div>`);
         $('input', row).oninput = e => { j.nome = e.target.value; if (i === 0) { prefs.nome = j.nome; salvarPrefs(); } };
         const tg = $('[data-ia]', row); if (tg) tg.onclick = () => { j.ia = !j.ia; draw(); };
+        const sp = $('[data-perfil]', row); if (sp) sp.onchange = e => { j.perfil = e.target.value; };
         row.querySelectorAll('.sw').forEach(s => s.onclick = () => { if (!usadas.includes(s.dataset.c)) { j.cor = s.dataset.c; draw(); } });
         const rm = $('[data-rm]', row); if (rm) rm.onclick = () => { jog.splice(i, 1); draw(); };
         pls.appendChild(row);
@@ -87,8 +91,8 @@
       const rt = $('#retomar'); if (rt) rt.onclick = () => retomarSala(salvo);
       $('#go').onclick = () => {
         const sv = $('#seed').value.trim(); const seed = sv ? [...sv].reduce((a, c) => (a * 31 + c.charCodeAt(0)) | 0, 7) : (Date.now() ^ (Math.random() * 1e9)) | 0;
-        if (modo === 'online') { jog[0].nome = jog[0].nome.trim() || 'Anfitrião'; return criarSala(jog.map((j, i) => ({ nome: j.nome, cor: j.cor, tipo: i === 0 ? 'eu' : j.ia ? 'ia' : 'remoto', ia: !!j.ia && i > 0 })), seed); }
-        st = E.novoJogo({ seed, elenco: prefs.elenco, conquistas: !!prefs.conquistas, jogadores: jog.map((j, i) => ({ nome: j.nome.trim() || (j.ia ? 'CPU ' + (i + 1) : 'Jogador ' + (i + 1)), cor: j.cor, ia: !!j.ia })) });
+        if (modo === 'online') { jog[0].nome = jog[0].nome.trim() || 'Anfitrião'; return criarSala(jog.map((j, i) => ({ nome: j.nome, cor: j.cor, tipo: i === 0 ? 'eu' : j.ia ? 'ia' : 'remoto', ia: !!j.ia && i > 0, perfil: j.perfil || 'padrao' })), seed); }
+        st = E.novoJogo({ seed, elenco: prefs.elenco, conquistas: !!prefs.conquistas, jogadores: jog.map((j, i) => ({ nome: j.nome.trim() || (j.ia ? 'CPU ' + (i + 1) : 'Jogador ' + (i + 1)), cor: j.cor, ia: !!j.ia, perfil: j.perfil || 'padrao' })) });
         salvar(); iniciarJogo();
       };
       const c = $('#cont'); if (c) c.onclick = () => { st = salvo; iniciarJogo(); };
@@ -346,7 +350,7 @@
     acoes = fixos + (acoes ? `<div class="actions">${acoes}</div>` : '');
     if (p.ia) acoes = `<span class="mut">🤖 ${esc(p.nome)} está jogando…</span>${souAnfitriao() ? `<button class="sm" id="pausa">${pausado ? '▶ Retomar IA' : '⏸ Pausar IA'}</button>` : ''}`;
     else if (online() && p.id !== NET.eu) acoes = `<span class="mut">⏳ Vez de ${esc(p.nome)}…</span>`;
-    tb.innerHTML = `<div class="turnHead"><span class="dot" style="background:${COR_HEX[p.cor]}"></span><h2>${esc(p.nome)}${p.ia ? ' <span class="tag">🤖 IA</span>' : ''}</h2><span class="tag">Rodada ${st.rodada}</span><button class="gear" id="btnCfg" title="Configurações">⚙</button></div>
+    tb.innerHTML = `<div class="turnHead"><span class="dot" style="background:${COR_HEX[p.cor]}"></span><h2>${esc(p.nome)}${p.ia ? ` <span class="tag" title="${esc(PERFIL_DESC[p.perfil] || '')}">🤖 ${esc(nomePerfil(p) || 'IA')}</span>` : ''}</h2><span class="tag">Rodada ${st.rodada}</span><button class="gear" id="btnCfg" title="Configurações">⚙</button></div>
       ${p.pular ? `<div class="mut" style="margin-bottom:6px">perde ${p.pular} turno(s)</div>` : ''}
       ${L ? `<div class="ldline" data-ld="${p.pos}"><img src="${L.img}"><div><b>${esc(L.nome)}</b> · força ${L.forca}${L.dual ? ' · DUAL' : ''}<br><span class="mut">${E.TIPOS_NOME[L.tipo]} · insígnia ${L.insignias}${p.lideresVencidos.includes(L.id) ? ' · <b style="color:var(--ok)">vencido</b>' : ''}</span></div></div>` : ''}
       ${t.dados ? `<div class="dice">${(() => { let usado = false; return t.dados.map(d => { const esc0 = t.dados.length > 1 && t.rolagem == null; const este = t.dados.length > 1 && t.rolagem != null && !usado && (d === t.rolagem || d === t.escolhido); if (este) usado = true; return `<div class="die ${esc0 ? 'escolher' : ''} ${t.dados.length > 1 && t.rolagem != null ? (este ? 'usado' : 'off') : ''}" data-d="${d}">${d}</div>`; }).join(''); })()}${t.rolagem != null && !t.dados.includes(t.rolagem) || (t.rolagem != null && t.dados.length === 1 && t.rolagem !== t.dados[0]) ? `<span class="mut">→ ${t.rolagem}</span>` : ''}</div>` : ''}
@@ -383,7 +387,7 @@
     botaoConq(); setTimeout(avisoConq, 0);
     mb.querySelectorAll('.ic').forEach(c => c.onclick = () => modalItem(c.dataset.i));
     // --- outros ---
-    $('#othersBox').innerHTML = secao('jogadores', 'Jogadores', st.jogadores.map(q => `<div class="other ${q.id === st.vez ? 'cur' : ''} ${q.eliminado ? 'elim' : ''}" data-p="${q.id}"><span class="dot" style="background:${COR_HEX[q.cor]}"></span><span style="flex:1">${esc(q.nome)}${online() && q.id === NET.eu ? ' <span class="tag">você</span>' : ''}${online() && q.remoto && !q.ia && !(NET.conectados || []).includes(q.id) ? ' <span title="desconectado">🔌</span>' : ''}${q.eliminado ? ' <span class="mut">· eliminado</span>' : st.vencedor === q.id ? ' 👑' : ''}</span><span class="mut cnt" title="${q.pokemon.length} Pokémon · ${q.itens.length} Itens">${q.pokemon.length} <img src="img/ui/pokebola.webp" alt="Pokémon"> · ${q.itens.length} <img src="img/ui/item.webp" alt="Itens"></span>${insignias(q, true)}</div>`).join(''));
+    $('#othersBox').innerHTML = secao('jogadores', 'Jogadores', st.jogadores.map(q => `<div class="other ${q.id === st.vez ? 'cur' : ''} ${q.eliminado ? 'elim' : ''}" data-p="${q.id}"><span class="dot" style="background:${COR_HEX[q.cor]}"></span><span style="flex:1">${esc(q.nome)}${q.ia ? ` <span class="mut perfTag" title="IA · ${esc(PERFIL_DESC[q.perfil] || '')}">🤖 ${esc(nomePerfil(q) || 'IA')}</span>` : ''}${online() && q.id === NET.eu ? ' <span class="tag">você</span>' : ''}${online() && q.remoto && !q.ia && !(NET.conectados || []).includes(q.id) ? ' <span title="desconectado">🔌</span>' : ''}${q.eliminado ? ' <span class="mut">· eliminado</span>' : st.vencedor === q.id ? ' 👑' : ''}</span><span class="mut cnt" title="${q.pokemon.length} Pokémon · ${q.itens.length} Itens">${q.pokemon.length} <img src="img/ui/pokebola.webp" alt="Pokémon"> · ${q.itens.length} <img src="img/ui/item.webp" alt="Itens"></span>${insignias(q, true)}</div>`).join(''));
     $('#othersBox').querySelectorAll('.other').forEach(o => o.onclick = () => modalJogador(+o.dataset.p));
     // --- registro ---
     const lg = $('#log'); const fundo = lg.scrollHeight - lg.scrollTop - lg.clientHeight < 30;
@@ -426,7 +430,7 @@
     on('cTema', () => { prefs.tema = prefs.tema === 'claro' ? 'escuro' : 'claro'; salvarPrefs(); aplicarTema(); modalConfig(); });
     const vel = $('#cVel'); if (vel) vel.onchange = e => { prefs.velIA = e.target.value; salvarPrefs(); };
     on('cTools', () => caixaFerramentas());
-    on('cIA', () => { const q = E.J(st); q.ia = !q.ia; salvar(); fecharExtra(); render(); if (NET.difundir) NET.difundir(); });
+    on('cIA', () => { const q = E.J(st); q.ia = !q.ia; if (q.ia && !q.perfil) q.perfil = 'padrao'; salvar(); fecharExtra(); render(); if (NET.difundir) NET.difundir(); });
     on('cExp', () => { const b = new Blob([JSON.stringify(st)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'pmthex-partida.json'; a.click(); });
     const imp = $('#cImp'); if (imp) imp.onchange = async e => { try { st = JSON.parse(await e.target.files[0].text()); salvar(); fecharModal(); iniciarJogo(); } catch (er) { alert('Arquivo inválido.'); } };
     on('cNova', () => { if (confirm('Sair desta partida? (ela continua salva até você começar outra)')) { fecharModal(); st = null; telaAbertura(); } });
@@ -1403,12 +1407,12 @@
   function modalJogador(i) {
     const q = E.J(st, i), tr = q.treinador && E.idx().tr[q.treinador];
     abrirModal(`<h2><span class="dot" style="display:inline-block;vertical-align:middle;background:${COR_HEX[q.cor]}"></span> ${esc(q.nome)}</h2>
-      <div class="row" style="margin:8px 0 14px">${insignias(q)}<span class="mut">${q.itens.length} itens · ${q.capturas} capturas${q.planalto ? ' · chegou ao Planalto' : ''}</span></div>
+      <div class="row" style="margin:8px 0 14px">${insignias(q)}<span class="mut">${q.ia ? `🤖 IA ${esc(nomePerfil(q) || '')} (${esc(PERFIL_DESC[q.perfil] || '')}) · ` : ''}${q.itens.length} itens · ${q.capturas} capturas${q.planalto ? ' · chegou ao Planalto' : ''}</span></div>
       ${timeAgrupado(q, 90)}
       ${tr ? `<div class="trainer"><img src="${tr.img}"><div><b>${esc(tr.nome)}</b><p>${esc(tr.texto)}</p></div></div>` : ''}
       <div class="mfoot">${podeProporPara(q) ? `<button class="pri" id="mjTroca" title="Proponha uma troca de até ${E.MAX_PROPOSTA} Pokémons com ${esc(q.nome)}">🤝 Propor troca</button>` : ''}${NET.modo === 'host' && q.id !== NET.eu ? `<button id="mjIA">${q.ia ? '🙂 Devolver o lugar ao jogador' : '🤖 Passar este lugar para a IA'}</button>` : ''}<button class="${podeProporPara(q) ? '' : 'pri'}" data-x>Fechar</button></div>`);
     const mt = $('#mjTroca'); if (mt) mt.onclick = () => { selProp = { para: q.id, meus: [], deles: [] }; mProporTroca(); };
-    const mj = $('#mjIA'); if (mj) mj.onclick = () => { q.ia = !q.ia; if (!q.ia) q.remoto = true; salvar(); fecharModal(); render(); NET.difundir && NET.difundir(); };
+    const mj = $('#mjIA'); if (mj) mj.onclick = () => { q.ia = !q.ia; if (q.ia && !q.perfil) q.perfil = 'padrao'; if (!q.ia) q.remoto = true; salvar(); fecharModal(); render(); NET.difundir && NET.difundir(); };
     $('#modalCard').querySelectorAll('.pc').forEach(c => c.onclick = () => zoom(E.P(c.dataset.id).img));
   }
 
@@ -1692,7 +1696,7 @@
       <div class="row" style="flex-wrap:nowrap"><input id="lk" value="${esc(link)}" readonly style="flex:1"><button id="cp">📋 Copiar</button></div>
       <h3 style="margin-top:18px">Lugares (${L.jog.length}/${MAX_LUGARES})</h3>
       <div class="salaLista">${L.jog.map((x, k) => `<div class="salaRow"><span class="dot" style="background:${COR_HEX[x.cor]}"></span><b style="flex:1">${esc(x.nome || (x.tipo === 'ia' ? 'CPU ' + (k + 1) : '—'))}</b>
-        ${x.tipo === 'eu' ? swatchesLobby(L.jog, k) : ''}<span class="mut">${x.tipo === 'eu' ? 'você · anfitrião' : x.tipo === 'ia' ? '🤖 IA' : x.token ? (con.has(k) ? '🌐 conectado' : '🔌 saiu') : '⏳ aguardando alguém entrar'}</span>
+        ${x.tipo === 'eu' ? swatchesLobby(L.jog, k) : ''}<span class="mut">${x.tipo === 'eu' ? 'você · anfitrião' : x.tipo === 'ia' ? '🤖 IA ' + selPerfil(x.perfil || 'padrao', `data-lp="${k}"`) : x.token ? (con.has(k) ? '🌐 conectado' : '🔌 saiu') : '⏳ aguardando alguém entrar'}</span>
         ${x.tipo !== 'eu' ? `<span class="salaBts"><button class="sm" data-lt="${k}" title="${x.tipo === 'ia' ? 'Abrir este lugar para uma pessoa entrar pelo link' : 'Passar este lugar para a IA' + (x.token ? ' (quem está nele passa a assistir)' : '')}">${x.tipo === 'ia' ? '→ 🌐 Pessoa' : '→ 🤖 IA'}</button><button class="sm" data-lr="${k}" ${L.jog.length <= 2 ? 'disabled' : ''} title="Remover este lugar${x.token ? ' (quem está nele passa a assistir)' : ''}">✖</button></span>` : ''}</div>`).join('')}</div>
       <div class="row" style="margin-top:12px;gap:8px"><span>Elenco de Pokémons:</span>${selElenco(L.elenco)}<span style="margin-left:10px">Conquistas:</span><select id="conqLob"><option value="">Desligadas</option><option value="1" ${L.conquistas ? 'selected' : ''}>Ativadas</option></select></div>
       <div class="row" style="margin-top:8px;gap:8px"><button class="sm" id="addR" ${L.jog.length >= MAX_LUGARES ? 'disabled' : ''}>+ Lugar para pessoa</button><button class="sm" id="addI" ${L.jog.length >= MAX_LUGARES ? 'disabled' : ''}>+ Lugar para IA</button>${[...H.conns.values()].filter(c => c.assento < 0).length ? `<span class="mut">👀 ${[...H.conns.values()].filter(c => c.assento < 0).length} assistindo (entra(m) se você abrir um lugar)</span>` : ''}</div>
@@ -1702,6 +1706,7 @@
     $('#cancel').onclick = () => { try { H.peer.destroy(); } catch (e) {} H.lobby = null; NET.modo = 'local'; telaAbertura(); };
     $('#start').onclick = () => comecarOnline();
     box.querySelectorAll('[data-lt]').forEach(b => b.onclick = () => editarLugar('tipo', +b.dataset.lt));
+    box.querySelectorAll('[data-lp]').forEach(sl => sl.onchange = e => { L.jog[+sl.dataset.lp].perfil = e.target.value; difundirLobby(); });
     box.querySelectorAll('[data-lr]').forEach(b => b.onclick = () => editarLugar('rem', +b.dataset.lr));
     $('#addR').onclick = () => editarLugar('add'); $('#addI').onclick = () => editarLugar('addIA');
     $('#elenco').onchange = e => { L.elenco = prefs.elenco = e.target.value; salvarPrefs(); difundirLobby(); };
@@ -1711,7 +1716,7 @@
   function comecarOnline() {
     const L = H.lobby; H.redesenhar = null;
     L.jog.forEach((x, k) => { if (x.tipo === 'remoto' && !x.token) { x.tipo = 'ia'; x.nome = 'CPU ' + (k + 1); } });
-    st = E.novoJogo({ seed: L.seed, elenco: L.elenco, conquistas: !!L.conquistas, jogadores: L.jog.map((x, k) => ({ nome: (x.nome || '').trim() || (x.tipo === 'ia' ? 'CPU ' + (k + 1) : 'Jogador ' + (k + 1)), cor: x.cor, ia: x.tipo === 'ia' })) });
+    st = E.novoJogo({ seed: L.seed, elenco: L.elenco, conquistas: !!L.conquistas, jogadores: L.jog.map((x, k) => ({ nome: (x.nome || '').trim() || (x.tipo === 'ia' ? 'CPU ' + (k + 1) : 'Jogador ' + (k + 1)), cor: x.cor, ia: x.tipo === 'ia', perfil: x.perfil || 'padrao' })) });
     st.jogadores.forEach((q, k) => { if (L.jog[k].tipo === 'remoto') { q.remoto = true; q.token = L.jog[k].token; } });
     NET.eu = 0; st.online = { codigo: L.codigo, eu: 0 }; H.lobby = null;
     salvar(); iniciarJogo(); atualizarConexoes();
